@@ -13,3 +13,41 @@
 
 # 프로젝트 비즈니스 개략적 설명
 해외 여행 시 가장 먼저 하는 것이 여행 목적지에 가기 위한 항공권 예약 입니다. 그 다음으로 중요한 것은 인근 호텔 예약입니다. 그리고 이 호텔을 중심으로 여러 액티비티를 즐깁니다. 여행 시 장거리 이동의 편의를 위해 현지에서 차량을 예약하기도 합니다. 이 프로젝트는 이처럼 해외 여행에 필수적인 숙박, 차량, 항공권을 손쉽게 한 번에 예약해주는 서비스입니다. 다만, 도메인 보다는 적절한 MSA 아키텍처 구현에 중점을 두고 있으므로 아키텍처 관점에서 봐주세요.
+
+# MVP 구현 목표
+
+## 1) MVP ver.1
+- 간단한 호텔/차량/항공권 예약 시스템을 만듭니다.
+- 코어 도메인 설계는 DDD 기반으로 합니다.
+- Hexagonal Architecture를 도입해 외부 요인과의 강결합을 없애고, 코어 도메인과 서비스 레이어를 분리해 도메인을 보호합니다.
+- 모든 애플리케이션 서버, DB 등의 리소스는 쿠버네티스 클러스터에 등록합니다.
+- Reservation, Payment, Hotel, Car, Flight 다섯 개의 마이크로서비스를 기반으로 비즈니스 로직을 구성합니다.
+
+  Hotel, Car, Flight 에 관한 테스트 정보를 얻기 위한 OTA* 벤더로 Amadeus를 사용합니다.
+
+  ※ *OTA: OTA는 Online Travel Agency의 약자로, 온라인 여행 예약 대행 서비스를 의미합니다. Agoda와 Expedia가 대표적인 OTA로 잘 알려져 있습니다.
+
+- Spring Cloud Gateway 를 사용해 게이트웨이 엣지 서버를 구성합니다.
+- KeyCloak을 활용해 OAuth2 인증을 수행합니다. 인증 서버는 KeyCloak 서버이고, Gateway 서버가 리소스 서버입니다.
+- 회복력과 가용성을 위해 Resilience4j를 적용합니다. 이는 서비스 내 리소스의 적절한 격리, DDos와 같은 brute force 공격 예방 등에 도움을 줍니다.
+- 각 마이크로서비스를 추적하고 관리하기 위해 Observability(metrics, tracing, logs) 데이터를 지속해서 수집하고 Grafana에서 모니터링 합니다. merics의 경우 Spring Actuator + Micrometer를 통해 Prometheus가 이해할 수 있는 JSON 포맷으로 제공하고, Grafana에서 모니터링 및 쿼리 가능합니다. logs의 경우 데이터 소스로 Loki를 사용하고, 이 또한 Grafana와 통합했습니다. Tracing의 경우 다음의 두 가지 방식을 제공합니다.
+    1. 각 마이크로서비스에 OpenTelemetry Java Agent 의존성을 추가하고 Exporter의 도움을 받아 분산 추적 데이터를 자동으로 Loki, Tempo에 보냅니다. 추적을 위해 OpenTelemetry 를 사용해 로그 Prefix 포맷을 Service Name, Trace ID, Span ID 형식으로 구조를 잡고, Grafana Loki + Tempo 에서 이를 시각화 합니다.
+    2. 쿠버네티스 클러스터에서 Observability 추적이 필요한 Pod 내부에 Envoy proxy를 Sidecar로 마이크로서비스와 함께 배포하고, 각 Pod 간의 East-West API 요청/응답은 이 Envoy proxy를 통해 진행합니다. Istio를 사용해 각 Envoy proxy를 관리하고, 모니터링 합니다. 이 방식은 마이크로서비스에는 비즈니스 로직만 존재하고, 지표 수집은 분리된 Sidecar를 통해 진행하므로 [a] 방식에 비해 인프라 관리에 용이하고, 개발자는 비즈니스 코어에 집중하기 좋은 환경이 구성됩니다.
+- 호텔/항공권/차량 예약 가능(호텔 도메인 용어로 Availibility 라고 합니다.) 목록은 Amadeus의 테스트 전용 API를 Spring Batch 애플리케이션을 통해 호출하여 적재합니다. 이미 이 작업은 선행했으므로 가데이터는 SQL 파일로 제공합니다. 따라서 따로 구동하지 않으셔도 됩니다.
+
+## 2) MVP ver.2
+- 기존의 카프카 처리 방식을 Spring Cloud 기반으로 변경합니다.
+
+  Zookeeper, Spring Kafka → KRaft, Spring Cloud Function, Spring Cloud Stream(with Kafka)
+
+- 테스트 호텔 예약 가능(Availibility) 데이터를 기반으로 Hote, Flight , Car 가데이터를 DB에 지속해서 생성하고 업데이트 합니다.
+- Hote, Flight , Car 데이터를 Elasticsearch에 색인하고, 검색될 수 있도록 합니다.
+- 글로벌 캐시 클러스터를 구성하고 배치 업데이트를 통해 Hote, Flight , Car 예약 데이터가 실시간으로 업데이트 되도록 합니다.
+- 외부 업체가 Hote, Flight , Car 데이터를 요청하는 즉, 트래블어드바이저가 공급업체가 되는 상황을 모사하기 위해 Open API 엔드포인트와 게이트웨이를 구현합니다.
+    - REST API를 Hateoas 규정에 맞게 구현합니다.
+    - 게이트웨이에 들어오는 요청 중 외부 업체의 등급에 따라 Rate Limit 제한을 동적으로 조율합니다.
+
+      e.g., 높은 등급 일 경우 느슨하게, 낮은 등급 일 경우 타이트하게 제한합니다.
+
+## 3) MVP ver.3
+- React로 프론트오피스를 구현합니다.
