@@ -1,0 +1,23 @@
+services:
+  traveladvisor-network-bridge:
+    networks:
+      - traveladvisor
+
+  common-microservice-config:
+    extends:
+      service: traveladvisor-network-bridge
+    deploy:
+      resources:
+        limits:
+          memory: 1024m
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
+      OTEL_METRICS_EXPORTER: none
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-1.33.5.jar"
+
+  config-microservice-config:
+    extends:
+      service: common-microservice-config
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/

@@ -1,0 +1,421 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper:2888:3888
+      KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=ruok"
+    volumes:
+      - ./.data/zookeeper/data:/var/lib/zookeeper/data
+      - ./.data/zookeeper/transactions:/var/lib/zookeeper/log
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+    user: "0:0"
+
+  # Debezium이 설치된 PostgreSQL 컨테이너입니다. CDC 구현에 사용합니다.
+  # (debezium.io/documentation/reference/stable/postgres-plugins.html)
+  # 참고로 Debezium 공식문서에서 언급하는 것처럼, CDC에 Postgres를 사용하려면 기본적으로 논리적 복제(Logical Replication)을 활성화 해야합니다. 이를 위해 다음의 절차를 실행합니다.
+  # Postgres 데이터 그립 콘솔에서 다음의 명령을 입력해 설정 파일의 위치를 알아냅니다. "show config_file;" (도커로 설치한 경우 보통 경로는 /var/lib/postgresql/data/postgresql.conf)
+  # 설정 파일을 열어 다음과 같이 수정합니다.
+  # wal_level = logical # 논리적 복제를 활성화합니다. 이는 WAL 로그를 다른 위치에 복제합니다.
+  # max_wal_senders = 6 # 복제를 위한 WAL 스트림을 보낼 수 있는 최대 수를 설정합니다.
+  # max_replication_slots = 6 # 복제 슬롯의 최대 수를 설정합니다. Outbox 테이블이 6개 있기 때문에 6개의 Debezium 커넥터를 만들어야 하므로 복제 슬롯 수를 6개로 설정했다. 각 Debezium 커넥터는 각각의 Outbox 테이블을 모니터링합니다.
+  # max_connections = 200 # 디폴트는 100개이며 옵션입니다.
+  # 현재 설정된 최대 커넥션 수를 보는 방법: SELECT * FROM pg_stat_activity;
+  postgres:
+    image: debezium/example-postgres
+    container_name: postgres
+    ports:
+      - 5432:5432
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "max_replication_slots=6"
+      - "-c"
+      - "max_wal_senders=6"
+    volumes:
+      - "./.data/postgres:/var/lib/postgresql/data"
+    environment:
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=admin"
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  schema-registry:
+    # Confluent 스키마 레지스트리를 사용합니다.
+    image: confluentinc/cp-schema-registry:7.0.1
+    hostname: schema-registry
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-broker-2:9092,LISTENER_LOCAL://localhost:29092
+      SCHEMA_REGISTRY_DEBUG: 'true'
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+    user: "0:0"
+
+  kafka-broker-1:
+    image: confluentinc/cp-kafka:7.0.1
+    hostname: kafka-broker-1
+    ports:
+      - "19092:19092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-1:9092,LISTENER_LOCAL://localhost:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,LISTENER_LOCAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_COMPRESSION_TYPE: producer
+    volumes:
+      - "./.data/kafka/broker-1:/var/lib/kafka/data"
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+    user: "0:0"
+
+  kafka-broker-2:
+    image: confluentinc/cp-kafka:7.0.1
+    hostname: kafka-broker-2
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-2:9092,LISTENER_LOCAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,LISTENER_LOCAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_COMPRESSION_TYPE: producer
+    volumes:
+      - "./.data/kafka/broker-2:/var/lib/kafka/data"
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+    user: "0:0"
+
+  kafka-broker-3:
+    image: confluentinc/cp-kafka:7.0.1
+    hostname: kafka-broker-3
+    ports:
+      - "39092:39092"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-3:9092,LISTENER_LOCAL://localhost:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,LISTENER_LOCAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_COMPRESSION_TYPE: producer
+    volumes:
+      - "./.data/kafka/broker-3:/var/lib/kafka/data"
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+    user: "0:0"
+
+  # debezium connector
+  kafka-debezium-connector:
+    image: debezium/connect:2.2
+    ports:
+      - 8083:8083
+    environment:
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: "connect-config"
+      OFFSET_STORAGE_TOPIC: "connect-offsets"
+      STATUS_STORAGE_TOPIC: "connect-status"
+      # 카프카 클러스터의 부트스트랩 설정. Kafka Connect에서 Kafka에 연결할 정보입니다.
+      BOOTSTRAP_SERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+      LOGGING_LEVEL: "DEBUG"
+      # 페이로드 스키마 설정
+      CONNECT_SCHEMA_NAME_ADJUSTMENT_MODE: avro
+      # Key 컨버터 설정
+      KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      # Value 컨버터 설정
+      VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      # Key, Value 컨버터 스키마 레지스트리 URL 설정
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+      - schema-registry
+    # 필수 스키마 레지스트리 JAR 파일을 실행 중인 Debezium Connector 컨테이너 볼륨과 마운트합니다. (debezium.io/documentation/reference/stable/configuration/avro.html)
+    # 이 곳엔 Debezium Connector가 정상적으로 작동하려면 필수로 필요한 JAR 파일들이 있습니다.
+    # JAR 파일 설치 사이트 (https://packages.confluent.io/maven/io/confluent/kafka-connect-avro-converter/7.2.5/kafka-connect-avro-converter-7.2.5.jar)
+    volumes:
+      - "./debezium-connector-schemaregistry-7.2.5:/kafka/connect/debezium-connector-schemaregistry-7.2.5"
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "9900:8080"
+    environment:
+      ZK_HOSTS: "zookeeper:2181"
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.2
+    container_name: keycloak
+    ports:
+      - "7080:8080"
+    environment:
+      KEYCLOAK_ADMIN: "admin"
+      KEYCLOAK_ADMIN_PASSWORD: "admin"
+    command: "start-dev"
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  read:
+    image: grafana/loki:3.0.0
+    command: "-config.file=/etc/loki/config.yaml -target=read"
+    ports:
+      - 3101:3100
+      - 7946
+      - 9095
+    volumes:
+      - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
+    depends_on:
+      - minio
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: &loki-dns
+      traveladvisor:
+        aliases:
+          - loki
+
+  write:
+    image: grafana/loki:3.0.0
+    command: "-config.file=/etc/loki/config.yaml -target=write"
+    ports:
+      - 3102:3100
+      - 7946
+      - 9095
+    volumes:
+      - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - minio
+    networks:
+      <<: *loki-dns
+
+  alloy:
+    image: grafana/alloy:v1.0.0
+    volumes:
+      - ../observability/alloy/alloy-local-config.yaml:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    ports:
+      - 12345:12345
+    depends_on:
+      - gateway
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  minio:
+    image: minio/minio:RELEASE.2024-05-27T19-17-46Z
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /data/loki-data && \
+        mkdir -p /data/loki-ruler && \
+        minio server /data
+    environment:
+      - MINIO_ROOT_USER=loki
+      - MINIO_ROOT_PASSWORD=supersecret
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+      - MINIO_UPDATE=off
+    ports:
+      - 9000
+    volumes:
+      - ./.data/minio:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 15s
+      timeout: 20s
+      retries: 5
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  prometheus:
+    image: prom/prometheus:v2.50.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  tempo:
+    image: grafana/tempo:2.4.2
+    container_name: tempo
+    command: -config.file /etc/tempo-config.yml
+    ports:
+      - "3110:3100"
+      - "4317:4317"
+    volumes:
+      - ../observability/tempo/tempo.yml:/etc/tempo-config.yml
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    depends_on:
+      - gateway
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        /run.sh
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../observability/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  backend:
+    image: grafana/loki:3.0.0
+    volumes:
+      - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
+    ports:
+      - "3100"
+      - "7946"
+    command: "-config.file=/etc/loki/config.yaml -target=backend -legacy-read-mode=false"
+    depends_on:
+      - gateway
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+  gateway:
+    image: nginx:1.25.5
+    depends_on:
+      - read
+      - write
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        cat <<EOF > /etc/nginx/nginx.conf
+        user  nginx;
+        worker_processes  5;  ## Default: 1
+
+        events {
+          worker_connections   1000;
+        }
+
+        http {
+          resolver 127.0.0.11;
+
+          server {
+            listen             3100;
+
+            location = / {
+              return 200 'OK';
+              auth_basic off;
+            }
+
+            location = /api/prom/push {
+              proxy_pass       http://write:3100\$$request_uri;
+            }
+
+            location = /api/prom/tail {
+              proxy_pass       http://read:3100\$$request_uri;
+              proxy_set_header Upgrade \$$http_upgrade;
+              proxy_set_header Connection "upgrade";
+            }
+
+            location ~ /api/prom/.* {
+              proxy_pass       http://read:3100\$$request_uri;
+            }
+
+            location = /loki/api/v1/push {
+              proxy_pass       http://write:3100\$$request_uri;
+            }
+
+            location = /loki/api/v1/tail {
+              proxy_pass       http://read:3100\$$request_uri;
+              proxy_set_header Upgrade \$$http_upgrade;
+              proxy_set_header Connection "upgrade";
+            }
+
+            location ~ /loki/api/.* {
+              proxy_pass       http://read:3100\$$request_uri;
+            }
+          }
+        }
+        EOF
+        /docker-entrypoint.sh nginx -g "daemon off;"
+    ports:
+      - "3100:3100"
+    healthcheck:
+      test: [ "CMD", "service", "nginx", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    extends:
+      file: common-config.yml
+      service: traveladvisor-network-bridge
+
+volumes:
+  kafka_data:
+    driver: local
+
+networks:
+  traveladvisor:
+    driver: "bridge"
