@@ -19,6 +19,7 @@
     </developers>
     <modules>
         <module>memberserver</module>
+        <module>common</module>
     </modules>
 
     <licenses>
