@@ -337,3 +337,44 @@ $ kubectl get po
 
 Intellij를 사용 중이시라면 Google Cloud Code 플러그인을 설치하면 리소스를 에디터에서 GUI로 손쉽게 모니터링하고 관리할 수 있습니다.
 
+# 도커 이미지 생성 및 도커 허브에 푸쉬하기
+
+만약 서버 소스 코드 수정 후 각 이미지를 다시 생성하고 배포하려면 먼저 도커 허브에 public 저장소를 생성한 후 다음의 절차를 따라주세요.
+
+```bash
+# 모든 마이크로서비스 JAR 파일 생성 및 도커 이미지 생성
+$ mvn clean install
+
+# 이미지 생성 확인
+$ docker images | grep com.traveladvisor
+
+# 태그 만들기
+$ docker tag {LOCAL_DOCKER_IMAGE_NAME}:{LOCAL_TAG_NAME} {DOCKER_HUB_REPOSITORY_NAME}:{DOCKER_HUB_TAG_NAME}
+# e.g., config-service 이미지에 대해 태그 생성 예시는 다음과 같습니다.
+$ docker tag com.traveladvisor/configserver:1.0.0-SNAPSHOT sunhyeok/com.traveladvisor:configserver-1.0.0-SNAPSHOT
+
+# 도커 허브에 업로드
+$ docker push {DOCKER_HUB_REPOSITORY_NAME}:{DOCKER_HUB_TAG_NAME}
+# e.g., config-service 이미지 배포 예시는 다음과 같습니다.
+# 다음은 도커 허브 저장소 sunhyeok/com.traveladvisor 에 config-service-1.0.0-SNAPSHOT 라는 태그 이름으로 푸쉬됩니다.
+$ docker push sunhyeok/com.traveladvisor:configserver-1.0.0-SNAPSHOT
+
+# infrastructure/microservices/{MICROSERVICE_NAME}/ 폴더로 이동 후
+$ helm dependencies build
+
+# infrastructure/environments/{PROFILE}/ 폴더로 이동 후
+$ helm dependencies build
+
+$ cd infrastructure/environments/
+$ helm upgrade traveladvisor prod-env # 실행하고자 하는 프로파일 지정
+
+# Pod 실행 및 컨테이너 Running 상태 확인
+$ kubectl get po -w
+```
+
+※ 도커 이미지 이름에 “com.traveladvisor” 가 포함되는 모든 이미지 제거하는 방법: `docker images | grep com.traveladvisor | awk '{print $3}' | xargs docker rmi -f`
+
+※ 개발을 진행하다보면 정말 많은 이미지 생성 및 제거가 발생하고, 이로 인해 종종 현재 코드와 빌드된 이미지 코드 간의 캐시가 일치하지 않는 정합성 문제가 발생할 수 있습니다. 이럴 땐 Maven 캐시를 제거하는 것을 권장합니다. Maven 캐시 제거 방법:
+
+- Windows: `rd /s /q C:\Users\{사용자_이름}\.m2\repository`
+- Linux: `rm -rf ~/.m2/repository`
