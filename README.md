@@ -1,9 +1,8 @@
 # 트래블어드바이저(traveladvisor) — Microservices with Spring Cloud Gateway, OAuth2, Keycloak, Kafka, Debezium CDC and PostgreSQL
 
 # 이 프로젝트를 만든 이유
-<p align="center">
-  <img src="https://media4.giphy.com/media/8dYmJ6Buo3lYY/giphy.gif?cid=7941fdc6vac0eapvo79w9tgrd48b8a9thrpwqw27t6rv76ty&ep=v1_gifs_search&rid=giphy.gif&ct=g" alt="Centered Image" />
-</p>
+<img src="https://media4.giphy.com/media/8dYmJ6Buo3lYY/giphy.gif?cid=7941fdc6vac0eapvo79w9tgrd48b8a9thrpwqw27t6rv76ty&ep=v1_gifs_search&rid=giphy.gif&ct=g" alt="baby trump" style="display: block; margin: 0 auto;" />
+
 
 이 프로젝트는 MSA + 쿠버네티스 환경에서 DDD와 Hexagonal Architecture를 결합 한다고 했을 때 어떻게 구성되고 관리되어야 하는지에 대한 호기심에서 시작되었습니다. 작은 규모의 프로젝트에서는 모놀리식 아키텍처나 멀티레포보다 복잡도가 높아지고, 러닝 커브가 높아 개발 속도가 느려질 수 있다는 점이 단점으로 올 수 있지만, 대규모 개발 환경에서는 조직 구조, 팀원 구성, 가용 가능 인원, 그리고 회사의 여유 자금 등 다양한 요인에 따라 MSA가 적합한 프로젝트 구조가 될 수 있다고 합니다.
 
@@ -284,7 +283,8 @@ $ kubectl apply -f kubernetes-discoveryserver-deployment.yml
 
 ## 9) Skaffold 로 아주 쉽게 마이크로서비스 배포 (🥲정말 감동적인 도구🥲)
 
-![https://media1.giphy.com/media/F3O8iAVrKgiR6QtgnE/giphy.gif?cid=7941fdc6kwhets7tqiro7l44okmdi8xlh6qhr51cwjd7ccsn&ep=v1_gifs_search&rid=giphy.gif&ct=g](https://media1.giphy.com/media/F3O8iAVrKgiR6QtgnE/giphy.gif?cid=7941fdc6kwhets7tqiro7l44okmdi8xlh6qhr51cwjd7ccsn&ep=v1_gifs_search&rid=giphy.gif&ct=g)
+<img src="https://media1.giphy.com/media/F3O8iAVrKgiR6QtgnE/giphy.gif?cid=7941fdc6kwhets7tqiro7l44okmdi8xlh6qhr51cwjd7ccsn&ep=v1_gifs_search&rid=giphy.gif&ct=g" alt="So gooooooood" style="display: block; margin: 0 auto;" />
+
 
 구글 선생님께서 만드신 Skaffold는 코드 변경 사항을 감지하고 자동으로 빌드, 푸쉬 및 배포해주는 도구입니다. 로컬 환경에서 Kubernetes 애플리케이션의 반복적인 테스트를 간단히 수행할 수 있습니다. 각 마이크로서비스 내에 Jib 의존성을 갖고 있으며, 이는 빌드 시 자동으로 도커 이미지를 만들어줍니다. skaffold.yaml 에서 또한 Jib를 통해 빌드 하도록 설정했으며, Helm을 통한 배포를 수행하도록 자동화했습니다. 따라서 손쉽게 다음의 명령을 수행하면 빌드, 도커 이미지 생성, Helm을 통한 배포가 한 방에 이루어집니다!
 
@@ -320,3 +320,20 @@ Intellij IDE 를 대상으로 설명하겠습니다. Cloud Code 플러그인이 
    ![image.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/672bfd9cf048b8a700aeec9fe979382aac35e196/image%25206.png)
 
    이제 IDE에서 디버그 모드가 동작합니다. 👍
+
+## 10) 쿠버네티스 클러스터에 배포된 전체 리소스 보기
+
+```bash
+# helm으로 배포된 리소스 보기
+$ helm ls
+
+# Service 보기. gatewayserver의 경우 서버 타입이 LoadBalancer 이므로
+# EXTERNAL-IP가 할당될 때 까지 기다려야 합니다. <pending> 상태가 아닐 때 외부에서 접근 가능합니다.
+$ kubectl get svc -w
+
+# Pod 보기
+$ kubectl get po
+```
+
+Intellij를 사용 중이시라면 Google Cloud Code 플러그인을 설치하면 리소스를 에디터에서 GUI로 손쉽게 모니터링하고 관리할 수 있습니다.
+
