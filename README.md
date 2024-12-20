@@ -1,7 +1,10 @@
 # 트래블어드바이저(traveladvisor) — Microservices with Spring Cloud Gateway, OAuth2, Keycloak, Kafka, Debezium CDC and PostgreSQL
 
 # 이 프로젝트를 만든 이유
-<img src="https://media4.giphy.com/media/8dYmJ6Buo3lYY/giphy.gif?cid=7941fdc6vac0eapvo79w9tgrd48b8a9thrpwqw27t6rv76ty&ep=v1_gifs_search&rid=giphy.gif&ct=g" alt="baby trump" style="display: block; margin: 0 auto;" />
+<p align="center">
+  <img src="https://media4.giphy.com/media/8dYmJ6Buo3lYY/giphy.gif?cid=7941fdc6vac0eapvo79w9tgrd48b8a9thrpwqw27t6rv76ty&ep=v1_gifs_search&rid=giphy.gif&ct=g" alt="baby trump" />
+</p>
+
 
 
 이 프로젝트는 MSA + 쿠버네티스 환경에서 DDD와 Hexagonal Architecture를 결합 한다고 했을 때 어떻게 구성되고 관리되어야 하는지에 대한 호기심에서 시작되었습니다. 작은 규모의 프로젝트에서는 모놀리식 아키텍처나 멀티레포보다 복잡도가 높아지고, 러닝 커브가 높아 개발 속도가 느려질 수 있다는 점이 단점으로 올 수 있지만, 대규모 개발 환경에서는 조직 구조, 팀원 구성, 가용 가능 인원, 그리고 회사의 여유 자금 등 다양한 요인에 따라 MSA가 적합한 프로젝트 구조가 될 수 있다고 합니다.
@@ -10,7 +13,7 @@
 
 마지막으로 이 프로젝트를 진행한 이유 중 하나는 과거 거대 버티컬 이커머스 프로젝트를 진행하면서 쿠버네티스를 처음 접해봤는데, 그때 느꼈던 부족함을 보완하고, 이번 기회에 쿠버네티스와 더욱 친숙해지는 계기를 만들고 싶었습니다.
 
-# 프로젝트 비즈니스 개략적 설명
+# 개략적인 도메인 설명
 해외 여행 시 가장 먼저 하는 것이 여행 목적지에 가기 위한 항공권 예약 입니다. 그 다음으로 중요한 것은 인근 호텔 예약입니다. 그리고 이 호텔을 중심으로 여러 액티비티를 즐깁니다. 여행 시 장거리 이동의 편의를 위해 현지에서 차량을 예약하기도 합니다. 이 프로젝트는 이처럼 해외 여행에 필수적인 숙박, 차량, 항공권을 손쉽게 한 번에 예약해주는 서비스입니다. 다만, 도메인 보다는 적절한 MSA 아키텍처 구현에 중점을 두고 있으므로 아키텍처 관점에서 봐주세요.
 
 # MVP 구현 목표
@@ -282,9 +285,9 @@ $ kubectl apply -f kubernetes-discoveryserver-deployment.yml
 ```
 
 ## 9) Skaffold 로 아주 쉽게 마이크로서비스 배포 (🥲정말 감동적인 도구🥲)
-
-<img src="https://media1.giphy.com/media/F3O8iAVrKgiR6QtgnE/giphy.gif?cid=7941fdc6kwhets7tqiro7l44okmdi8xlh6qhr51cwjd7ccsn&ep=v1_gifs_search&rid=giphy.gif&ct=g" alt="So gooooooood" style="display: block; margin: 0 auto;" />
-
+<p align="center">
+  <img src="https://media1.giphy.com/media/F3O8iAVrKgiR6QtgnE/giphy.gif?cid=7941fdc6kwhets7tqiro7l44okmdi8xlh6qhr51cwjd7ccsn&ep=v1_gifs_search&rid=giphy.gif&ct=g" alt="So gooooooood" />
+</p>
 
 구글 선생님께서 만드신 Skaffold는 코드 변경 사항을 감지하고 자동으로 빌드, 푸쉬 및 배포해주는 도구입니다. 로컬 환경에서 Kubernetes 애플리케이션의 반복적인 테스트를 간단히 수행할 수 있습니다. 각 마이크로서비스 내에 Jib 의존성을 갖고 있으며, 이는 빌드 시 자동으로 도커 이미지를 만들어줍니다. skaffold.yaml 에서 또한 Jib를 통해 빌드 하도록 설정했으며, Helm을 통한 배포를 수행하도록 자동화했습니다. 따라서 손쉽게 다음의 명령을 수행하면 빌드, 도커 이미지 생성, Helm을 통한 배포가 한 방에 이루어집니다!
 
@@ -531,4 +534,12 @@ $ docker compose up -d
   <scope>test</scope>
 </dependency>
 ```
+
+# Saga 패턴
+
+Saga는 마이크로서비스 전반에 걸쳐 분산된 장기 실행 트랜잭션(LLT, Long Lived Transactions)을 의미하며, 기본 아이디어는 LLT를 완료하기 위해 서비스 전반에 걸쳐 로컬 ACID 트랜잭션 체인을 만드는 것입니다.
+
+이 데모 프로젝트에서 여행 예약 과정을 하나의 논리적인 LLT로 묶어 처리합니다. 그러기 위해선 `예약 생성 → 호텔 예약 → 항공권 예약 → 차량 예약 → 예약 승인 응답` 이라는 일련의 절차가 필요합니다. 이 유즈케이스를 충족시키기 위해 카프카를 이벤트 버스로 사용해 Saga 패턴을 구현합니다.
+
+Saga 패턴을 조정(Coordinate)하기 위해 Reservation 마이크로서비스를 Orchestrator로 사용합니다.
 
