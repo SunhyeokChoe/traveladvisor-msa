@@ -51,3 +51,66 @@
 
 ## 3) MVP ver.3
 - React로 프론트오피스를 구현합니다.
+
+# 시스템 구성
+- Language
+  - Java 17
+- Application
+  - Spring Boot
+    - Web
+    - Security
+    - Batch
+    - Data JPA
+    - Data Redis Reactive
+    - Validation
+    - Actuator
+    - Devtools
+  - Spring Cloud
+    - Config
+    - Gateway
+    - Kubernetes Discovery Client
+    - Open Feign
+    - Resilience4j
+    - Kafka
+  - Compile & Build
+    - maven-compiler-plugin
+    - jib-maven-plugin
+  - Utility Belt
+    - Google Guava
+  - Document
+    - SpringDoc
+- Infrastructure
+  - Kubernetes
+  - Docker Compose
+- Data Source
+  - PostgreSQL
+- Event Streaming
+  - Kafka(with Zookeeper)
+
+    ※ KRaft 방식으로 변경 예정
+
+- Service Discovery
+  - Kubernetes Discovery Server
+- Authentication Server
+  - KeyCloak
+- Collect Observabilities
+  - OpenTelemetry
+  - Spring Actuator
+  - Micrometer
+  - Prometheus
+  - Loki
+  - Tempo
+- Monitoring
+  - Grafana
+- Collect Observabilities + Monitoring + request/response Flow Control
+  - Istio
+- Kubernetes resources distributor
+  - Helm
+- Cloud Provider
+  - GCP(Google Cloud Platform)
+
+    ※ 가이드 작성 예정
+
+  - AWS(Amazon Web Services)
+
+    ※ 가이드 작성 예정
