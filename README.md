@@ -156,3 +156,167 @@
   - OpenTelemetry: 각 마이크로서비스에서 추적 가능한 로그를 생성하고 Loki, Tempo로 전달합니다. 메트릭은 Spring Actuator + Micrometer 에서 수집하므로 OpenTelemetry는 로그 관련 책임만 갖도록 합니다.
   - Grafana: metrics, tracing, logs 를 모니터링하고, 알람을 받아볼 수 있는 다재다능한 도구입니다.
 
+# 사전 설치 리스트
+- JDK 17
+- Maven
+- Docker Desktop + Kubernetes Cluster 활성화
+- Kubectl
+
+# Kubernetes 클러스터에 배포해 프로젝트 시작하기
+
+## 1) Secret 생성
+
+```bash
+# PROD
+$ kubectl create secret generic prod-traveladvisor-postgres-secret \
+  --from-literal=datasource_postgres_url='jdbc:postgresql://postgres:5432/postgres?binaryTransfer=true&reWriteBatchedInserts=true&stringtype=unspecified' \
+  --from-literal=datasource_postgres_username='prod-admin' \
+  --from-literal=datasource_postgres_password='prod-admin'
+
+# QA
+$ kubectl create secret generic qa-traveladvisor-postgres-secret \
+  --from-literal=datasource_postgres_url='jdbc:postgresql://postgres:5432/postgres?binaryTransfer=true&reWriteBatchedInserts=true&stringtype=unspecified' \
+  --from-literal=datasource_postgres_username='qa-admin' \
+  --from-literal=datasource_postgres_password='qa-admin'
+
+# DEV
+$ kubectl create secret generic dev-traveladvisor-postgres-secret \
+  --from-literal=datasource_postgres_url='jdbc:postgresql://postgres:5432/postgres?binaryTransfer=true&reWriteBatchedInserts=true&stringtype=unspecified' \
+  --from-literal=datasource_postgres_username='dev-admin' \
+  --from-literal=datasource_postgres_password='dev-admin'
+
+# 생성 확인  
+$ kubectl get secret | grep traveladvisor-postgres-secret
+prod-traveladvisor-postgres-secret                                  Opaque               3      26s
+qa-traveladvisor-postgres-secret                                    Opaque               3      21s
+dev-traveladvisor-postgres-secret                                   Opaque               3      12s
+```
+
+## 2) KeyCloak 배포
+
+```bash
+# KeyCloak 배포
+# localhost:80으로 접속 가능합니다.
+$ helm install keycloak keycloak
+# 실행 후 다음의 코드를 실행해 엔트리포인트를 얻습니다.
+export HTTP_SERVICE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[?(@.name=='http')].port}" services keycloak)
+export SERVICE_IP=$(kubectl get svc --namespace default keycloak -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo "http://${SERVICE_IP}:${HTTP_SERVICE_PORT}/"
+# 다음의 코드를 입력해 ID, PWD 를 얻습니다.
+echo Username: user
+echo Password: $(kubectl get secret --namespace default keycloak -o jsonpath="{.data.admin-password}" | base64 -d)
+# 엔트리포인트: localhost:80
+# Username: user
+# Password: password
+# localhost:80 에 접속해 위 정보를 입력해 로그인 합니다.
+```
+
+다음의 KeyCloak 설정을 임포트 합니다.
+
+[realm-export.json](realm-export.json)
+
+## 3) Kafka 배포 (with Zookeeper)
+
+```bash
+$ cd infrastructure/helm
+$ helm install confluent cp-helm-charts --version 0.6.0
+```
+
+브로커 replicaCount는 3개로 설정했습니다. 브로커 DNS와 포트는 다음과 같습니다.
+
+- `confluent-cp-kafka:9092`
+
+## 4) Prometheus 배포
+
+```bash
+$ cd infrastructure/helm
+$ helm install prometheus kube-prometheus
+```
+
+디폴트로 ClustIP로 생성되므로 외부에서 직접적인 접근은 불가능하지만, 다음의 명령을 통해 임시로 접근 가능하도록 할 수 있습니다.
+
+```bash
+echo "Prometheus URL: http://127.0.0.1:9090/"
+    kubectl port-forward --namespace default svc/prometheus-kube-prometheus-prometheus 9090:9090
+```
+
+## 5) Grafana Loki 배포
+
+```bash
+$ cd infrastructure/helm
+$ helm install loki grafana-loki
+```
+
+## 6) Grafana Tempo 배포
+
+```bash
+$ cd infrastructure/helm
+$ helm install tempo grafana-tempo
+```
+
+## 7) Grafana 배포
+
+```bash
+$ cd infrastructure/helm
+$ helm install grafana grafana
+```
+
+Grafana는 디폴트로 ClusterIP 서비스 타입으로 배포됩니다. 만약 브라우저로 접속해 모니터링이나 디버깅을 해야 하는 경우 다음을 수행합니다.
+
+```bash
+echo "Browse to http://127.0.0.1:3000"
+kubectl port-forward svc/grafana 3000:3000
+```
+
+아이디와 비밀번호를 알기 위해 다음을 입력합니다.
+
+```bash
+$ echo "User: admin"
+  echo "Password: $(kubectl get secret grafana-admin --namespace default -o jsonpath="{.data.GF_SECURITY_ADMIN_PASSWORD}" | base64 -d)"
+```
+
+## 8) Kubernetes Discovery Server 배포
+
+```bash
+$ cd infrastructure/kubernetes
+$ kubectl apply -f kubernetes-discoveryserver-deployment.yml
+```
+
+## 9) Skaffold 로 아주 쉽게 마이크로서비스 배포 (🥲정말 감동적인 도구🥲)
+
+![https://media1.giphy.com/media/F3O8iAVrKgiR6QtgnE/giphy.gif?cid=7941fdc6kwhets7tqiro7l44okmdi8xlh6qhr51cwjd7ccsn&ep=v1_gifs_search&rid=giphy.gif&ct=g](https://media1.giphy.com/media/F3O8iAVrKgiR6QtgnE/giphy.gif?cid=7941fdc6kwhets7tqiro7l44okmdi8xlh6qhr51cwjd7ccsn&ep=v1_gifs_search&rid=giphy.gif&ct=g)
+
+구글 선생님께서 만드신 Skaffold는 코드 변경 사항을 감지하고 자동으로 빌드, 푸쉬 및 배포해주는 도구입니다. 로컬 환경에서 Kubernetes 애플리케이션의 반복적인 테스트를 간단히 수행할 수 있습니다. 각 마이크로서비스 내에 Jib 의존성을 갖고 있으며, 이는 빌드 시 자동으로 도커 이미지를 만들어줍니다. skaffold.yaml 에서 또한 Jib를 통해 빌드 하도록 설정했으며, Helm을 통한 배포를 수행하도록 자동화했습니다. 따라서 손쉽게 다음의 명령을 수행하면 빌드, 도커 이미지 생성, Helm을 통한 배포가 한 방에 이루어집니다!
+
+```bash
+# skaffold를 먼저 다운로드 받으신 후 프로젝트 루트에서 다음을 수행해주세요.
+
+# 프로젝트 첫 실행이라면 먼저 JAR 파일을 로컬 Maven Repository에 생성해야 합니다.
+$ mvn clean install
+
+# 이후부터는 다음의 명령만 수행하면 됩니다.
+$ skaffold dev
+```
+
+기본적으로 모든 마이크로서비스 로그가 하나의 터미널에서 표시됩니다.
+
+### 9-1) 쿠버네티스 클러스터에 배포된 서비스 디버깅 하기 (🥲더 감동적인 도구🥲)
+
+그런데, 호스트 PC에서 어떻게 쿠버네티스 클러스터에 배포된 Pod의 컨테이너 내 자바 애플리케이션 디버깅을 할까요?
+
+Skaffold는 디버깅을 위해 Pod를 재구성하고, 포트를 해당 Pod로 포워딩 해주는 역할을 합니다. 그리고 Intellij, VS Code, Cloud Code IDE에 Cloud Code 플러그인을 사용하면 로컬 호스트 PC에서 디버깅 하는 것과 같은 효과를 낸다고 합니다. 즉, 프로세스간 통신 사이에 디버깅 소통 규격으로 JDWP를 준수하는 기능을 넣어 놓은 것으로 보입니다. (런타임: JVM, 프로토콜: JDWP)
+
+Intellij IDE 를 대상으로 설명하겠습니다. Cloud Code 플러그인이 설치되어 있어야 합니다.
+
+1. Run/Debug Configurations 창에 접속합니다.
+2. Add New Configuration → Cloud Code: Kubernetes를 선택합니다.
+3. 다음과 같이 설정한 후 Apply → OK 버튼을 클릭합니다.
+
+   ![image 4.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/66656689cc7389d3ea2a517cfe3b92e23d6b5ca5/image%25204.png)
+   ![image 5.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/66656689cc7389d3ea2a517cfe3b92e23d6b5ca5/image%25205.png)
+
+4. Debug 버튼을 클릭하고 정상 동작을 확인합니다.
+
+   ![image.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/672bfd9cf048b8a700aeec9fe979382aac35e196/image%25206.png)
+
+   이제 IDE에서 디버그 모드가 동작합니다. 👍
