@@ -114,3 +114,23 @@
   - AWS(Amazon Web Services)
 
     ※ 가이드 작성 예정
+
+# 마이크로서비스 목록
+- K8s 네임스페이스: `default`
+
+| 마이크로서비스 | 컨테이너 포트 | K8s 클러스터 내 서비스 DNS | ClusterIP 포트 |
+| --- | --- | --- | --- |
+| batch | 9100 |  |  |
+| member | 9200 |  |  |
+| payment | 9300 |  |  |
+| booking | 9400 |  |  |
+| hotel | 9500 |  |  |
+| flight | 9600 |  |  |
+| car | 9700 |  |  |
+| Grafana | 3000 |  |  |
+| Config | 8071 |  |  |
+| Gateway | 8072 | gateway-service |  |
+| K8s Discovery Server | 8761 |  | 80 |
+| KeyCloak | 8080(HTTP) / 8443(HTTPS) |  |  |
+| Kafka Broker Cluster | 9092 | kafka-controller-0.kafka-controller-headless.default.svc.cluster.local | <none> |
+
