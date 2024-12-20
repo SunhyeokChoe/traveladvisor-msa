@@ -88,7 +88,33 @@
 
             <!-- END: common -->
 
-
+            <!-- BEGIN: member microservice -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-application-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-domain-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-message</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: member microservice -->
         </dependencies>
     </dependencyManagement>
 

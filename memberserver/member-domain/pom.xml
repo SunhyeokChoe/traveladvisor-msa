@@ -3,21 +3,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>memberserver</artifactId>
+    <artifactId>member-domain</artifactId>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>com.traveladvisor</groupId>
-        <artifactId>traveladvisor</artifactId>
+        <artifactId>memberserver</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <modules>
-        <module>member-container</module>
-        <module>member-domain</module>
-        <module>member-application</module>
-        <module>member-datasource</module>
-        <module>member-message</module>
+        <module>member-application-service</module>
+        <module>member-domain-core</module>
     </modules>
 
 </project>
