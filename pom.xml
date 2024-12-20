@@ -17,6 +17,9 @@
             <timezone>+9</timezone>
         </developer>
     </developers>
+    <modules>
+        <module>memberserver</module>
+    </modules>
 
     <licenses>
         <license>
