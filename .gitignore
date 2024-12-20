@@ -112,7 +112,7 @@ fabric.properties
 *.rar
 
 # Include specific jar files in the given directory
-!infrastructure/docker-compose/Users/Shared/debezium-connector-schemaregistry-7.2.5/*.jar
+!infrastructure/docker-compose/debezium-connector-schemaregistry-7.2.5/*.jar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
