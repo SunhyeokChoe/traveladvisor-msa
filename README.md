@@ -406,7 +406,7 @@ $ kubectl get po -w
 </profiles>
 ```
 
-인텔리제이 사용자의 경우 Settings -> Build, Excecution, Deployment -> Compiler -> Build project automatically 체크 박스를 체크하셔야 합니다.
+인텔리제이 사용자의 경우 Settings → Build, Excecution, Deployment → Compiler → Build project automatically 체크 박스를 체크하셔야 합니다.
 
 # 로컬 개발 환경에서의 리소스
 
@@ -442,3 +442,93 @@ $ docker compose up -d
 4. infrastructure/environments/{PROFILE}/Chart.yaml 의 dependencies에 의존을 추가합니다.
 5. infrastructure/kube-prometheus/values.yaml 의 additionalScrapeConfigs.internal.jobList에 마이크로서비스 metrics 수집 대상 엔드포인트를 추가합니다. helm 리소를 수정했으므로 반드시 `helm dependencies build` 명령을 수행해야 합니다.
 6. skaffold.yaml 파일 내 build.artifacts, deploy.helm.releases 에 새로운 마이크로서비스 내용을 추가합니다.
+
+# Keycloak 인증 서버 설정
+
+1. Keycloak 설치 및 실행
+  - [2) Keycloak 배포](https://github.com/SunhyeokChoe/traveladvisor-msa?tab=readme-ov-file#2-keycloak-%EB%B0%B0%ED%8F%AC) 의 가이드에 따라 컨테이너를 띄웁니다. 공식문서의 경우 [여기](https://www.keycloak.org/getting-started/getting-started-docker)를 참조해 주세요.
+  - 포트는 `8080`이며, 개발모드(start-dev)는 최초 시작 시 자동으로 관리자 계정을 생성합니다.
+2. Realm 설정
+  - ※ real-export.json 내용을 통해 손쉽게 import 해도 됩니다. Create realm 단계에서 Browse 를 클릭해 import 할 수 있습니다.
+  - Realm은 보안 영역을 나타내며, 새로운 Realm을 생성합니다. 기본으로 `master` Realm이 생성되어 있으며, 이는 다른 Realm 을 관리하는데 사용됩니다.
+  - Realm name을 `traveladvisor`로 생성합니다.
+3. `traveladvisor` realm에 OpenID Connect 클라이언트 생성
+   - External Service 혹은 API로부터 게이트웨이로 들어오는 요청 검증 → Client Credentials Grant Type 설정
+     - Client authentication: ON 설정: 인증 값을 클라이언트가 자체 소유 가능하도록 합니다.
+     - Authentication flow: Service accounts roles 만 체크합니다. 이는 Client Credentials Grant 를 의미합니다.
+
+      User가 scope를 갖고 있어야 해당 스코프에 접근 가능하듯이 Client 또한 scope를 가져야 해당 스코프에 접근 가능합니다. Client > Client scopes 탭에 접속해 할당할 수 있습니다.
+
+   - 외부 클라이언트(웹 브라우저, 모바일)로부터 게이트웨이로 들어오는 요청 검증 → Authorization Code Grant Type 설정
+     - Client authentication: ON 설정: 인증 값을 클라이언트가 자체 소유 가능하도록 합니다.
+     - Authentication flow: Standard flow 만 체크합니다. 이는 Authorization Code Grant 를 의미합니다.
+     - Valid redirect URIs: *로 설정합니다. 이 데모 프로젝트는 아직 UI를 제공하지 않기 때문입니다. 하지만 프로덕션 환경에서는 *가 아닌 반드시 우리 도메인의 URI로 명시해주어야 합니다. *로 설정하면 해커가 액세스 토큰을 자신의 웹사이트로 전달할 가능성이 있기 때문입니다.
+     - Valid post logout redirect URIs: 공백으로 설정합니다.
+     - Web origins: *로 설정합니다. 이 또한 데모를 위해 느슨하게 설정했으며, 실제로는 모든 오리진을 허용하면 안됩니다.
+
+     이 요청 흐름은 외부 퍼블릭 클라이언트와의 인증/인가 흐름이므로 Users에서 유저를 생성해야 합니다.
+4. 게이트웨이 애플리케이션 설정
+   ```yaml
+    security:
+      oauth2:
+        resourceserver:
+          jwt:
+            jwk-set-uri: "http://localhost:7080/realms/master/protocol/openid-connect/certs"
+   ```
+5. Client 테스트를 위한 Client scopes 추가
+
+   Client scopes → Create client scope에서 다음과 같이 설정합니다.
+  - Name: TEST
+  - Type: None
+  - Protocol: OpenID Connect
+
+6. gateway 클라이언트에 TEST 스코프 추가
+
+   Clients → Client scopes → TEST 스코프를 추가하고 추가된 TEST 스코프를 확인합니다.
+
+# OAuth2를 지원하는 KeyCloak 기반 Spring Cloud Gateway 구성
+게이트웨이 서버는 모든 요청을 받는 엣지 포인트가 되므로 리소스 서버와 인증/인가 확인 책임을 갖도록 했습니다. 즉, 인바운드 요청에 대해 사용자가 회원가입/로그인은 했는지, 해당 리소스에 권한이 있는지 체크합니다. 이러한 책임을 구현하기 위해 다음의 종속성으로 구성됩니다.
+
+- `spring-cloud-starter-gateway`: Spring Cloud 기반 게이트웨이 서버
+- `spring-security-oauth2-resource-server`: OAuth2 리소스 서버
+- `spring-boot-starter-security`: 보안
+- `spring-security-oauth2-jose`: JWT 토큰 파싱
+
+인증 서버로 KeyCloak을 사용합니다. 이는 웹 클라이언트/모바일 클라이언트/API 등의 다양한 엔드 유저의 요청을 게이트웨이 서버로부터 전달 받아 인증을 처리하고, OAuth 2.0 + OIDC에 기반한 JWT 토큰을 발행하는 역할을 합니다.
+
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-oauth2-client</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.security</groupId>
+  <artifactId>spring-security-oauth2-resource-server</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.security</groupId>
+  <artifactId>spring-security-oauth2-jose</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-gateway</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-test</artifactId>
+  <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>com.github.dasniko</groupId>
+  <artifactId>testcontainers-keycloak</artifactId>
+  <version>3.2.0</version>
+ <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>org.testcontainers</groupId>
+  <artifactId>junit-jupiter</artifactId>
+  <version>1.19.6</version>
+  <scope>test</scope>
+</dependency>
+```
+
