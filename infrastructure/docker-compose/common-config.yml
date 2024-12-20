@@ -11,8 +11,15 @@ services:
         limits:
           memory: 1024m
     environment:
+      # OpenTelemetry가 수집한 traces 데이터를 보낼 대상을 지정합니다.
+      # 포트번호 4317은 OTLP(OpenTelemetry Protocol) gRPC 포트입니다.
+      # 추적 데이터 수집 경로: 마이크로서비스 → OpenTelemetry Java Agent → Tempo(4317) → Grafana
       OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
+      # 이미 Prometheus를 통해 /actuator/metrics/prometheus metrics을 수집하고 있으므로 metrics 내보내기는 비활성화 했습니다.
+      # 메트릭 수집 경로: 마이크로서비스 → Spring Actuator + Micrometer → Prometheus → Grafana
       OTEL_METRICS_EXPORTER: none
+      # 오픈 텔레메트리 공식문서에 따르면, 마이크로서비스를 관찰하기 위해 JVM 실행 시 옵션으로 OpenTelemetry Java Agent jar 파일 위치를 알려줘야 합니다.
+      # 각 마이크로서비스의 pom.xml 파일 내에 opentelemetry-javaagent 의존성을 추가했으므로 빌드 시 app/libs/ 경로에 이 jar 파일이 존재 생성됩니다. 이 jar 파일을 사용하도록 하면 됩니다.
       JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-1.33.5.jar"
 
   config-microservice-config:

@@ -192,11 +192,13 @@ services:
     environment:
       KEYCLOAK_ADMIN: "admin"
       KEYCLOAK_ADMIN_PASSWORD: "admin"
+    # 개발 모드는 내부적으로 H2 데이터베이스를 사용하지만, 프로덕션 모드에서는 외부 데이터베이스를 사용해야 합니다.
     command: "start-dev"
     extends:
       file: common-config.yml
       service: traveladvisor-network-bridge
 
+  # 읽기 전용 로키 설정
   read:
     image: grafana/loki:3.0.0
     command: "-config.file=/etc/loki/config.yaml -target=read"
@@ -218,6 +220,7 @@ services:
         aliases:
           - loki
 
+  # 쓰기 전용 로키 설정
   write:
     image: grafana/loki:3.0.0
     command: "-config.file=/etc/loki/config.yaml -target=write"
@@ -239,6 +242,7 @@ services:
 
   alloy:
     image: grafana/alloy:v1.0.0
+    # ro: read only. 읽기 전용으로 설정하여 Alloy 컨테이너가 함부로 이 파일을 수정하지 못하도록 합니다.
     volumes:
       - ../observability/alloy/alloy-local-config.yaml:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock
@@ -251,8 +255,11 @@ services:
       file: common-config.yml
       service: traveladvisor-network-bridge
 
+  # 쓰기 전용 로키는 MinIO 에 로그를 저장합니다.
   minio:
     image: minio/minio:RELEASE.2024-05-27T19-17-46Z
+    # /data/loki-data: Loki 로그 데이터용 디렉토리
+    # /data/loki-ruler: Loki ruler 데이터용 디렉토리
     entrypoint:
       - sh
       - -euc
@@ -260,6 +267,8 @@ services:
         mkdir -p /data/loki-data && \
         mkdir -p /data/loki-ruler && \
         minio server /data
+    # MINIO_PROMETHEUS_AUTH_TYPE=public: Prometheus 메트릭 공개 설정
+    # MINIO_UPDATE=off: MinIO 자동 업데이트 비활성화
     environment:
       - MINIO_ROOT_USER=loki
       - MINIO_ROOT_PASSWORD=supersecret

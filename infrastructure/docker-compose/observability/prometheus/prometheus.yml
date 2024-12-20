@@ -1,0 +1,42 @@
+global:
+  scrape_interval:     5s # 메트릭 수집 주기입니다. 마이크로미터가 액츄에이터의 메트릭을 /actuator/metrics/prometheus 경로로 노출하는데, 이 엔드포인트를 이 주기마다 호출해 메트릭을 수집합니다.
+  evaluation_interval: 5s # 규칙 평가 주기입니다. 수집한 메트릭을 프로메테우스의 데이터나 그래프에 반영하는데 이 주기마다 계산됩니다.
+
+# 관찰 대상 마이크로서비스 정의입니다.
+scrape_configs:
+  - job_name: 'batchserver'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'batchserver:9100' ] # 호스트명:포트번호. 호스트명은 docker-compose에서 정의한 컨테이너 이름입니다.
+  - job_name: 'memberserver'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'memberserver:9200' ]
+  - job_name: 'paymentserver'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'paymentserver:9300' ]
+  - job_name: 'bookingserver'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'bookingserver:9400' ]
+  - job_name: 'hotelserver'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'hotelserver:9500' ]
+  - job_name: 'flightserver'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'flightserver:9600' ]
+  - job_name: 'carserver'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'carserver:9700' ]
+  - job_name: 'configserver'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'configserver:8071' ]
+  - job_name: 'gatewayserver'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'gatewayserver:8072' ]

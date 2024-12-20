@@ -1,0 +1,51 @@
+apiVersion: 1
+
+deleteDatasources:
+  - name: Prometheus
+  - name: Loki
+  - name: Tempo
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    uid: prometheus
+    url: http://prometheus:9090
+    access: proxy
+    orgId: 1
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: GET
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    url: http://tempo:3100
+    access: proxy
+    orgId: 1
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: GET
+      serviceMap:
+        datasourceUid: 'prometheus'
+  - name: Loki
+    type: loki
+    uid: loki
+    access: proxy
+    orgId: 1
+    editable: true
+    url: http://gateway:3100
+    jsonData:
+      httpHeaderName1: "X-Scope-OrgID"
+      # 로그에서 정규식으로 TraceID를 추출하고, Loki에서 로그 클릭 시 Links가 표시되도록 하기 위한 파생된 필드 정의 입니다.
+      derivedFields:
+        - datasourceUid: tempo                # 데이터소스로 Tempo를 사용합니다. 이는 위의 Tempo uid와 일치해야 합니다.
+          matcherRegex: "\\[.+,(.+),.+\\]"    # 로그를 파싱하기 위한 정규식입니다.
+          name: TraceID                       # 정규식으로 추출된 필드의 이름입니다.
+          url: '$${__value.raw}'              # 쿼리 정의입니다. 추출된 필드 TraceID의 값을 매핑했습니다.
+    secureJsonData:
+      httpHeaderValue1: "tenant1"

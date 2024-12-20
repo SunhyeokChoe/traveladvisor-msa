@@ -1,0 +1,37 @@
+server:
+  # HTTP 요청을 처리하는 Tempo 서버 포트입니다.
+  http_listen_port: 3100
+
+# OpenTelemetry(OTLP) 프로토콜을 통해 traces 데이터를 수신합니다.
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        # HTTP 프로토콜을 통해 traces 데이터를 수신합니다.
+        http:
+        # gRPC 프로토콜을 통한 traces 데이터 수신도 가능합니다.
+        grpc:
+
+# traces 데이터를 메모리에 저장하는 ingester입니다.
+ingester:
+  trace_idle_period: 10s
+  max_block_bytes: 1_000_000
+  max_block_duration: 5m
+
+# 블록을 압축하는 compactor입니다.
+compactor:
+  compaction:
+    compaction_window: 1h
+    max_compaction_objects: 1000000
+    block_retention: 1h
+    compacted_block_retention: 10m
+
+# traces 데이터를 저장하는 스토리지입니다.
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/blocks
+    pool:
+      max_workers: 100
+      queue_depth: 10000

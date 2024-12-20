@@ -111,12 +111,22 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- 용도: 각 마이크로서비스의 지표 수집 -->
+        <!--
+            용도: 각 마이크로서비스의 지표 수집
+            오픈 텔레메트리 자바 에이전트로, 들어오는 HTTP 요청, DB 쿼리, 외부 API 호출 등을 자동으로 추적해 마이크로서비스 간의 요청 흐름을 추적 가능하게 해줍니다.
+            또한 마이크로서비스 간 통신의 지연 시간도 파악 가능합니다.
+            거기에 더해 JVM 메트릭(메모리 사용량, GC 활동 등), 시스템 메트릭(CPU 사용률, 메모리 등), 애플리케이션 성능 등의 메트릭을 수집합니다.
+         -->
         <dependency>
             <groupId>io.opentelemetry.javaagent</groupId>
             <artifactId>opentelemetry-javaagent</artifactId>
             <version>${openTelemetry.version}</version>
-            <!-- 수집 대상이 되는 지표는 런타임에 생성되므로 스코프로 runtime 을 명시합니다. -->
+            <!--
+                수집 대상이 되는 지표는 런타임에 생성되므로 스코프로 runtime 을 명시합니다.
+                오픈 텔레메트리는 컴파일 시점에 필요하지 않습니다. 개발자가 직접 코드에서 오픈 텔레메트리 API를 호출하지 않기 때문입니다.
+                오픈 텔레메트리 Java Agent는 JVM 실행 시점에 바이트코드를 조작합니다.
+                런타임 시점에 필요하므로 runtime 스코프로 설정했습니다. 그럼 자동으로 컴파일 classpath에서 제외됩니다.
+            -->
             <scope>runtime</scope>
         </dependency>
 

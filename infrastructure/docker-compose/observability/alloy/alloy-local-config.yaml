@@ -1,0 +1,42 @@
+// ※ Promtail -> Alloy 로 변경되었습니다.
+// 이 파일은 도커 컨테이너의 로그를 자동으로 수집하여 중앙 집중식 로그 저장소인 Loki로 전송하는 파이프라인을 구성합니다.
+// 이는 분산 시스템에서의 로그 모니터링과 분석을 위한 기본 인프라를 제공합니다.
+
+// Docker 컨테이너 발견 설정. 도커 소켓을 통해 실행 중인 컨테이너를 5초마다 검색합니다.
+discovery.docker "flog_scrape" {
+	host             = "unix:///var/run/docker.sock"
+	refresh_interval = "5s"
+}
+
+// 발견된 컨테이너의 이름을 정규식을 통해 처리하고 container 레이블로 변환합니다.
+// source_labels = ["__meta_docker_container_name"]: 원본 레이블
+// regex = "/(.*)": 맨 앞의 '/' 제거
+// target_label = "container": 그 결과를 container라는 새로운 레이블로 저장
+discovery.relabel "flog_scrape" {
+	targets = []
+
+	rule {
+		source_labels = ["__meta_docker_container_name"]
+		regex         = "/(.*)"
+		target_label  = "container"
+	}
+}
+
+// 로그 수집 및 전송 설정입니다. 로그 수집 대상이 되는 컨테이너의 로그를 수집해 Loki로 전송하는 설정입니다. 5초마다 새로운 로그를 확인합니다.
+loki.source.docker "flog_scrape" {
+	host             = "unix:///var/run/docker.sock"
+	targets          = discovery.docker.flog_scrape.targets
+	forward_to       = [loki.write.default.receiver]
+	relabel_rules    = discovery.relabel.flog_scrape.rules
+	refresh_interval = "5s"
+}
+
+// Loki 에 로그를 전송하기 위한 엔드포인트 설정입니다. Alloy는 로그를 수집하고 이를 게이트웨이에 보내 Loki에 전달되도록 합니다.
+// tenant_id 는 테넌트 식별자로 사용되며, 그 이름으로 "tenant1"로 설정했습니다.
+loki.write "default" {
+	endpoint {
+		url       = "http://gateway:3100/loki/api/v1/push"
+		tenant_id = "tenant1"
+	}
+	external_labels = {}
+}
