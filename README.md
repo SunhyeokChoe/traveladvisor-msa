@@ -419,3 +419,26 @@ $ cd infrastructure/docker-compose/local-resources
 $ docker compose up -d
 ```
 
+# 새로운 마이크로서비스 추가 시 체크리스트
+
+1. 새로운 마이크로서비스의 pom.xml 에 다음을 추가 합니다.
+
+    ```yaml
+    <!-- 용도: Config Server의 설정을 주입받기 위해 사용 -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-config</artifactId>
+    </dependency>
+    
+    <!-- 용도: K8s의 Discovery Service에게 탐지되기 위한 Discovery Client 사용 -->
+    <dependency>
+    		<groupId>org.springframework.cloud</groupId>
+    		<artifactId>spring-cloud-starter-kubernetes-discoveryclient</artifactId>
+    </dependency>
+    ```
+
+2. config-service 마이크로서비스의 resources/configs 하위에 생성한 마이크로서비스 애플리케이션 이름으로 파일을 생성합니다. config를 주입 받아야 하는 경우에만 이 단계를 수행해주세요.
+3. infrastructure/microservices 에 헬름 차트를 생성합니다.
+4. infrastructure/environments/{PROFILE}/Chart.yaml 의 dependencies에 의존을 추가합니다.
+5. infrastructure/kube-prometheus/values.yaml 의 additionalScrapeConfigs.internal.jobList에 마이크로서비스 metrics 수집 대상 엔드포인트를 추가합니다. helm 리소를 수정했으므로 반드시 `helm dependencies build` 명령을 수행해야 합니다.
+6. skaffold.yaml 파일 내 build.artifacts, deploy.helm.releases 에 새로운 마이크로서비스 내용을 추가합니다.
