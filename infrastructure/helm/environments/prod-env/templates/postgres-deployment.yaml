@@ -1,0 +1,75 @@
+# Postgres 배포 매니페스트입니다.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+  namespace: default
+  labels:
+    app: postgres-deployment
+spec:
+  selector:
+    matchLabels:
+      app: postgres-deployment
+  template:
+    metadata:
+      labels:
+        app: postgres-deployment
+    spec:
+      containers:
+        - name: postgres
+          image: debezium/example-postgres:3.0.0.Final
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresSecretName }}
+                  key: datasource_postgres_username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresSecretName }}
+                  key: datasource_postgres_password
+#          command:
+#            - "postgres"
+#            - "-c"
+#            - "wal_level=logical"
+#            - "-c"
+#            - "max_connections=200"
+#            - "-c"
+#            - "max_replication_slots=6"
+#            - "-c"
+#            - "max_wal_senders=6"
+#          volumeMounts:
+#            - name: postgres-data
+#              mountPath: /var/lib/postgresql/data
+#          securityContext:
+#            runAsUser: 999        # postgres 컨테이너의 기본 postgres 사용자 UID
+#            runAsGroup: 999       # postgres 컨테이너의 기본 postgres 그룹 GID
+#            fsGroup: 999          # 볼륨에 대한 파일 시스템 권한 설정
+#      volumes:
+#        - name: postgres-data
+#          emptyDir: {} # 개발 환경에서 사용할 임시 볼륨, 프로덕션에서는 PersistentVolumeClaim을 사용합니다.
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: default
+  labels:
+    app: postgres-deployment
+spec:
+  selector:
+    app: postgres-deployment
+  ports:
+    - name: postgres-port
+      protocol: TCP
+      port: 5432
+  # 도커 데스크탑은 로컬 머신에서 로컬 쿠버네티스 클러스터와 네트워크를 공유하기 때문에 LoadBalancer 타입이 설정된 서비스도 localhost에서 접근 가능하도록 해줍니다.
+  # 이것은 도커 데스크탑 환경의 특성으로, 실제 클라우드 환경의 쿠버네티스에서는 LoadBalancer가 외부 IP 주소를 할당받아야만 외부에서 접근이 가능한데,
+  # 도커 데스크탑에서는 이 외부 IP 주소를 자동으로 localhost로 연결해 주기 때문에 쿠버네티스 클러스터 내에 있는 postgres와 다른 서비스들이
+  # DNS 이름으로 접근해도 잘 연결되고, 호스트 PC에서 localhost:5432로 접근 가능하게 되는 것입니다.
+  # ※ 개발 편의를 위해 LoadBalancer로 지정했습니다. 프로덕션에서는 기본적으로 외부에서 DB로의 접근을 막아야 하므로 ClusterIP 로 변경해야 합니다.
+  type: LoadBalancer
+  loadBalancerIP: ""

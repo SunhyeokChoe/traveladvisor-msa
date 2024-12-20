@@ -1,0 +1,11 @@
+global:
+  activeProfile: default
+  postgresSecretName: dev-traveladvisor-postgres-secret
+  configMapName: dev-traveladvisor-configmap
+  configServerURL: configserver:http://configserver:8071/
+  discoveryServerURL: "http://spring-cloud-kubernetes-discoveryserver:80/"
+  keyCloakURL: http://keycloak.default.svc.cluster.local:80/realms/master/protocol/openid-connect/certs
+  kafkaBrokerURL: confluent-cp-kafka:9092
+  openTelemetryJavaAgent: "-javaagent:/app/libs/opentelemetry-javaagent-1.33.5.jar"
+  otelExporterEndPoint: http://tempo-grafana-tempo-distributor:4317
+  otelMetricsExporter: none
