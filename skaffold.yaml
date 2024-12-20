@@ -1,0 +1,135 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: traveladvisor
+build:
+  local:
+    push: false
+  artifacts:
+    # 이 이미지 이름에 존재하는 /, ., - 는 _ 로 sanitize 됩니다.
+    # 따라서 이 파일의 deploy.helm.releases 내 setValueTemplates, setValues에서 _ 로 치환해 적어야 생성된 이미지 이름과 제대로 매핑됩니다.
+    # (참조: https://skaffold.dev/docs/renderers/helm/#sanitizing-the-artifact-name-from-invalid-go-template-characters)
+    - image: com.traveladvisor/batchserver # Push 없이 로컬 이미지를 활용합니다. setValueTemplates에서 완전히 일치해야 합니다.
+      # Multi Module 프로젝트의 경우 container 모듈을 빌드 대상으로 지정해야 합니다.
+      # container 모듈에서 서브 모듈들을 불러와 Spring Application 을 완성하기 때문입니다.
+      context: ./batchserver/batch-container
+      jib:
+        args:
+          - -DskipTests
+          - -Djib.useOnlyProjectCache=false
+          - -Djib.alwaysCacheBaseImage=false
+          - -Dspring-boot.run.arguments=--debug
+        fromImage: docker.io/library/eclipse-temurin:17-jre
+    - image: com.traveladvisor/memberserver
+      context: ./memberserver/member-container
+      jib:
+        args:
+          - -DskipTests
+          - -Djib.useOnlyProjectCache=false
+          - -Djib.alwaysCacheBaseImage=false
+          - -Dspring-boot.run.arguments=--debug
+        fromImage: docker.io/library/eclipse-temurin:17-jre
+    - image: com.traveladvisor/paymentserver
+      context: ./paymentserver/payment-container
+      jib:
+        args:
+          - -DskipTests
+          - -Djib.useOnlyProjectCache=false
+          - -Djib.alwaysCacheBaseImage=false
+          - -Dspring-boot.run.arguments=--debug
+        fromImage: docker.io/library/eclipse-temurin:17-jre
+    - image: com.traveladvisor/bookingserver
+      context: ./bookingserver/booking-container
+      jib:
+        args:
+          - -DskipTests
+          - -Djib.useOnlyProjectCache=false
+          - -Djib.alwaysCacheBaseImage=false
+          - -Dspring-boot.run.arguments=--debug
+        fromImage: docker.io/library/eclipse-temurin:17-jre
+    - image: com.traveladvisor/hotelserver
+      context: ./hotelserver/hotel-container
+      jib:
+        args:
+          - -DskipTests
+          - -Djib.useOnlyProjectCache=false
+          - -Djib.alwaysCacheBaseImage=false
+          - -Dspring-boot.run.arguments=--debug
+        fromImage: docker.io/library/eclipse-temurin:17-jre
+    - image: com.traveladvisor/flightserver
+      context: ./flightserver/flight-container
+      jib:
+        args:
+          - -DskipTests
+          - -Djib.useOnlyProjectCache=false
+          - -Djib.alwaysCacheBaseImage=false
+          - -Dspring-boot.run.arguments=--debug
+        fromImage: docker.io/library/eclipse-temurin:17-jre
+    - image: com.traveladvisor/carserver
+      context: ./carserver/car-container
+      jib:
+        args:
+          - -DskipTests
+          - -Djib.useOnlyProjectCache=false
+          - -Djib.alwaysCacheBaseImage=false
+          - -Dspring-boot.run.arguments=--debug
+        fromImage: docker.io/library/eclipse-temurin:17-jre
+    - image: com.traveladvisor/configserver
+      context: ./configserver
+      jib:
+        args:
+          - -DskipTests
+          - -Djib.useOnlyProjectCache=false
+          - -Djib.alwaysCacheBaseImage=false
+          - -Dspring-boot.run.arguments=--debug
+        fromImage: docker.io/library/eclipse-temurin:17-jre
+    - image: com.traveladvisor/gatewayserver
+      context: ./gatewayserver
+      jib:
+        args:
+          - -DskipTests
+          - -Djib.useOnlyProjectCache=false
+          - -Djib.alwaysCacheBaseImage=false
+          - -Dspring-boot.run.arguments=--debug
+        fromImage: docker.io/library/eclipse-temurin:17-jre
+  tagPolicy:
+    sha256: {}
+
+deploy:
+  helm:
+    releases:
+      - name: prod-env
+        chartPath: helm/environments/prod-env
+        valuesFiles:
+          - helm/environments/prod-env/values.yaml
+        version: 0.1.0
+        setValueTemplates:
+          batchserver.image.repository: "{{.IMAGE_REPO_com_traveladvisor_batchserver}}"
+          batchserver.image.tag: "{{.IMAGE_TAG_com_traveladvisor_batchserver}}"
+          memberserver.image.repository: "{{.IMAGE_REPO_com_traveladvisor_memberserver}}"
+          memberserver.image.tag: "{{.IMAGE_TAG_com_traveladvisor_memberserver}}"
+          paymentserver.image.repository: "{{.IMAGE_REPO_com_traveladvisor_paymentserver}}"
+          paymentserver.image.tag: "{{.IMAGE_TAG_com_traveladvisor_paymentserver}}"
+          bookingserver.image.repository: "{{.IMAGE_REPO_com_traveladvisor_bookingserver}}"
+          bookingserver.image.tag: "{{.IMAGE_TAG_com_traveladvisor_bookingserver}}"
+          hotelserver.image.repository: "{{.IMAGE_REPO_com_traveladvisor_hotelserver}}"
+          hotelserver.image.tag: "{{.IMAGE_TAG_com_traveladvisor_hotelserver}}"
+          flightserver.image.repository: "{{.IMAGE_REPO_com_traveladvisor_flightserver}}"
+          flightserver.image.tag: "{{.IMAGE_TAG_com_traveladvisor_flightserver}}"
+          carserver.image.repository: "{{.IMAGE_REPO_com_traveladvisor_carserver}}"
+          carserver.image.tag: "{{.IMAGE_TAG_com_traveladvisor_carserver}}"
+          configserver.image.repository: "{{.IMAGE_REPO_com_traveladvisor_configserver}}"
+          configserver.image.tag: "{{.IMAGE_TAG_com_traveladvisor_configserver}}"
+          gatewayserver.image.repository: "{{.IMAGE_REPO_com_traveladvisor_gatewayserver}}"
+          gatewayserver.image.tag: "{{.IMAGE_TAG_com_traveladvisor_gatewayserver}}"
+
+        setValues:
+          batchserver.image.pullPolicy: "Never"
+          memberserver.image.pullPolicy: "Never"
+          paymentserver.image.pullPolicy: "Never"
+          bookingserver.image.pullPolicy: "Never"
+          hotelserver.image.pullPolicy: "Never"
+          flightserver.image.pullPolicy: "Never"
+          carserver.image.pullPolicy: "Never"
+          gatewayserver.image.pullPolicy: "Never"
+          configserver.image.pullPolicy: "Never"
