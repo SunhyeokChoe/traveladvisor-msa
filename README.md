@@ -388,24 +388,24 @@ $ kubectl get po -w
 
 ```yaml
 <profiles>
-	<!-- 개발 환경(default) 프로파일일 경우 DevTools 의존성을 포함시킵니다. 즉, 개발 환경에서만 Hot Reload 기능을 사용하도록 합니다. -->
-	<profile>
-		<id>default</id>
-		<activation>
-			<property>
-				<name>spring.profiles.active</name>
-				<value>default</value>
-			</property>
-		</activation>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-devtools</artifactId>
-				<scope>runtime</scope>
-				<optional>true</optional>
-			</dependency>
-		</dependencies>
-	</profile>
+  <!-- 개발 환경(default) 프로파일일 경우 DevTools 의존성을 포함시킵니다. 즉, 개발 환경에서만 Hot Reload 기능을 사용하도록 합니다. -->
+  <profile>
+    <id>default</id>
+    <activation>
+      <property>
+        <name>spring.profiles.active</name>
+        <value>default</value>
+      </property>
+    </activation>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-devtools</artifactId>
+        <scope>runtime</scope>
+        <optional>true</optional>
+      </dependency>
+    </dependencies>
+  </profile>
 </profiles>
 ```
 
@@ -429,14 +429,14 @@ $ docker compose up -d
     ```yaml
     <!-- 용도: Config Server의 설정을 주입받기 위해 사용 -->
     <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-config</artifactId>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-config</artifactId>
     </dependency>
     
     <!-- 용도: K8s의 Discovery Service에게 탐지되기 위한 Discovery Client 사용 -->
     <dependency>
-    		<groupId>org.springframework.cloud</groupId>
-    		<artifactId>spring-cloud-starter-kubernetes-discoveryclient</artifactId>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-kubernetes-discoveryclient</artifactId>
     </dependency>
     ```
 
@@ -637,3 +637,23 @@ Reservation Status Flow 를 중심으로 설명하겠습니다. 모든 도메인
 
 차량 예약 실패 케이스
 
+## Saga Action 인터페이스 및 상태 정의
+
+Saga 패턴 구현을 위한 인터페이스 정의는 다음과 같습니다.
+
+```java
+public interface SagaAction<T> {
+	void process(T event);
+	void compensate(T event);
+}
+
+public enum SagaActionStatus {
+    STARTED,      // 시작
+    PROCESSING,   // 진행 중
+    COMPENSATING, // 보상 진행 중
+    SUCCEEDED,    // 성공
+    COMPENSATED   // 보상 완료
+}
+```
+
+Saga 패턴 구현에는 process, compensate 두 개의 메서드가 필요합니다. process로 Saga 단계를 순차적으로 진행하고, 어떤 시점에 실패하는 경우 다시 역순으로 순차적으로 트랜잭션을 보상(Compensating)해야 합니다. 보상 작업은 compensate 메서드에 정의합니다.
