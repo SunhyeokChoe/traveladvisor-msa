@@ -378,3 +378,33 @@ $ kubectl get po -w
 
 - Windows: `rd /s /q C:\Users\{사용자_이름}\.m2\repository`
 - Linux: `rm -rf ~/.m2/repository`
+
+# 로컬 개발 시 빠르게 소스 코드 반영 보고 싶은 경우 각 마이크로서비스 로컬 실행
+
+게이트웨이 서버와 상관 없는 비즈니스 코어 로직을 개발할 때에는 Skaffold 도움 조차 필요 없을 수 있습니다. 이럴 때는 로컬에서 마이크로서비스를 바로 실행해 기민하게 개발할 수 있어야 합니다. 따라서 각 마이크로서비스의 소스 코드가 즉각 반영될 수 있도록 DevTools 의존성을 추가했습니다.
+
+```yaml
+<profiles>
+	<!-- 개발 환경(default) 프로파일일 경우 DevTools 의존성을 포함시킵니다. 즉, 개발 환경에서만 Hot Reload 기능을 사용하도록 합니다. -->
+	<profile>
+		<id>default</id>
+		<activation>
+			<property>
+				<name>spring.profiles.active</name>
+				<value>default</value>
+			</property>
+		</activation>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-devtools</artifactId>
+				<scope>runtime</scope>
+				<optional>true</optional>
+			</dependency>
+		</dependencies>
+	</profile>
+</profiles>
+```
+
+인텔리제이 사용자의 경우 Settings -> Build, Excecution, Deployment -> Compiler -> Build project automatically 체크 박스를 체크하셔야 합니다.
+
