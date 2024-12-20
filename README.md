@@ -567,3 +567,73 @@ Outbox 패턴을 구현할 때 중요한 점은 이벤트를 직접 게시하는
 Outbox 패턴은 서비스 로직 변경과 Outbox 이벤트 저장을 하나의 트랜잭션으로 묶어 처리해야 하므로, 서비스 DB 내에 Outbox 테이블이 존재해야 합니다. 상당히 복잡한 아키텍처로 구성된 토스뱅크에서는 수백 개의 MSA 서버가 독립된 스키마(DB)를 바라보고 있고, 이 스키마들은 수십 개의 분리된 물리 서버 위에 그룹핑되어 존재한다고 합니다. 그리고 사용하는 DB 역시 Oracle, MySQL, MongoDB 등 다양한 DB를 Polyglot 형태로 사용한다고 합니다. 이것이 바로 Outbox를 적용하고자 할 때 트레이드 오프를 고려해야 하는 경계가 됩니다. 수백 개의 MSA에 일괄적으로 Outbox 패턴을 적용하려면, DB 종류, 물리 서버, 스키마마다 다양한 형태의 아웃박스 테이블들을 만들어줘야 하고, 테이블에서 메시지를 발행하는 애플리케이션도 각각 작성해야 합니다. 토스뱅크는 이러한 복잡도를 피하기 위해 Outbox 테이블을 따로 구성하는 게 아닌, Kafka 브로커에 이벤트를 발송하는 형태로 구축된 것으로 보입니다. 그리고 PDL(Producer Dead Letter) 이라고 하는 컴포넌트를 구현해 모든 서버에서 동일한 메시지 브로커를 바라볼 수 있도록 하고, PDL 에 접근하기 위한 라이브러리를 만들어 제공하므로 모든 마이크로서비스에 일괄 적용하는데 편리한 점이 있다고 합니다.
 
 이 데모 프로젝트에서는 마이크로서비스 아키텍처의 복잡성을 적정 수준으로 유지하고, Saga 패턴의 핵심 원리를 빠르고 간단하게 파악할 수 있도록 Outbox 패턴을 사용합니다.
+
+# CDC(Change Data Capture)
+
+CDC는 데이터베이스의 변경 사항(삽입, 수정, 삭제)을 실시간으로 감지하고 이를 다른 시스템으로 전달하는 기술입니다. 이 기술을 활용하면 시스템 간의 데이터 일관성을 유지할 수 있습니다. 사용 사례로는 데이터베이스 복제, 이벤트 소싱, 실시간 분석 파이프라인, 마이크로서비스 간 데이터 동기화 등이 있습니다. CDC에 특화된 대표적인 도구로는 Debezium, Apache Nifi, AWS DMS 등이 있습니다.
+
+이 데모 프로젝트에서는 오픈소스 CDC 플랫폼인 Debezium을 사용합니다. 이 도구는 Kafka connect의 Source connector이며, DB의 변경 사항을 캡쳐하고 Kafka 토픽에 이를 발행합니다. 이 발행된 토픽은 해당 토픽을 구독하고 있던 Kakfa consumer가 받아 후속 조치를 취할 수 있습니다.
+
+![Debezium CDC 내부 동작](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/cdc.png)
+
+Debezium CDC 내부 동작
+
+이 데모 프로젝트에서 DB로 Postgres를 사용하는데, 트랜잭션 로그가 WAL 에 기록됩니다. 이 WAL에 관찰 대상 테이블의 신규 트랜잭션이 있는지 파악하고 존재하는 경우 이를 읽어 PGOutput 플러그인을 통해 JSON으로 디코딩되어 Replication Slot으로 전달됩니다. 이 과정은 Push 모델입니다.
+
+그 후 Debezium Source Connector는 지속해서 Replication Slot에 새로운 데이터가 발생했는지 Polling 하고, 받아올 데이터가 있는 경우 가져옵니다. 이 과정은 Pull 모델입니다.
+
+# Debezium CDC
+
+Debezium은 오픈소스 CDC 플랫폼이며, 실제로 여러 IT 대기업에서 안정적으로 사용하고 있는 검증된 도구입니다.
+
+![image.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/cdc%2520with%2520kafka.png)
+
+Debezium Postgres Source Connector가 Replication Slot에 추가된 트랜잭션이 있는지 지속해서 확인하고, 존재하는 경우 Kafka 토픽에 발행합니다. Saga 액션 흐름의 Orchestrator 역할을 하는 Reservation 마이크로서비스는 debezium 관련 토픽에 새로운 메시지가 들어왔는지 Polling하고, 이를 가져옵니다. Saga의 전체 단계 중 한 부분에 관해 작업을 마치면 해당 Saga 액션을 완수했음을 알리고, 다음 액션이 실행될 수 있도록 Kafka에 이벤트를 발행합니다. Orchestrator로부터 지령을 전달받은 마이크로서비스는 Saga 액션을 수행합니다.
+
+# Saga 패턴 + Outbox 패턴 + CDC를 결합한 비즈니스 구현
+
+![Saga, Outbox, Reservation 상태 정의](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/saga+outbox+booking%2520status.png)
+
+Saga, Outbox, Reservation 상태 정의
+
+예약에 관해 Orchestrator 책임을 갖는 Reservation 마이크로서비스를 중심으로 예약 시퀀스를 살펴보면 다음과 같습니다.
+
+## 1) 호텔/항공권/차량 예약 성공 케이스
+
+![호텔/항공권/차량 예약 성공 케이스](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/booking%2520all%2520success.png)
+
+호텔/항공권/차량 예약 성공 케이스
+
+Reservation Status Flow 를 중심으로 설명하겠습니다. 모든 도메인 이벤트는 과거형으로 작성합니다.
+
+1. 사용자가 예약을 요청합니다.
+2. Reservation 서비스는 `Reservation Created Event(예약 생성 이벤트)`를 Hotel 서비스로 전송합니다. 이 시점에서 Reservation 서비스의 로컬 데이터베이스에는 예약 상태를 `PENDING(진행 중)` 으로 표시합니다.
+3. Hotel 서비스는 `Reservation Created Event`를 전달받아 호텔 예약/결제를 수행하고 로컬 데이터베이스에 `HOTEL_RESERVATED(호텔 예약/결제 완료)` 상태로 기록합니다.
+4. Reservation 서비스에서 호텔 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `HOTEL_RESERVATED`로 변경합니다. 그리고 `Hotel Reservated Event`를 Flight 서비스에 전달합니다.
+5. Flight 서비스는 `Hotel Reservated Event`를 전달받아 항공권 예약/결제를 수행하고 로컬 데이터베이스에 `FLIGHT_RESERVATED(항공권 예약/결제 완료)` 상태로 기록합니다.
+6. Reservation 서비스에서 항공권 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `FLIGHT_RESERVATED`로 변경합니다. 그리고 `Flight Reservated Event`를 Car 서비스에 전달합니다.
+7. Car 서비스는 `Car Reservated Event`를 전달받아 차량 예약/결제를 수행하고 로컬 데이터베이스에 `Car_RESERVATED(차량 예약/결제 완료)` 상태로 기록합니다.
+8. Reservation 서비스에서 차량 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `APPROVED(승인 됨)` 으로 변경하고 예약을 마칩니다.
+
+예약 흐름의 기조는 위와 같으며 보시다시피 Kafka를 활용해 프로세스를 비동기로 처리합니다.
+
+실패 케이스에 따른 보상 흐름은 다음과 같습니다.
+
+## 2) 호텔 예약 실패 케이스
+
+![호텔 예약 실패 케이스](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/booking%2520hotel%2520failed.png)
+
+호텔 예약 실패 케이스
+
+## 3) 항공권 예약 실패 케이스
+
+![항공권 예약 실패 케이스](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/booking%2520flight%2520failed.png)
+
+항공권 예약 실패 케이스
+
+## 4) 차량 예약 실패 케이스
+
+![차량 예약 실패 케이스](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/car%2520failed.png)
+
+차량 예약 실패 케이스
+
