@@ -134,3 +134,25 @@
 | KeyCloak | 8080(HTTP) / 8443(HTTPS) |  |  |
 | Kafka Broker Cluster | 9092 | kafka-controller-0.kafka-controller-headless.default.svc.cluster.local | <none> |
 
+# 아키텍처 구성 (쿠버네티스 기반)
+- **Spring Cloud Gateway:** 스프링 클라우드 게이트웨이는 여기서 OAuth2 Client 및 OAuth2 Resource Server 역할을 합니다. 모든 요청은 게이트웨이에 전달되며, 요청을 다운스트림 서비스로 전달하기 전에 액세스 토큰을 확인합니다. 인증되지 않은 요청에 대해서는 Authentication Code Grant (OAuth2 인증 타입 중 하나) 흐름 절차로 Keycloak으로부터 새로운 토큰 발급을 위해 인증을 요청합니다. 또한 요청에 대한 안정성을 위해 Resilience4j 를 활용합니다. 게이트웨이 서버는 모든 서비스의 입구 역할을 하는데, 너무 많은 책임을 지게 하면 단일 실패 지점(Single Point of Failure)이 되기 쉬우므로 최대한 가볍게 유지하도록 합니다.
+- **KeyCloak**: OAuth2 및 OpenID Connect 표준을 지원하는 인증 서버로서, 사용자 인증, 권한 부여, 토큰 발급 등을 담당합니다.
+- **마이크로서비스**: 마이크로서비스는 게이트웨이를 통해서만 접근 가능합니다. Reservation 서비스는 내부적으로 여러 서비스를 호출하고 응답을 관리하기 때문에 요청에 대한 실패가 발생할 수 있으므로 이를 처리하기 위해 Circuit breaker, Retry 등의 패턴을 적용합니다.
+
+  각 마이크로서비스마다 개별적인 인증 및 인가를 구현하는 것은 복잡하고 유지보수가 어렵습니다. 이를 해결하기 위해 OAuth2 및 OpenID Connect(OIDC) 표준을 지원하는 KeyCloak과 같은 통합 인증 서버를 게이트웨이 서버에 연동해 Resource Server 책임을 부여해 이곳에서 중앙집중식으로 인증 및 권한을 체크하도록 합니다.
+
+- **데이터베이스 논리적 분리**: 이 프로젝트에서 데이터베이스 분리 전략은 논리적 분리로 합니다. 즉, 하나의 데이터베이스 인스턴스(물리 서버 또는 클라우드 DB)에 각 서비스별로 별도의 스키마를 생성해 데이터베이스를 논리적으로 분리합니다. 이는 소규모 프로젝트에서 운영 및 유지보수가 간편하고, 인프라 비용 절감 효과가 있기 때문입니다. 단점은 데이터베이스 인스턴스에 장애가 발생하면 모든 서비스가 영향을 받을 수 있다는 것입니다. 추후 서비스가 커지고 트래픽이 늘어나면 물리적 분리로의 전환을 권장합니다.
+- **Resilience4j Bulkhead 패턴**: 리소스를 격벽의 형태로 나누어 격리해 일부 컴포넌트에서 문제가 발생했을 때 전체 시스템으로의 장애로 전파되지 않게 해주는 패턴입니다. 정리하면, **리소스 격리를 통한 장애 격리**라고 할 수 있습니다.
+- **Resilience4j Circuit breaker 패턴**: 서비스 요청 실패 발생 시 새로 들어오는 요청을 제한해 서버가 회복하는데 시간을 벌어다 줄 수 있습니다. 이를 통해 얻는 이점은 다음과 같습니다.
+  - Fail fast
+  - Fail gracefully
+  - Recover seamlessly
+- **Resilience4j Fallback 패턴**: 요청 실패에 대한 대안으로 Fallback 경로로 전환합니다.
+- **Resilience4j Retry 패턴**: 서비스에 잠시 장애가 발생했을 때 요청 실패 시 요청을 재시도 합니다.
+- **Resilience4j Rate limit 패턴**: 특정 시간 구간 내에 들어오는 요청의 수를 제한합니다. 짧은 시간 내 과도한 요청을 보내는 클라이언트를 제한 할 수 있습니다.
+- **Aggregation 패턴**: 특정 서비스에서 여러 다른 서비스나 저장소로부터 데이터를 모으는 패턴입니다.
+- **Observability(Spring Actuator + Micrometer: metrics, Loki)**
+  - **Spring Actuator + Spring Micrometer**: 각 마이크로서비스 내 메트릭을 수집합니다. Spring Micrometer는 벤더 중립적인 API 인터페이스를 사용해 코드 실행 시간, 호출 추적을 할 수 있도록 해주고, 이 메트릭 정보를 외부 모니터링 시스템으로 보내줍니다.
+  - OpenTelemetry: 각 마이크로서비스에서 추적 가능한 로그를 생성하고 Loki, Tempo로 전달합니다. 메트릭은 Spring Actuator + Micrometer 에서 수집하므로 OpenTelemetry는 로그 관련 책임만 갖도록 합니다.
+  - Grafana: metrics, tracing, logs 를 모니터링하고, 알람을 받아볼 수 있는 다재다능한 도구입니다.
+
