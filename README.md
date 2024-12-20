@@ -408,3 +408,14 @@ $ kubectl get po -w
 
 인텔리제이 사용자의 경우 Settings -> Build, Excecution, Deployment -> Compiler -> Build project automatically 체크 박스를 체크하셔야 합니다.
 
+# 로컬 개발 환경에서의 리소스
+
+쿠버네티스 클러스터 환경이 아닌 로컬 PC에서 마이크로서비스 인스턴스만 띄워 개발할 때 Redis, Kafka, PostgreSQL등의 리소스가 필요할 수 있습니다. 각 리소스는 infrastructure/local-resources 폴더에 정의돼 있으며 Docker Compose로 띄울 수 있습니다.
+
+다음의 명령을 실행합니다.
+
+```bash
+$ cd infrastructure/docker-compose/local-resources
+$ docker compose up -d
+```
+
