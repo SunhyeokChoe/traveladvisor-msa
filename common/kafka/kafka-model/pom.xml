@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>kafka-model</artifactId>
+
+    <parent>
+        <groupId>com.traveladvisor</groupId>
+        <artifactId>kafka</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+              용도: Avro 스키마 파일 기반 Avro Java 클래스 자동 생성
+              Maven 빌드 시 이 플러그인을 통해 resources/avro/*.avro 파일을 읽어 자동으로 해당 스키마에 맞는 POJO 클래스를 생성합니다.
+            -->
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>${avro.version}</version>
+                <configuration>
+                    <!--
+                      Avro 스키마에서 문자열 타입을 Java의 String 타입으로 매핑합니다.
+                      기본적으로 Avro 문자열은 UTF-8 타입으로 매핑되는데, 이를 String으로 변경하여 우리가 익숙하게 사용할 수 있도록 합니다.
+                    -->
+                    <stringType>String</stringType>
+                    <!-- Avro 스키마에서 decimal 타입을 활성화 해 Avro의 decimal 타입이 Java의 BigDecimal로 매핑되도록 합니다. -->
+                    <enableDecimalLogicalType>true</enableDecimalLogicalType>
+                </configuration>
+                <executions>
+                    <execution>
+                        <!-- Maven 빌드 중 generate-sources 단계에서 avro-maven-plugin이 실행되어 소스 파일이 생성되도록 합니다. -->
+                        <phase>generate-sources</phase>
+                        <!-- 플러그인이 수행할 목표를 정의합니다. 목표를 schema로 지정하여 Avro 스키마 파일을 처리하도록 한다. -->
+                        <goals>
+                            <goal>schema</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Avro 스키마 파일이 위치한 디렉토리 경로를 지정합니다. -->
+                            <sourceDirectory>src/main/resources/avro</sourceDirectory>
+                            <!-- 자동 생성된 Avro Java 파일이 저장될 디렉토리 경로 -->
+                            <outputDirectory>src/main/java</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

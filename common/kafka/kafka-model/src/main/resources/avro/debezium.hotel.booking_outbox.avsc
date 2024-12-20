@@ -1,0 +1,246 @@
+{
+    "type": "record",
+    "name": "Envelope",
+    "namespace": "debezium.hotel.booking_outbox",
+    "fields": [
+        {
+            "name": "before",
+            "type": [
+                "null",
+                {
+                    "type": "record",
+                    "name": "Value",
+                    "fields": [
+                        {
+                            "name": "id",
+                            "type": {
+                                "type": "string",
+                                "connect.version": 1,
+                                "connect.name": "io.debezium.data.Uuid"
+                            }
+                        },
+                        {
+                            "name": "saga_action_id",
+                            "type": {
+                                "type": "string",
+                                "connect.version": 1,
+                                "connect.name": "io.debezium.data.Uuid"
+                            }
+                        },
+                        {
+                            "name": "event_type",
+                            "type": "string"
+                        },
+                        {
+                            "name": "event_payload",
+                            "type": {
+                                "type": "string",
+                                "connect.version": 1,
+                                "connect.name": "io.debezium.data.Json"
+                            }
+                        },
+                        {
+                            "name": "booking_status",
+                            "type": {
+                                "type": "string",
+                                "connect.version": 1,
+                                "connect.parameters": {
+                                    "allowed": "HOTEL_BOOKED,HOTEL_CANCELLED"
+                                },
+                                "connect.name": "io.debezium.data.Enum"
+                            }
+                        },
+                        {
+                            "name": "outbox_status",
+                            "type": {
+                                "type": "string",
+                                "connect.version": 1,
+                                "connect.parameters": {
+                                    "allowed": "STARTED,COMPLETED,FAILED"
+                                },
+                                "connect.name": "io.debezium.data.Enum"
+                            }
+                        },
+                        {
+                            "name": "created_at",
+                            "type": {
+                                "type": "string",
+                                "connect.version": 1,
+                                "connect.default": "1970-01-01T00:00:00.000000Z",
+                                "connect.name": "io.debezium.time.ZonedTimestamp"
+                            },
+                            "default": "1970-01-01T00:00:00.000000Z"
+                        },
+                        {
+                            "name": "updated_at",
+                            "type": [
+                                "null",
+                                {
+                                    "type": "string",
+                                    "connect.version": 1,
+                                    "connect.name": "io.debezium.time.ZonedTimestamp"
+                                }
+                            ],
+                            "default": null
+                        },
+                        {
+                            "name": "completed_at",
+                            "type": [
+                                "null",
+                                {
+                                    "type": "string",
+                                    "connect.version": 1,
+                                    "connect.name": "io.debezium.time.ZonedTimestamp"
+                                }
+                            ],
+                            "default": null
+                        },
+                        {
+                            "name": "version",
+                            "type": "int"
+                        }
+                    ],
+                    "connect.name": "debezium.hotel.booking_outbox.Value"
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "after",
+            "type": [
+                "null",
+                "Value"
+            ],
+            "default": null
+        },
+        {
+            "name": "source",
+            "type": {
+                "type": "record",
+                "name": "Source",
+                "namespace": "io.debezium.connector.postgresql",
+                "fields": [
+                    {
+                        "name": "version",
+                        "type": "string"
+                    },
+                    {
+                        "name": "connector",
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "name": "ts_ms",
+                        "type": "long"
+                    },
+                    {
+                        "name": "snapshot",
+                        "type": [
+                            {
+                                "type": "string",
+                                "connect.version": 1,
+                                "connect.parameters": {
+                                    "allowed": "true,last,false,incremental"
+                                },
+                                "connect.default": "false",
+                                "connect.name": "io.debezium.data.Enum"
+                            },
+                            "null"
+                        ],
+                        "default": "false"
+                    },
+                    {
+                        "name": "db",
+                        "type": "string"
+                    },
+                    {
+                        "name": "sequence",
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "default": null
+                    },
+                    {
+                        "name": "schema",
+                        "type": "string"
+                    },
+                    {
+                        "name": "table",
+                        "type": "string"
+                    },
+                    {
+                        "name": "txId",
+                        "type": [
+                            "null",
+                            "long"
+                        ],
+                        "default": null
+                    },
+                    {
+                        "name": "lsn",
+                        "type": [
+                            "null",
+                            "long"
+                        ],
+                        "default": null
+                    },
+                    {
+                        "name": "xmin",
+                        "type": [
+                            "null",
+                            "long"
+                        ],
+                        "default": null
+                    }
+                ],
+                "connect.name": "io.debezium.connector.postgresql.Source"
+            }
+        },
+        {
+            "name": "op",
+            "type": "string"
+        },
+        {
+            "name": "ts_ms",
+            "type": [
+                "null",
+                "long"
+            ],
+            "default": null
+        },
+        {
+            "name": "transaction",
+            "type": [
+                "null",
+                {
+                    "type": "record",
+                    "name": "block",
+                    "namespace": "event",
+                    "fields": [
+                        {
+                            "name": "id",
+                            "type": "string"
+                        },
+                        {
+                            "name": "total_order",
+                            "type": "long"
+                        },
+                        {
+                            "name": "data_collection_order",
+                            "type": "long"
+                        }
+                    ],
+                    "connect.version": 1,
+                    "connect.name": "event.block"
+                }
+            ],
+            "default": null
+        }
+    ],
+    "connect.version": 1,
+    "connect.name": "debezium.hotel.booking_outbox.Envelope"
+}
