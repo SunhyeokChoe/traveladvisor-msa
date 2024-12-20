@@ -39,12 +39,10 @@
     -->
     <packaging>pom</packaging>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.4</version>
-        <relativePath/>
-    </parent>
+    <modules>
+        <module>memberserver</module>
+        <module>common</module>
+    </modules>
 
     <repositories>
         <!-- Kafka Avro Serializer 종속성을 사용하기 위해 Confluent 저장소를 추가했습니다. -->
@@ -53,6 +51,13 @@
             <url>https://packages.confluent.io/maven/</url>
         </repository>
     </repositories>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.4</version>
+        <relativePath/>
+    </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -82,10 +87,78 @@
             <!-- END: Spring Cloud BOM -->
 
             <!-- BEGIN: common -->
-
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>common-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>common-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>common-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>common-message</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- END: common -->
 
+            <!-- BEGIN: member microservice -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-application-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-domain-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>member-message</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: member microservice -->
 
+            <!-- BEGIN: kafka -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>kafka-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>kafka-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>kafka-producer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>kafka-consumer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: kafka -->
         </dependencies>
     </dependencyManagement>
 
