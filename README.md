@@ -657,3 +657,88 @@ public enum SagaActionStatus {
 ```
 
 Saga 패턴 구현에는 process, compensate 두 개의 메서드가 필요합니다. process로 Saga 단계를 순차적으로 진행하고, 어떤 시점에 실패하는 경우 다시 역순으로 순차적으로 트랜잭션을 보상(Compensating)해야 합니다. 보상 작업은 compensate 메서드에 정의합니다.
+
+# Kafka 토픽 구성
+
+> 💡 토픽 네이밍 컨벤션은 다음과 같이 구성했습니다.
+`<트랜잭션_타입(명사)>.<발행자_서비스_이름>.<소비자_서비스_이름>.<액션(동사)>`
+트랜잭션 타입을 최상위 카테고리로 두면, 해당 토픽은 어느 비즈니스 범주에 포함되는지 한눈에 알기 쉬워 추후 서비스가 커졌을 때 함께 불어난 토픽 유지보수에 많은 노력을 들이지 않아도 될 것 같아 위와 같은 구조로 정의했습니다.
+>
+
+<aside>
+
+
+Kafka 토픽으로의 메시지 발행은 Debezium Postgres Source Connector가 outbox 테이블의 WAL 로그의 변경사항을 감지하고 메시지를 생성해 Kafka 토픽으로 전달합니다.
+
+각 마이크로서비스에 Kafka Producer를 정의하고 메시지를 직접 발행하는 방식이 아닙니다.
+
+</aside>
+
+※ 상호 비동기 통신 마이크로서비스 목록: booking ↔ (hotel, flight, car)
+
+### 주문-결제-승인 트랜잭션 흐름 (booking_request_flow)
+
+- `booking_request_flow.booking.hotel.request_booking`: booking → hotel 예약 요청
+- `booking_request_flow.hotel.booking.notify_booking_completed`: hotel → booking 예약 완료 알림
+- `booking_request_flow.booking.flight.request_booking`: booking → flight 예약 요청
+- `booking_request_flow.flight.booking.notify_booking_completed`: flight → booking 예약 완료 알림
+- `booking_request_flow.booking.car.request_booking`: booking→ car 예약 요청
+- `booking_request_flow.flight.booking.notify_booking_completed`: car → booking 예약 완료 알림
+
+### 주문 취소 요청 트랜잭션 흐름 (booking_cancel_flow)
+
+- `booking_cancel_flow.booking.hotel.cancel_booking`: booking → hotel 주문 취소 요청
+- `booking_cancel_flow.hotel.booking.notify_booking_canceled`: hotel → booking 예약 취소 완료 알림
+- `booking_cancel_flow.booking.flight.cancel_booking`: booking→ flight 결제 취소 요청
+- `booking_cancel_flow.flight.booking.notify_booking_canceled`: flight→ booking 예약 취소 완료 알림
+- `booking_cancel_flow.booking.car.cancel_booking`: booking→ car 결제 취소 요청
+- `booking_cancel_flow.car.booking.notify_booking_canceled`: car→ booking 예약 취소 완료 알림
+
+이를 booking 서비스의 application.yaml에 정의하면 다음과 같습니다.
+
+```yaml
+spring:
+    # Spring Cloud Function
+    function:
+      # booking 마이크로서비스와 hotel, flight, car 마이크로서비스들 간의 예약 요청/응답을 처리하는 function
+      definition: hotelBookingFlow;flightBookingFlow;carBookingFlow;hotelCancelFlow;flightCancelFlow;carCancelFlow
+    # Spring Cloud Stream
+    stream:
+      kafka:
+        binder:
+          brokers:
+            - localhost:9092
+      bindings:
+        # ===== 예약 요청 플로우(booking_request_flow) =====
+        # 호텔 예약 완료 응답 처리
+        hotelBookingCompleted-in-0:
+          destination: booking_request_flow.hotel.booking.notify_booking_completed
+          group: ${spring.application.name}-hotel-booking
+
+        # 항공권 예약 완료 응답 처리
+        flightBookingCompleted-in-0:
+          destination: booking_request_flow.flight.booking.notify_booking_completed
+          group: ${spring.application.name}-flight-booking
+
+        # 차량 예약 완료 응답 처리
+        carBookingCompleted-in-0:
+          destination: booking_request_flow.car.booking.notify_booking_completed
+          group: ${spring.application.name}-car-booking
+
+        # ===== 예약 취소 플로우(booking_cancel_flow) =====
+        # 호텔 예약 취소 완료 응답 처리
+        hotelCancelCompleted-in-0:
+          destination: booking_cancel_flow.hotel.booking.notify_booking_canceled
+          group: ${spring.application.name}-hotel-booking-canceling
+
+        # 항공권 예약 취소 완료 응답 처리
+        flightCancelCompleted-in-0:
+          destination: booking_cancel_flow.flight.booking.notify_booking_canceled
+          group: ${spring.application.name}-flight-booking-canceling
+
+        # 차량 예약 취소 완료 응답 처리
+        carCancelCompleted-in-0:
+          destination: booking_cancel_flow.car.booking.notify_booking_canceled
+          group: ${spring.application.name}-car-booking-canceling
+```
+
