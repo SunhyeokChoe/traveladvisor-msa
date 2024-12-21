@@ -1,8 +1,8 @@
 package com.traveladvisor.memberserver.service.datasource.member.mapper;
 
 import com.traveladvisor.common.domain.vo.MemberId;
-import com.traveladvisor.member.service.datasource.member.entity.MemberEntity;
-import com.traveladvisor.member.service.domain.entity.Member;
+import com.traveladvisor.memberserver.service.datasource.member.entity.MemberEntity;
+import com.traveladvisor.memberserver.service.domain.entity.Member;
 import org.springframework.stereotype.Component;
 
 @Component

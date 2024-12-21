@@ -1,7 +1,7 @@
 package com.traveladvisor.memberserver.service.domain.event;
 
 import com.traveladvisor.common.domain.event.DomainEvent;
-import com.traveladvisor.member.service.domain.entity.Member;
+import com.traveladvisor.memberserver.service.domain.entity.Member;
 
 import java.time.ZonedDateTime;
 

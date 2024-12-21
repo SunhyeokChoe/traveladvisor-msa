@@ -1,10 +1,10 @@
 package com.traveladvisor.memberserver.service.application.rest;
 
 import com.traveladvisor.common.application.dto.ErrorResponseDto;
-import com.traveladvisor.member.service.domain.dto.command.CreateMemberCommand;
-import com.traveladvisor.member.service.domain.dto.command.CreateMemberResponse;
-import com.traveladvisor.member.service.domain.dto.query.QueryMemberResponse;
-import com.traveladvisor.member.service.domain.port.input.service.MemberApplicationService;
+import com.traveladvisor.memberserver.service.domain.dto.command.CreateMemberCommand;
+import com.traveladvisor.memberserver.service.domain.dto.command.CreateMemberResponse;
+import com.traveladvisor.memberserver.service.domain.dto.query.QueryMemberResponse;
+import com.traveladvisor.memberserver.service.domain.port.input.service.MemberApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

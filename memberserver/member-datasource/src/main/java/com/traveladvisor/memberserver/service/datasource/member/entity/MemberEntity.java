@@ -2,6 +2,7 @@ package com.traveladvisor.memberserver.service.datasource.member.entity;
 
 import com.traveladvisor.common.datasource.common.entity.BaseAuditEntity;
 import com.traveladvisor.common.domain.vo.Gender;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.UUID;

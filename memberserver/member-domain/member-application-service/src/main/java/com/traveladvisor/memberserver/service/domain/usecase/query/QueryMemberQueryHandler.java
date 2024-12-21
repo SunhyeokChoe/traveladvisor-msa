@@ -1,12 +1,12 @@
 package com.traveladvisor.memberserver.service.domain.usecase.query;
 
-import com.traveladvisor.member.service.domain.MemberDomainService;
-import com.traveladvisor.member.service.domain.dto.query.QueryMemberResponse;
-import com.traveladvisor.member.service.domain.entity.Member;
-import com.traveladvisor.member.service.domain.exception.MemberApplicationServiceException;
-import com.traveladvisor.member.service.domain.mapper.MemberMapper;
-import com.traveladvisor.member.service.domain.port.output.client.PaymentServiceApiClient;
-import com.traveladvisor.member.service.domain.repository.MemberRepository;
+import com.traveladvisor.memberserver.service.domain.MemberDomainService;
+import com.traveladvisor.memberserver.service.domain.dto.query.QueryMemberResponse;
+import com.traveladvisor.memberserver.service.domain.entity.Member;
+import com.traveladvisor.memberserver.service.domain.exception.MemberApplicationServiceException;
+import com.traveladvisor.memberserver.service.domain.mapper.MemberMapper;
+import com.traveladvisor.memberserver.service.domain.port.output.client.PaymentServiceApiClient;
+import com.traveladvisor.memberserver.service.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

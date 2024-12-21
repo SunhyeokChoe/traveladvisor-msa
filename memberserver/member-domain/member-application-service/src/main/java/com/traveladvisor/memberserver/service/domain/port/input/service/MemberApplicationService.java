@@ -1,8 +1,8 @@
 package com.traveladvisor.memberserver.service.domain.port.input.service;
 
-import com.traveladvisor.member.service.domain.dto.command.CreateMemberCommand;
-import com.traveladvisor.member.service.domain.dto.command.CreateMemberResponse;
-import com.traveladvisor.member.service.domain.dto.query.QueryMemberResponse;
+import com.traveladvisor.memberserver.service.domain.dto.command.CreateMemberCommand;
+import com.traveladvisor.memberserver.service.domain.dto.command.CreateMemberResponse;
+import com.traveladvisor.memberserver.service.domain.dto.query.QueryMemberResponse;
 import jakarta.validation.Valid;
 
 public interface MemberApplicationService {

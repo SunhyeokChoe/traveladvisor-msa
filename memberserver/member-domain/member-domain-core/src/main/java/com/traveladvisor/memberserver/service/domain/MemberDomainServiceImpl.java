@@ -1,7 +1,7 @@
 package com.traveladvisor.memberserver.service.domain;
 
-import com.traveladvisor.member.service.domain.entity.Member;
-import com.traveladvisor.member.service.domain.event.MemberCreatedEvent;
+import com.traveladvisor.memberserver.service.domain.entity.Member;
+import com.traveladvisor.memberserver.service.domain.event.MemberCreatedEvent;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZoneId;

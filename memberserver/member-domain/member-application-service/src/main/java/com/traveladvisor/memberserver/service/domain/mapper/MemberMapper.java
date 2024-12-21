@@ -1,10 +1,10 @@
 package com.traveladvisor.memberserver.service.domain.mapper;
 
 import com.traveladvisor.common.domain.vo.MemberId;
-import com.traveladvisor.member.service.domain.dto.command.CreateMemberCommand;
-import com.traveladvisor.member.service.domain.dto.command.CreateMemberResponse;
-import com.traveladvisor.member.service.domain.dto.query.QueryMemberResponse;
-import com.traveladvisor.member.service.domain.entity.Member;
+import com.traveladvisor.memberserver.service.domain.dto.command.CreateMemberCommand;
+import com.traveladvisor.memberserver.service.domain.dto.command.CreateMemberResponse;
+import com.traveladvisor.memberserver.service.domain.dto.query.QueryMemberResponse;
+import com.traveladvisor.memberserver.service.domain.entity.Member;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;

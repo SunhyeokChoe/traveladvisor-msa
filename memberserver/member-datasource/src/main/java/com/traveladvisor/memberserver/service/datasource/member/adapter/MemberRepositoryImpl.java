@@ -1,9 +1,9 @@
 package com.traveladvisor.memberserver.service.datasource.member.adapter;
 
-import com.traveladvisor.member.service.datasource.member.mapper.MemberDatasourceMapper;
-import com.traveladvisor.member.service.datasource.member.repository.MemberJpaRepository;
-import com.traveladvisor.member.service.domain.entity.Member;
-import com.traveladvisor.member.service.domain.repository.MemberRepository;
+import com.traveladvisor.memberserver.service.datasource.member.mapper.MemberDatasourceMapper;
+import com.traveladvisor.memberserver.service.datasource.member.repository.MemberJpaRepository;
+import com.traveladvisor.memberserver.service.domain.entity.Member;
+import com.traveladvisor.memberserver.service.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

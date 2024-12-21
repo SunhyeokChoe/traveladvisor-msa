@@ -1,8 +1,8 @@
 package com.traveladvisor.memberserver.service.message.outbound.adapter;
 
 import com.traveladvisor.common.domain.vo.EventActionType;
-import com.traveladvisor.member.service.domain.port.output.client.PaymentServiceApiClient;
-import com.traveladvisor.member.service.message.outbound.client.PaymentServiceFeignClient;
+import com.traveladvisor.memberserver.service.domain.port.output.client.PaymentServiceApiClient;
+import com.traveladvisor.memberserver.service.message.outbound.client.PaymentServiceFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

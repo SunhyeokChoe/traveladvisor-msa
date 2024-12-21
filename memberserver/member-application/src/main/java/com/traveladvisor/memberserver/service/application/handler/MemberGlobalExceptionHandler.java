@@ -2,7 +2,7 @@ package com.traveladvisor.memberserver.service.application.handler;
 
 import com.traveladvisor.common.application.dto.ErrorResponseDto;
 import com.traveladvisor.common.application.exception.GlobalExceptionHandler;
-import com.traveladvisor.member.service.domain.exception.MemberApplicationServiceException;
+import com.traveladvisor.memberserver.service.domain.exception.MemberApplicationServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

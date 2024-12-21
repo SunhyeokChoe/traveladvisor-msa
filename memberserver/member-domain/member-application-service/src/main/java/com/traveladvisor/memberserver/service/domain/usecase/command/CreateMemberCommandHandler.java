@@ -1,15 +1,15 @@
 package com.traveladvisor.memberserver.service.domain.usecase.command;
 
 import com.traveladvisor.common.domain.vo.EventActionType;
-import com.traveladvisor.member.service.domain.MemberDomainService;
-import com.traveladvisor.member.service.domain.dto.command.CreateMemberCommand;
-import com.traveladvisor.member.service.domain.dto.command.CreateMemberResponse;
-import com.traveladvisor.member.service.domain.entity.Member;
-import com.traveladvisor.member.service.domain.event.MemberCreatedEvent;
-import com.traveladvisor.member.service.domain.exception.MemberApplicationServiceException;
-import com.traveladvisor.member.service.domain.mapper.MemberMapper;
-import com.traveladvisor.member.service.domain.port.output.client.PaymentServiceApiClient;
-import com.traveladvisor.member.service.domain.repository.MemberRepository;
+import com.traveladvisor.memberserver.service.domain.MemberDomainService;
+import com.traveladvisor.memberserver.service.domain.dto.command.CreateMemberCommand;
+import com.traveladvisor.memberserver.service.domain.dto.command.CreateMemberResponse;
+import com.traveladvisor.memberserver.service.domain.entity.Member;
+import com.traveladvisor.memberserver.service.domain.event.MemberCreatedEvent;
+import com.traveladvisor.memberserver.service.domain.exception.MemberApplicationServiceException;
+import com.traveladvisor.memberserver.service.domain.mapper.MemberMapper;
+import com.traveladvisor.memberserver.service.domain.port.output.client.PaymentServiceApiClient;
+import com.traveladvisor.memberserver.service.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
