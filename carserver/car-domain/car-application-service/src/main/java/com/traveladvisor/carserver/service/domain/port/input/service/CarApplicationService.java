@@ -1,6 +1,6 @@
 package com.traveladvisor.carserver.service.domain.port.input.service;
 
-import com.traveladvisor.car.service.domain.dto.query.QueryCarOffersResponse;
+import com.traveladvisor.carserver.service.domain.dto.query.QueryCarOffersResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -1,6 +1,6 @@
 package com.traveladvisor.carserver.service.domain.port.output.repository;
 
-import com.traveladvisor.car.service.domain.entity.CarOffer;
+import com.traveladvisor.carserver.service.domain.entity.CarOffer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

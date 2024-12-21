@@ -1,8 +1,8 @@
 package com.traveladvisor.carserver.service.domain.usecase.query;
 
-import com.traveladvisor.car.service.domain.dto.query.QueryCarOffersResponse;
-import com.traveladvisor.car.service.domain.mapper.CarOfferMapper;
-import com.traveladvisor.car.service.domain.port.output.repository.CarOfferRepository;
+import com.traveladvisor.carserver.service.domain.dto.query.QueryCarOffersResponse;
+import com.traveladvisor.carserver.service.domain.mapper.CarOfferMapper;
+import com.traveladvisor.carserver.service.domain.port.output.repository.CarOfferRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

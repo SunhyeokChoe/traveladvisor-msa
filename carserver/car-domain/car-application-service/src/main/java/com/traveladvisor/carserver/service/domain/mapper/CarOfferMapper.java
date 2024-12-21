@@ -1,7 +1,7 @@
 package com.traveladvisor.carserver.service.domain.mapper;
 
-import com.traveladvisor.car.service.domain.dto.query.QueryCarOffersResponse;
-import com.traveladvisor.car.service.domain.entity.CarOffer;
+import com.traveladvisor.carserver.service.domain.dto.query.QueryCarOffersResponse;
+import com.traveladvisor.carserver.service.domain.entity.CarOffer;
 import org.springframework.stereotype.Component;
 
 @Component
