@@ -45,6 +45,7 @@
         <module>paymentserver</module>
         <module>configserver</module>
         <module>gatewayserver</module>
+        <module>booknigserver</module>
     </modules>
 
     <repositories>
@@ -112,6 +113,62 @@
             </dependency>
             <!-- END: common -->
 
+            <!-- BEGIN: batch microservice -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>batch-application-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>batch-domain-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>batch-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>batch-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>batch-message</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: batch microservice -->
+
+            <!-- BEGIN: booking microservice -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>booking-application-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>booking-domain-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>booking-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>booking-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>booking-message</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: booking microservice -->
+
             <!-- BEGIN: member microservice -->
             <dependency>
                 <groupId>com.traveladvisor</groupId>
@@ -167,6 +224,22 @@
                 <version>${project.version}</version>
             </dependency>
             <!-- END: payment microservice -->
+
+            <!-- BEGIN: config microservice -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>configserver</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: config microservice -->
+
+            <!-- BEGIN: gateway microservice -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>gatewayserver</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: gateway microservice -->
 
             <!-- BEGIN: kafka -->
             <dependency>
