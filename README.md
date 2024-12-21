@@ -440,7 +440,7 @@ $ kubectl get po -w
 다음의 명령을 실행합니다.
 
 ```bash
-$ cd infrastructure/docker-compose/local-resources
+$ cd infrastructure/docker-compose
 $ docker compose up -d
 ```
 
