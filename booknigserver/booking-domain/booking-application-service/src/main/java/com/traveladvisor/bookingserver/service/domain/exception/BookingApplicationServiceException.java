@@ -1,4 +1,4 @@
-package com.traveladvisor.bookingserver.service.domain.dto.exception;
+package com.traveladvisor.bookingserver.service.domain.exception;
 
 import com.traveladvisor.common.domain.exception.DomainException;
 
