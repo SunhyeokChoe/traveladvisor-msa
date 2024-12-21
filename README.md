@@ -502,7 +502,7 @@ $ docker compose up -d
       oauth2:
         resourceserver:
           jwt:
-            jwk-set-uri: "http://localhost:7080/realms/master/protocol/openid-connect/certs"
+            jwk-set-uri: "http://localhost:8080/realms/master/protocol/openid-connect/certs"
    ```
 5. Client 테스트를 위한 Client scopes 추가
 
