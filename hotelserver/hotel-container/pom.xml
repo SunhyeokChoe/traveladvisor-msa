@@ -70,11 +70,11 @@
                         <image>eclipse-temurin:17-jre</image>
                     </from>
                     <to>
-                        <image>${project.groupId}/hotel:${project.version}</image>
+                        <image>${project.groupId}/hotelserver:${project.version}</image>
                     </to>
                     <!-- 애플리케이션 메인 클래스를 명시해야 합니다. -->
                     <container>
-                        <mainClass>com.traveladvisor.hotel.service.domain.HotelServiceApplication</mainClass>
+                        <mainClass>com.traveladvisor.hotelserver.service.domain.HotelServiceApplication</mainClass>
                     </container>
                 </configuration>
             </plugin>
