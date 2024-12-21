@@ -44,6 +44,7 @@
         <module>common</module>
         <module>paymentserver</module>
         <module>configserver</module>
+        <module>gatewayserver</module>
     </modules>
 
     <repositories>
