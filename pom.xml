@@ -43,6 +43,7 @@
         <module>memberserver</module>
         <module>common</module>
         <module>paymentserver</module>
+        <module>configserver</module>
     </modules>
 
     <repositories>
