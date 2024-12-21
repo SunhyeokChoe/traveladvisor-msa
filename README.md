@@ -648,11 +648,11 @@ Booking Status Flow 를 중심으로 설명하겠습니다. 모든 도메인 이
 
 1. 사용자가 예약을 요청합니다.
 2. Booking 서비스는 `Booking Created Event(예약 생성 이벤트)`를 Hotel 서비스로 전송합니다. 이 시점에서 Booking 서비스의 로컬 데이터베이스에는 예약 상태를 `PENDING(진행 중)` 으로 표시합니다.
-3. Hotel 서비스는 `Booking Created Event`를 전달받아 호텔 예약/결제를 수행하고 로컬 데이터베이스에 `HOTEL_RESERVATED(호텔 예약/결제 완료)` 상태로 기록합니다.
-4. Booking 서비스에서 호텔 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `HOTEL_RESERVATED`로 변경합니다. 그리고 `Hotel Reservated Event`를 Flight 서비스에 전달합니다.
-5. Flight 서비스는 `Hotel Reservated Event`를 전달받아 항공권 예약/결제를 수행하고 로컬 데이터베이스에 `FLIGHT_RESERVATED(항공권 예약/결제 완료)` 상태로 기록합니다.
-6. Booking 서비스에서 항공권 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `FLIGHT_RESERVATED`로 변경합니다. 그리고 `Flight Reservated Event`를 Car 서비스에 전달합니다.
-7. Car 서비스는 `Car Reservated Event`를 전달받아 차량 예약/결제를 수행하고 로컬 데이터베이스에 `Car_RESERVATED(차량 예약/결제 완료)` 상태로 기록합니다.
+3. Hotel 서비스는 `Booking Created Event`를 전달받아 호텔 예약/결제를 수행하고 로컬 데이터베이스에 `HOTEL_BOOKED(호텔 예약/결제 완료)` 상태로 기록합니다.
+4. Booking 서비스에서 호텔 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `HOTEL_BOOKED`로 변경합니다. 그리고 `Hotel BOOKED Event`를 Flight 서비스에 전달합니다.
+5. Flight 서비스는 `Hotel BOOKED Event`를 전달받아 항공권 예약/결제를 수행하고 로컬 데이터베이스에 `FLIGHT_BOOKED(항공권 예약/결제 완료)` 상태로 기록합니다.
+6. Booking 서비스에서 항공권 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `FLIGHT_BOOKED`로 변경합니다. 그리고 `Flight BOOKED Event`를 Car 서비스에 전달합니다.
+7. Car 서비스는 `Car BOOKED Event`를 전달받아 차량 예약/결제를 수행하고 로컬 데이터베이스에 `Car_BOOKED(차량 예약/결제 완료)` 상태로 기록합니다.
 8. Booking 서비스에서 차량 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `APPROVED(승인 됨)` 으로 변경하고 예약을 마칩니다.
 
 예약 흐름의 기조는 위와 같으며 보시다시피 Kafka를 활용해 프로세스를 비동기로 처리합니다.
