@@ -45,7 +45,7 @@
         <module>paymentserver</module>
         <module>configserver</module>
         <module>gatewayserver</module>
-        <module>booknigserver</module>
+        <module>bookingserver</module>
         <module>hotelserver</module>
         <module>flightserver</module>
         <module>carserver</module>
