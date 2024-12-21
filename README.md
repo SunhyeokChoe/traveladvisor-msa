@@ -41,7 +41,7 @@
 - 각 마이크로서비스를 추적하고 관리하기 위해 Observability(metrics, tracing, logs) 데이터를 지속해서 수집하고 Grafana에서 모니터링 합니다. merics의 경우 Spring Actuator + Micrometer를 통해 Prometheus가 이해할 수 있는 JSON 포맷으로 제공하고, Grafana에서 모니터링 및 쿼리 가능합니다. logs의 경우 데이터 소스로 Loki를 사용하고, 이 또한 Grafana와 통합했습니다. Tracing의 경우 다음의 두 가지 방식을 제공합니다.
     1. 각 마이크로서비스에 OpenTelemetry Java Agent 의존성을 추가하고 Exporter의 도움을 받아 분산 추적 데이터를 자동으로 Loki, Tempo에 보냅니다. 추적을 위해 OpenTelemetry 를 사용해 로그 Prefix 포맷을 Service Name, Trace ID, Span ID 형식으로 구조를 잡고, Grafana Loki + Tempo 에서 이를 시각화 합니다.
     2. 쿠버네티스 클러스터에서 Observability 추적이 필요한 Pod 내부에 Envoy proxy를 Sidecar로 마이크로서비스와 함께 배포하고, 각 Pod 간의 East-West API 요청/응답은 이 Envoy proxy를 통해 진행합니다. Istio를 사용해 각 Envoy proxy를 관리하고, 모니터링 합니다. 이 방식은 마이크로서비스에는 비즈니스 로직만 존재하고, 지표 수집은 분리된 Sidecar를 통해 진행하므로 [a] 방식에 비해 인프라 관리에 용이하고, 개발자는 비즈니스 코어에 집중하기 좋은 환경이 구성됩니다.
-- 호텔/항공권/차량 예약 가능(호텔 도메인 용어로 Availibility 라고 합니다.) 목록은 Amadeus의 테스트 전용 API를 Spring Batch 애플리케이션을 통해 호출하여 적재합니다. 이미 이 작업은 선행했으므로 가데이터는 SQL 파일로 제공합니다. 따라서 따로 구동하지 않으셔도 됩니다.
+- 호텔/항공권/차량 예약 가능(도메인 용어로 Availibility 라고 합니다.) 목록은 Amadeus의 테스트 전용 API를 Spring Batch 애플리케이션을 통해 호출하여 적재합니다. 이미 이 작업은 선행했으므로 가데이터는 SQL 파일로 제공합니다. 따라서 따로 구동하지 않으셔도 됩니다.
 
 ## 2) MVP ver.2
 - 기존의 카프카 처리 방식을 Spring Cloud 기반으로 변경합니다.
