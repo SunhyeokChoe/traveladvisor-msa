@@ -42,6 +42,7 @@
     <modules>
         <module>memberserver</module>
         <module>common</module>
+        <module>paymentserver</module>
     </modules>
 
     <repositories>
@@ -136,6 +137,34 @@
                 <version>${project.version}</version>
             </dependency>
             <!-- END: member microservice -->
+
+            <!-- BEGIN: payment microservice -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>payment-application-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>payment-domain-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>payment-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>payment-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>payment-message</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: payment microservice -->
 
             <!-- BEGIN: kafka -->
             <dependency>
