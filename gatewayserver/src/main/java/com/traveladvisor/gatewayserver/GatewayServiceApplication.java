@@ -49,7 +49,7 @@ public class GatewayServiceApplication {
                                         .setFallbackUri("forward:/contact-us"))
                                 .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
                                         .setKeyResolver(userKeyResolver())))
-                        .uri("http://batch:9100")) // 이 프로젝트는 K8s Discovery Server를 사용하므로 쿠버네티스 클러스터 내 서비스 호출을 위해 DNS 이름을 사용합니다.
+                        .uri("http://batchserver:9100")) // 이 프로젝트는 K8s Discovery Server를 사용하므로 쿠버네티스 클러스터 내 서비스 호출을 위해 DNS 이름을 사용합니다.
                 .route(p -> p
                         .path("/member/**")
                         .filters(f -> f.rewritePath("/member/(?<segment>.*)", "/${segment}")
@@ -61,7 +61,7 @@ public class GatewayServiceApplication {
                                 .retry(retryConfig -> retryConfig.setRetries(3)
                                         .setMethods(HttpMethod.GET)
                                         .setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000), 2, true)))
-                        .uri("http://member:9200"))
+                        .uri("http://memberserver:9200"))
                 .route(p -> p
                         .path("/payment/**")
                         .filters(f -> f.rewritePath("/payment/(?<segment>.*)", "/${segment}")
@@ -73,7 +73,7 @@ public class GatewayServiceApplication {
                                 .retry(retryConfig -> retryConfig.setRetries(3)
                                         .setMethods(HttpMethod.GET)
                                         .setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000), 2, true)))
-                        .uri("http://payment:9300"))
+                        .uri("http://paymentserver:9300"))
                 .route(p -> p
                         .path("/booking/**")
                         .filters(f -> f.rewritePath("/booking/(?<segment>.*)", "/${segment}")
@@ -85,7 +85,7 @@ public class GatewayServiceApplication {
                                 .retry(retryConfig -> retryConfig.setRetries(3)
                                         .setMethods(HttpMethod.GET)
                                         .setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000), 2, true)))
-                        .uri("http://booking:9400"))
+                        .uri("http://bookingserver:9400"))
                 .route(p -> p
                         .path("/hotel/**")
                         .filters(f -> f.rewritePath("/hotel/(?<segment>.*)", "/${segment}")
@@ -97,7 +97,7 @@ public class GatewayServiceApplication {
                                 .retry(retryConfig -> retryConfig.setRetries(3)
                                         .setMethods(HttpMethod.GET)
                                         .setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000), 2, true)))
-                        .uri("http://hotel:9500"))
+                        .uri("http://hotelserver:9500"))
                 .route(p -> p
                         .path("/flight/**")
                         .filters(f -> f.rewritePath("/flight/(?<segment>.*)", "/${segment}")
@@ -109,7 +109,7 @@ public class GatewayServiceApplication {
                                 .retry(retryConfig -> retryConfig.setRetries(3)
                                         .setMethods(HttpMethod.GET)
                                         .setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000), 2, true)))
-                        .uri("http://flight:9600"))
+                        .uri("http://flightserver:9600"))
                 .route(p -> p
                         .path("/car/**")
                         .filters(f -> f.rewritePath("/car/(?<segment>.*)", "/${segment}")
@@ -121,7 +121,7 @@ public class GatewayServiceApplication {
                                 .retry(retryConfig -> retryConfig.setRetries(3)
                                         .setMethods(HttpMethod.GET)
                                         .setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000), 2, true)))
-                        .uri("http://car:9700"))
+                        .uri("http://carserver:9700"))
                 .build();
     }
 
