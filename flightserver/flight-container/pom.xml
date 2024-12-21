@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>flight-container</artifactId>
+
+    <parent>
+        <groupId>com.traveladvisor</groupId>
+        <artifactId>flightserver</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+        <!-- BEGIN: flight microservice -->
+        <dependency>
+            <groupId>com.traveladvisor</groupId>
+            <artifactId>flight-domain-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.traveladvisor</groupId>
+            <artifactId>flight-application-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.traveladvisor</groupId>
+            <artifactId>flight-application</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.traveladvisor</groupId>
+            <artifactId>flight-datasource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.traveladvisor</groupId>
+            <artifactId>flight-message</artifactId>
+        </dependency>
+        <!-- END: flight microservice -->
+
+        <!-- 용도: Config Server의 설정을 주입받기 위해 사용 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+
+        <!-- 용도: K8s의 Discovery Service에게 탐지되기 위한 Discovery Client 사용 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-kubernetes-discoveryclient</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
