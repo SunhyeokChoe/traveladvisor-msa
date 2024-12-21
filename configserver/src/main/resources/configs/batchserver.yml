@@ -1,0 +1,18 @@
+build:
+  version: "1.0"
+  description: "Batch Service Configuration for Distributed Environment"
+  created_by: "SunhyeokChoe"
+  created_at: "2024-12-21"
+  updated_at: "2024-12-21"
+
+batch:
+  message: "[PROFILE: DEFAULT] Batch Service API 입니다."
+  environment:
+    stage: "default"
+    region: "AP-NORTHEAST-1"
+  contacts:
+    name: "SunhyeokChoe - Developer"
+    email: "sunhyeokchoe@gmail.com"
+    github: "https://github.com/sunhyeokchoe"
+  phones:
+    - "+82 000-0000-0000"
