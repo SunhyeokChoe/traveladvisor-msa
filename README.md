@@ -1,5 +1,7 @@
 # 트래블어드바이저(traveladvisor) — Microservices with Spring Cloud Gateway, OAuth2, Keycloak, Kafka, Debezium CDC and PostgreSQL
 
+<br><br>
+
 # 이 프로젝트를 만든 이유
 <p align="center">
   <img src="https://media4.giphy.com/media/8dYmJ6Buo3lYY/giphy.gif?cid=7941fdc6vac0eapvo79w9tgrd48b8a9thrpwqw27t6rv76ty&ep=v1_gifs_search&rid=giphy.gif&ct=g" alt="baby trump" />
@@ -13,8 +15,12 @@
 
 마지막으로 이 프로젝트를 진행한 이유 중 하나는 과거 거대 버티컬 이커머스 프로젝트를 진행하면서 쿠버네티스를 처음 접해봤는데, 그때 느꼈던 부족함을 보완하고, 이번 기회에 쿠버네티스와 더욱 친숙해지는 계기를 만들고 싶었습니다.
 
+<br>
+
 # 개략적인 도메인 설명
 해외 여행 시 가장 먼저 하는 것이 여행 목적지에 가기 위한 항공권 예약 입니다. 그 다음으로 중요한 것은 인근 호텔 예약입니다. 그리고 이 호텔을 중심으로 여러 액티비티를 즐깁니다. 여행 시 장거리 이동의 편의를 위해 현지에서 차량을 예약하기도 합니다. 이 프로젝트는 이처럼 해외 여행에 필수적인 숙박, 차량, 항공권을 손쉽게 한 번에 예약해주는 서비스입니다. 다만, 도메인 보다는 적절한 MSA 아키텍처 구현에 중점을 두고 있으므로 아키텍처 관점에서 봐주세요.
+
+<br>
 
 # MVP 구현 목표
 
@@ -53,6 +59,8 @@
 
 ## 3) MVP ver.3
 - React Native로 모바일 앱을 구현합니다.
+
+<br>
 
 # 시스템 구성
 - Language
@@ -117,6 +125,8 @@
 
     ※ 가이드 작성 예정
 
+<br>
+
 # 마이크로서비스 목록
 - K8s 네임스페이스: `default`
 
@@ -135,6 +145,8 @@
 | K8s Discovery Server | 8761 |  | 80 |
 | KeyCloak | 8080(HTTP) / 8443(HTTPS) |  |  |
 | Kafka Broker Cluster | 9092 | kafka-controller-0.kafka-controller-headless.default.svc.cluster.local | <none> |
+
+<br>
 
 # 아키텍처 구성 (쿠버네티스 기반)
 - **Spring Cloud Gateway:** 스프링 클라우드 게이트웨이는 여기서 OAuth2 Client 및 OAuth2 Resource Server 역할을 합니다. 모든 요청은 게이트웨이에 전달되며, 요청을 다운스트림 서비스로 전달하기 전에 액세스 토큰을 확인합니다. 인증되지 않은 요청에 대해서는 Authentication Code Grant (OAuth2 인증 타입 중 하나) 흐름 절차로 Keycloak으로부터 새로운 토큰 발급을 위해 인증을 요청합니다. 또한 요청에 대한 안정성을 위해 Resilience4j 를 활용합니다. 게이트웨이 서버는 모든 서비스의 입구 역할을 하는데, 너무 많은 책임을 지게 하면 단일 실패 지점(Single Point of Failure)이 되기 쉬우므로 최대한 가볍게 유지하도록 합니다.
@@ -158,11 +170,15 @@
   - OpenTelemetry: 각 마이크로서비스에서 추적 가능한 로그를 생성하고 Loki, Tempo로 전달합니다. 메트릭은 Spring Actuator + Micrometer 에서 수집하므로 OpenTelemetry는 로그 관련 책임만 갖도록 합니다.
   - Grafana: metrics, tracing, logs 를 모니터링하고, 알람을 받아볼 수 있는 다재다능한 도구입니다.
 
+<br>
+
 # 사전 설치 리스트
 - JDK 17
 - Maven
 - Docker Desktop + Kubernetes Cluster 활성화
 - Kubectl
+
+<br>
 
 # Kubernetes 클러스터에 배포해 프로젝트 시작하기
 
@@ -340,6 +356,8 @@ $ kubectl get po
 
 Intellij를 사용 중이시라면 Google Cloud Code 플러그인을 설치하면 리소스를 에디터에서 GUI로 손쉽게 모니터링하고 관리할 수 있습니다.
 
+<br>
+
 # 도커 이미지 생성 및 도커 허브에 푸쉬하기
 
 만약 서버 소스 코드 수정 후 각 이미지를 다시 생성하고 배포하려면 먼저 도커 허브에 public 저장소를 생성한 후 다음의 절차를 따라주세요.
@@ -382,6 +400,8 @@ $ kubectl get po -w
 - Windows: `rd /s /q C:\Users\{사용자_이름}\.m2\repository`
 - Linux: `rm -rf ~/.m2/repository`
 
+<br>
+
 # 로컬 개발 시 빠르게 소스 코드 반영 보고 싶은 경우 각 마이크로서비스 로컬 실행
 
 게이트웨이 서버와 상관 없는 비즈니스 코어 로직을 개발할 때에는 Skaffold 도움 조차 필요 없을 수 있습니다. 이럴 때는 로컬에서 마이크로서비스를 바로 실행해 기민하게 개발할 수 있어야 합니다. 따라서 각 마이크로서비스의 소스 코드가 즉각 반영될 수 있도록 DevTools 의존성을 추가했습니다.
@@ -411,6 +431,8 @@ $ kubectl get po -w
 
 인텔리제이 사용자의 경우 Settings → Build, Excecution, Deployment → Compiler → Build project automatically 체크 박스를 체크하셔야 합니다.
 
+<br>
+
 # 로컬 개발 환경에서의 리소스
 
 쿠버네티스 클러스터 환경이 아닌 로컬 PC에서 마이크로서비스 인스턴스만 띄워 개발할 때 Redis, Kafka, PostgreSQL등의 리소스가 필요할 수 있습니다. 각 리소스는 infrastructure/local-resources 폴더에 정의돼 있으며 Docker Compose로 띄울 수 있습니다.
@@ -421,6 +443,8 @@ $ kubectl get po -w
 $ cd infrastructure/docker-compose/local-resources
 $ docker compose up -d
 ```
+
+<br>
 
 # 새로운 마이크로서비스 추가 시 체크리스트
 
@@ -445,6 +469,8 @@ $ docker compose up -d
 4. infrastructure/environments/{PROFILE}/Chart.yaml 의 dependencies에 의존을 추가합니다.
 5. infrastructure/kube-prometheus/values.yaml 의 additionalScrapeConfigs.internal.jobList에 마이크로서비스 metrics 수집 대상 엔드포인트를 추가합니다. helm 리소를 수정했으므로 반드시 `helm dependencies build` 명령을 수행해야 합니다.
 6. skaffold.yaml 파일 내 build.artifacts, deploy.helm.releases 에 새로운 마이크로서비스 내용을 추가합니다.
+
+<br>
 
 # Keycloak 인증 서버 설정
 
@@ -488,6 +514,8 @@ $ docker compose up -d
 6. gateway 클라이언트에 TEST 스코프 추가
 
    Clients → Client scopes → TEST 스코프를 추가하고 추가된 TEST 스코프를 확인합니다.
+
+<br>
 
 # OAuth2를 지원하는 KeyCloak 기반 Spring Cloud Gateway 구성
 게이트웨이 서버는 모든 요청을 받는 엣지 포인트가 되므로 리소스 서버와 인증/인가 확인 책임을 갖도록 했습니다. 즉, 인바운드 요청에 대해 사용자가 회원가입/로그인은 했는지, 해당 리소스에 권한이 있는지 체크합니다. 이러한 책임을 구현하기 위해 다음의 종속성으로 구성됩니다.
@@ -535,6 +563,8 @@ $ docker compose up -d
 </dependency>
 ```
 
+<br>
+
 # Saga 패턴
 
 Saga는 마이크로서비스 전반에 걸쳐 분산된 장기 실행 트랜잭션(LLT, Long Lived Transactions)을 의미하며, 기본 아이디어는 LLT를 완료하기 위해 서비스 전반에 걸쳐 로컬 ACID 트랜잭션 체인을 만드는 것입니다.
@@ -542,6 +572,8 @@ Saga는 마이크로서비스 전반에 걸쳐 분산된 장기 실행 트랜잭
 이 데모 프로젝트에서 여행 예약 과정을 하나의 논리적인 LLT로 묶어 처리합니다. 그러기 위해선 `예약 생성 → 호텔 예약 → 항공권 예약 → 차량 예약 → 예약 승인 응답` 이라는 일련의 절차가 필요합니다. 이 유즈케이스를 충족시키기 위해 카프카를 이벤트 버스로 사용해 Saga 패턴을 구현합니다.
 
 Saga 패턴을 조정(Coordinate)하기 위해 Reservation 마이크로서비스를 Orchestrator로 사용합니다.
+
+<br>
 
 # Outbox 패턴
 
@@ -562,11 +594,15 @@ Outbox 패턴은 로컬 ACID 트랜잭션을 사용하여 일관된 분산 트�
 
 Outbox 패턴을 구현할 때 중요한 점은 이벤트를 직접 게시하는 게 아닌 Outbox 테이블이라는 로컬 데이터베이스 테이블에 이벤트를 보관한다는 것입니다. 이 테이블은 로컬 데이터베이스 작업에 사용하는 것과 동일한 효과를 갖습니다. 따라서 이벤트가 ACID를 사용하여 로컬 데이터베이스 내에서 원자적으로 생성되고 관리될 것입니다. Outbox 테이블에 저장된 이벤트를 읽고 게시하여 Outbox 패턴을 완료하는 것이 주안점입니다.
 
+<br>
+
 ## Outbox 패턴은 장점만 있는 것이 아닙니다.
 
 Outbox 패턴은 서비스 로직 변경과 Outbox 이벤트 저장을 하나의 트랜잭션으로 묶어 처리해야 하므로, 서비스 DB 내에 Outbox 테이블이 존재해야 합니다. 상당히 복잡한 아키텍처로 구성된 토스뱅크에서는 수백 개의 MSA 서버가 독립된 스키마(DB)를 바라보고 있고, 이 스키마들은 수십 개의 분리된 물리 서버 위에 그룹핑되어 존재한다고 합니다. 그리고 사용하는 DB 역시 Oracle, MySQL, MongoDB 등 다양한 DB를 Polyglot 형태로 사용한다고 합니다. 이것이 바로 Outbox를 적용하고자 할 때 트레이드 오프를 고려해야 하는 경계가 됩니다. 수백 개의 MSA에 일괄적으로 Outbox 패턴을 적용하려면, DB 종류, 물리 서버, 스키마마다 다양한 형태의 아웃박스 테이블들을 만들어줘야 하고, 테이블에서 메시지를 발행하는 애플리케이션도 각각 작성해야 합니다. 토스뱅크는 이러한 복잡도를 피하기 위해 Outbox 테이블을 따로 구성하는 게 아닌, Kafka 브로커에 이벤트를 발송하는 형태로 구축된 것으로 보입니다. 그리고 PDL(Producer Dead Letter) 이라고 하는 컴포넌트를 구현해 모든 서버에서 동일한 메시지 브로커를 바라볼 수 있도록 하고, PDL 에 접근하기 위한 라이브러리를 만들어 제공하므로 모든 마이크로서비스에 일괄 적용하는데 편리한 점이 있다고 합니다.
 
 이 데모 프로젝트에서는 마이크로서비스 아키텍처의 복잡성을 적정 수준으로 유지하고, Saga 패턴의 핵심 원리를 빠르고 간단하게 파악할 수 있도록 Outbox 패턴을 사용합니다.
+
+<br>
 
 # CDC(Change Data Capture)
 
@@ -582,6 +618,8 @@ Debezium CDC 내부 동작
 
 그 후 Debezium Source Connector는 지속해서 Replication Slot에 새로운 데이터가 발생했는지 Polling 하고, 받아올 데이터가 있는 경우 가져옵니다. 이 과정은 Pull 모델입니다.
 
+<br>
+
 # Debezium CDC
 
 Debezium은 오픈소스 CDC 플랫폼이며, 실제로 여러 IT 대기업에서 안정적으로 사용하고 있는 검증된 도구입니다.
@@ -589,6 +627,8 @@ Debezium은 오픈소스 CDC 플랫폼이며, 실제로 여러 IT 대기업에�
 ![image.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/cdc%2520with%2520kafka.png)
 
 Debezium Postgres Source Connector가 Replication Slot에 추가된 트랜잭션이 있는지 지속해서 확인하고, 존재하는 경우 Kafka 토픽에 발행합니다. Saga 액션 흐름의 Orchestrator 역할을 하는 Reservation 마이크로서비스는 debezium 관련 토픽에 새로운 메시지가 들어왔는지 Polling하고, 이를 가져옵니다. Saga의 전체 단계 중 한 부분에 관해 작업을 마치면 해당 Saga 액션을 완수했음을 알리고, 다음 액션이 실행될 수 있도록 Kafka에 이벤트를 발행합니다. Orchestrator로부터 지령을 전달받은 마이크로서비스는 Saga 액션을 수행합니다.
+
+<br>
 
 # Saga 패턴 + Outbox 패턴 + CDC를 결합한 비즈니스 구현
 
@@ -637,7 +677,9 @@ Reservation Status Flow 를 중심으로 설명하겠습니다. 모든 도메인
 
 차량 예약 실패 케이스
 
-## Saga Action 인터페이스 및 상태 정의
+<br>
+
+# Saga Action 인터페이스 및 상태 정의
 
 Saga 패턴 구현을 위한 인터페이스 정의는 다음과 같습니다.
 
@@ -657,6 +699,8 @@ public enum SagaActionStatus {
 ```
 
 Saga 패턴 구현에는 process, compensate 두 개의 메서드가 필요합니다. process로 Saga 단계를 순차적으로 진행하고, 어떤 시점에 실패하는 경우 다시 역순으로 순차적으로 트랜잭션을 보상(Compensating)해야 합니다. 보상 작업은 compensate 메서드에 정의합니다.
+
+<br>
 
 # Kafka 토픽 구성
 
@@ -742,6 +786,8 @@ spring:
           group: ${spring.application.name}-car-booking-canceling
 ```
 
+<br>
+
 # RDB 중 MySQL 이 아닌 PostgreSQL를 선택한 이유 (사담)
 
 MySQL은 Bin 로그로, PostgreSQL은 WAL을 통해 트랜잭션 변경 사항을 기록하고, 복제하고, 복구하는데 사용됩니다. 이 두 가지 방식 모두 트랜잭션 관리 및 복구 기능을 제공하지만, 안정성과 데이터 일관성 측면에서 차이가 있습니다.
@@ -763,11 +809,15 @@ MySQL의 Bin 로그는 복제의 편의성이 장점이지만, 안정성과 데�
 
 ※ 사실 이 프로젝트는 DB 복제를 다루지 않기도 하고, 무엇보다 사용 경험이 없지만, 요즘 뜨고 있는 PostgreSQL을 사용해보고 싶었습니다. 🥸
 
+<br>
+
 # Service Discovery 패턴과 Service Registration 패턴 (사담)
 
 서비스 디스커버리 패턴은 서비스 레지스트리에서 실행 및 관리 중인 서버 인스턴스에 대한 모든 정보를 추적하는 걸 포함하는 개념입니다. 서비스 레지스트리의 목적은 서버 인스턴스가 생성될 때마다 레지스트리 내부에 등록하고, 종료 또는 삭제될 때 레지스트리에서 제거하는 것입니다. 만약 10개의 채팅 서버가 뜬다면 레지스트리에 모든 서버를 등록하게 되고, 서비스 디스커버리는 이 정보를 바탕으로 적절한 서비스를 찾을 수 있게 되는 것입니다. 정리하면, 서비스 디스커버리와 레지스트레이션은 각 마이크로서비스가 서로 어떻게 찾고 통신할 것인가에 대한 문제 해결 수단인 것입니다.
 
 여기에 두 가지 종류의 로드밸런서 개념이 있는데,  하나는 클라이언트 사이드 서비스 디스커버리이고, 다른 하나는 서버 사이드 서비스 디스커버리이다. 이 프로젝트에는 쿠버네티스를 활용하여 서버 사이드 서비스 디스커버리를 도입했습니다. 클라이언트 사이드 서비스 디스커버리의 경우 유레카 서버와 같은 디스커버리 서비스를 따로 구성해야 하고, 지속해서 이 서버를 유지/관리해야 하는 비용이 들어갑니다. 따라서 관리의 부담을 줄이기 위해 K8s의 Discovery Server의 힘을 빌리기로 했습니다. 검색 대상이 되는 각 마이크로서비스는 `spring-cloud-starter-netflix-eureka-client` 가 아닌 `spring-cloud-starter-kubernetes-discoveryclient` 의존성을 갖고, 메인 애플리케이션 클래스에 `@EnableDiscoveryClient` 를 부착하면 됩니다.
+
+<br>
 
 # Helm 차트를 사용하는 이유 (사담)
 
