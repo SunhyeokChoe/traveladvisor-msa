@@ -47,6 +47,7 @@
         <module>gatewayserver</module>
         <module>booknigserver</module>
         <module>hotelserver</module>
+        <module>flightserver</module>
     </modules>
 
     <repositories>
@@ -253,6 +254,34 @@
                 <version>${project.version}</version>
             </dependency>
             <!-- END: hotel microservice -->
+
+            <!-- BEGIN: flight microservice -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>flight-application-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>flight-domain-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>flight-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>flight-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>flight-message</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: flight microservice -->
 
             <!-- BEGIN: config microservice -->
             <dependency>
