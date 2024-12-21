@@ -29,7 +29,7 @@
 - 코어 도메인 설계는 DDD 기반으로 합니다.
 - Hexagonal Architecture를 도입해 외부 요인과의 강결합을 없애고, 코어 도메인과 서비스 레이어를 분리해 도메인을 보호합니다.
 - 모든 애플리케이션 서버, DB 등의 리소스는 쿠버네티스 클러스터에 등록합니다.
-- Reservation, Payment, Hotel, Car, Flight 다섯 개의 마이크로서비스를 기반으로 비즈니스 로직을 구성합니다.
+- Booking, Payment, Hotel, Car, Flight 다섯 개의 마이크로서비스를 기반으로 비즈니스 로직을 구성합니다.
 
   Hotel, Car, Flight 에 관한 테스트 정보를 얻기 위한 OTA* 벤더로 Amadeus를 사용합니다.
 
@@ -151,7 +151,7 @@
 # 아키텍처 구성 (쿠버네티스 기반)
 - **Spring Cloud Gateway:** 스프링 클라우드 게이트웨이는 여기서 OAuth2 Client 및 OAuth2 Resource Server 역할을 합니다. 모든 요청은 게이트웨이에 전달되며, 요청을 다운스트림 서비스로 전달하기 전에 액세스 토큰을 확인합니다. 인증되지 않은 요청에 대해서는 Authentication Code Grant (OAuth2 인증 타입 중 하나) 흐름 절차로 Keycloak으로부터 새로운 토큰 발급을 위해 인증을 요청합니다. 또한 요청에 대한 안정성을 위해 Resilience4j 를 활용합니다. 게이트웨이 서버는 모든 서비스의 입구 역할을 하는데, 너무 많은 책임을 지게 하면 단일 실패 지점(Single Point of Failure)이 되기 쉬우므로 최대한 가볍게 유지하도록 합니다.
 - **KeyCloak**: OAuth2 및 OpenID Connect 표준을 지원하는 인증 서버로서, 사용자 인증, 권한 부여, 토큰 발급 등을 담당합니다.
-- **마이크로서비스**: 마이크로서비스는 게이트웨이를 통해서만 접근 가능합니다. Reservation 서비스는 내부적으로 여러 서비스를 호출하고 응답을 관리하기 때문에 요청에 대한 실패가 발생할 수 있으므로 이를 처리하기 위해 Circuit breaker, Retry 등의 패턴을 적용합니다.
+- **마이크로서비스**: 마이크로서비스는 게이트웨이를 통해서만 접근 가능합니다. Booking 서비스는 내부적으로 여러 서비스를 호출하고 응답을 관리하기 때문에 요청에 대한 실패가 발생할 수 있으므로 이를 처리하기 위해 Circuit breaker, Retry 등의 패턴을 적용합니다.
 
   각 마이크로서비스마다 개별적인 인증 및 인가를 구현하는 것은 복잡하고 유지보수가 어렵습니다. 이를 해결하기 위해 OAuth2 및 OpenID Connect(OIDC) 표준을 지원하는 KeyCloak과 같은 통합 인증 서버를 게이트웨이 서버에 연동해 Resource Server 책임을 부여해 이곳에서 중앙집중식으로 인증 및 권한을 체크하도록 합니다.
 
@@ -571,7 +571,7 @@ Saga는 마이크로서비스 전반에 걸쳐 분산된 장기 실행 트랜잭
 
 이 데모 프로젝트에서 여행 예약 과정을 하나의 논리적인 LLT로 묶어 처리합니다. 그러기 위해선 `예약 생성 → 호텔 예약 → 항공권 예약 → 차량 예약 → 예약 승인 응답` 이라는 일련의 절차가 필요합니다. 이 유즈케이스를 충족시키기 위해 카프카를 이벤트 버스로 사용해 Saga 패턴을 구현합니다.
 
-Saga 패턴을 조정(Coordinate)하기 위해 Reservation 마이크로서비스를 Orchestrator로 사용합니다.
+Saga 패턴을 조정(Coordinate)하기 위해 Booking 마이크로서비스를 Orchestrator로 사용합니다.
 
 <br>
 
@@ -626,17 +626,17 @@ Debezium은 오픈소스 CDC 플랫폼이며, 실제로 여러 IT 대기업에�
 
 ![image.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/cdc%2520with%2520kafka.png)
 
-Debezium Postgres Source Connector가 Replication Slot에 추가된 트랜잭션이 있는지 지속해서 확인하고, 존재하는 경우 Kafka 토픽에 발행합니다. Saga 액션 흐름의 Orchestrator 역할을 하는 Reservation 마이크로서비스는 debezium 관련 토픽에 새로운 메시지가 들어왔는지 Polling하고, 이를 가져옵니다. Saga의 전체 단계 중 한 부분에 관해 작업을 마치면 해당 Saga 액션을 완수했음을 알리고, 다음 액션이 실행될 수 있도록 Kafka에 이벤트를 발행합니다. Orchestrator로부터 지령을 전달받은 마이크로서비스는 Saga 액션을 수행합니다.
+Debezium Postgres Source Connector가 Replication Slot에 추가된 트랜잭션이 있는지 지속해서 확인하고, 존재하는 경우 Kafka 토픽에 발행합니다. Saga 액션 흐름의 Orchestrator 역할을 하는 Booking 마이크로서비스는 debezium 관련 토픽에 새로운 메시지가 들어왔는지 Polling하고, 이를 가져옵니다. Saga의 전체 단계 중 한 부분에 관해 작업을 마치면 해당 Saga 액션을 완수했음을 알리고, 다음 액션이 실행될 수 있도록 Kafka에 이벤트를 발행합니다. Orchestrator로부터 지령을 전달받은 마이크로서비스는 Saga 액션을 수행합니다.
 
 <br>
 
 # Saga 패턴 + Outbox 패턴 + CDC를 결합한 비즈니스 구현
 
-![Saga, Outbox, Reservation 상태 정의](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/saga+outbox+booking%2520status.png)
+![Saga, Outbox, Booking 상태 정의](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/saga+outbox+booking%2520status.png)
 
-Saga, Outbox, Reservation 상태 정의
+Saga, Outbox, Booking 상태 정의
 
-예약에 관해 Orchestrator 책임을 갖는 Reservation 마이크로서비스를 중심으로 예약 시퀀스를 살펴보면 다음과 같습니다.
+예약에 관해 Orchestrator 책임을 갖는 Booking 마이크로서비스를 중심으로 예약 시퀀스를 살펴보면 다음과 같습니다.
 
 ## 1) 호텔/항공권/차량 예약 성공 케이스
 
@@ -644,16 +644,16 @@ Saga, Outbox, Reservation 상태 정의
 
 호텔/항공권/차량 예약 성공 케이스
 
-Reservation Status Flow 를 중심으로 설명하겠습니다. 모든 도메인 이벤트는 과거형으로 작성합니다.
+Booking Status Flow 를 중심으로 설명하겠습니다. 모든 도메인 이벤트는 과거형으로 작성합니다.
 
 1. 사용자가 예약을 요청합니다.
-2. Reservation 서비스는 `Reservation Created Event(예약 생성 이벤트)`를 Hotel 서비스로 전송합니다. 이 시점에서 Reservation 서비스의 로컬 데이터베이스에는 예약 상태를 `PENDING(진행 중)` 으로 표시합니다.
-3. Hotel 서비스는 `Reservation Created Event`를 전달받아 호텔 예약/결제를 수행하고 로컬 데이터베이스에 `HOTEL_RESERVATED(호텔 예약/결제 완료)` 상태로 기록합니다.
-4. Reservation 서비스에서 호텔 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `HOTEL_RESERVATED`로 변경합니다. 그리고 `Hotel Reservated Event`를 Flight 서비스에 전달합니다.
+2. Booking 서비스는 `Booking Created Event(예약 생성 이벤트)`를 Hotel 서비스로 전송합니다. 이 시점에서 Booking 서비스의 로컬 데이터베이스에는 예약 상태를 `PENDING(진행 중)` 으로 표시합니다.
+3. Hotel 서비스는 `Booking Created Event`를 전달받아 호텔 예약/결제를 수행하고 로컬 데이터베이스에 `HOTEL_RESERVATED(호텔 예약/결제 완료)` 상태로 기록합니다.
+4. Booking 서비스에서 호텔 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `HOTEL_RESERVATED`로 변경합니다. 그리고 `Hotel Reservated Event`를 Flight 서비스에 전달합니다.
 5. Flight 서비스는 `Hotel Reservated Event`를 전달받아 항공권 예약/결제를 수행하고 로컬 데이터베이스에 `FLIGHT_RESERVATED(항공권 예약/결제 완료)` 상태로 기록합니다.
-6. Reservation 서비스에서 항공권 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `FLIGHT_RESERVATED`로 변경합니다. 그리고 `Flight Reservated Event`를 Car 서비스에 전달합니다.
+6. Booking 서비스에서 항공권 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `FLIGHT_RESERVATED`로 변경합니다. 그리고 `Flight Reservated Event`를 Car 서비스에 전달합니다.
 7. Car 서비스는 `Car Reservated Event`를 전달받아 차량 예약/결제를 수행하고 로컬 데이터베이스에 `Car_RESERVATED(차량 예약/결제 완료)` 상태로 기록합니다.
-8. Reservation 서비스에서 차량 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `APPROVED(승인 됨)` 으로 변경하고 예약을 마칩니다.
+8. Booking 서비스에서 차량 예약/결제 완료 이벤트를 Kafka 메시지 큐에서 받아와 로컬 데이터베이스에 예약 상태를 `APPROVED(승인 됨)` 으로 변경하고 예약을 마칩니다.
 
 예약 흐름의 기조는 위와 같으며 보시다시피 Kafka를 활용해 프로세스를 비동기로 처리합니다.
 
