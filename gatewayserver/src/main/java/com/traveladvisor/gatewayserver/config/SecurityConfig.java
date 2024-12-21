@@ -33,12 +33,12 @@ public class SecurityConfig {
 
         serverHttpSecurity.authorizeExchange(exchanges -> exchanges.pathMatchers(HttpMethod.GET).permitAll()
                         .pathMatchers("/batch/**").hasRole("DEVELOPER")
-                        .pathMatchers("/member/**").hasAnyRole("MEMBER", "EDGE_GATEWAY")
-                        .pathMatchers("/payment/**").hasRole("EDGE_GATEWAY")
-                        .pathMatchers("/booking/**").hasRole("EDGE_GATEWAY")
-                        .pathMatchers("/hotel/**").hasRole("EDGE_GATEWAY")
-                        .pathMatchers("/flight/**").hasRole("EDGE_GATEWAY")
-                        .pathMatchers("/car/**").hasRole("EDGE_GATEWAY")
+                        .pathMatchers("/member/**").hasAnyRole("TRAVELADVISOR_MEMBER", "TRAVELADVISOR_GATEWAY")
+                        .pathMatchers("/payment/**").hasRole("TRAVELADVISOR_GATEWAY")
+                        .pathMatchers("/booking/**").hasRole("TRAVELADVISOR_GATEWAY")
+                        .pathMatchers("/hotel/**").hasRole("TRAVELADVISOR_GATEWAY")
+                        .pathMatchers("/flight/**").hasRole("TRAVELADVISOR_GATEWAY")
+                        .pathMatchers("/car/**").hasRole("TRAVELADVISOR_GATEWAY")
                         .pathMatchers("/contact-us/**").permitAll())
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfTokenRepository)
