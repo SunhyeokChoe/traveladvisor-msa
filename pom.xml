@@ -46,6 +46,7 @@
         <module>configserver</module>
         <module>gatewayserver</module>
         <module>booknigserver</module>
+        <module>hotelserver</module>
     </modules>
 
     <repositories>
@@ -224,6 +225,34 @@
                 <version>${project.version}</version>
             </dependency>
             <!-- END: payment microservice -->
+
+            <!-- BEGIN: hotel microservice -->
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>hotel-application-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>hotel-domain-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>hotel-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>hotel-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.traveladvisor</groupId>
+                <artifactId>hotel-message</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- END: hotel microservice -->
 
             <!-- BEGIN: config microservice -->
             <dependency>

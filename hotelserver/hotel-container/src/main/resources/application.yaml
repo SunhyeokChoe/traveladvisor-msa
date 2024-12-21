@@ -1,0 +1,169 @@
+## 서버 설정
+server:
+  port: 9500
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    accept-count: 400
+    connection-timeout: 3000
+
+## 애플리케이션 정보
+info:
+  app:
+    name: "hotelserver"
+    description: "Travel Advisor Hotel Service"
+    version: "1.0.0"
+
+## 커스텀 설정
+kafka:
+  topic:
+    booking:
+      inbound-topic-name: debezium.booking.hotel_outbox
+      outbound-topic-name: debezium.hotel.booking_outbox
+  config:
+    common:
+      schema-registry-url: http://localhost:8081
+      schema-registry-url-key: schema.registry.url
+      bootstrap-servers: localhost:19092, localhost:29092, localhost:39092
+      num-of-partitions: 3
+      replication-factor: 3
+    producer:
+      key-serializer-class: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer-class: io.confluent.kafka.serializers.KafkaAvroSerializer
+      compression-type: none
+      acks: all
+      batch-size: 16384
+      batch-size-boost-factor: 100
+      linger-ms: 5
+      request-timeout-ms: 60000
+      retry-count: 5
+    consumer:
+      hotel-consumer-group-id: hotel-consumer-booking-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      auto-offset-reset: earliest
+      specific-avro-reader-key: specific.avro.reader
+      specific-avro-reader: true
+      batch-listener: false # 이벤트를 단일로 받아 처리합니다.
+      auto-startup: true
+      concurrency-level: 3
+      session-timeout-ms: 10000
+      heartbeat-interval-ms: 3000
+      max-poll-interval-ms: 300000
+      max-poll-records: 500
+      max-partition-fetch-bytes-default: 1048576
+      max-partition-fetch-bytes-boost-factor: 1
+      poll-timeout-ms: 150
+
+## 로깅 설정
+# TODO: PROD 헬름 차트에서 로그 레벨을 WARN 으로 설정 후 배포 시 이 프로파일에 덮어씌우도록 해야 합니다.
+logging:
+  level:
+    com:
+      traveladvisor:
+        hotelserver: debug
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
+## 스프링 설정
+spring:
+  application:
+    name: "hotelserver"
+  devtools:
+    livereload.enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  datasource:
+    # binaryTransfer: true로 설정 시 데이터가 바이너리 형식으로 postgres 서버에서 JDBC 드라이버로 전송되므로 더 빠릅니다.
+    # reWriteBatchedInserts: true로 설정 시 다중 값 insert 시 여러번 insert를 수행하는 것이 아닌 batch insert를 수행합니다. 이는 삽입 성능을 향상시킵니다.
+    # stringtype: unspecified로 설정 시, JDBC 드라이버가 모든 문자열을 타입 지정 없이 전송하도록 합니다. 이를 통해 PostgreSQL이 문자열을 특정 데이터 타입(예: UUID)으로 해석하여 발생하는 타입 불일치 오류를 방지할 수 있습니다.
+    url: jdbc:postgresql://localhost:5432/postgres?binaryTransfer=true&reWriteBatchedInserts=true&stringtype=unspecified
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      # TODO: PROD Environment 헬름 차트에서 mode를 never로 설정 후 배포 시 이 프로파일에 덮어씌우도록 해야 합니다.
+      mode: never
+      schema-locations: classpath:init-schema.sql
+      data-locations: classpath:init-data.sql
+      platform: postgres
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+  cloud:
+    kubernetes:
+      discovery:
+        # 다른 네임스페이스에 존재하는 디스커버리 클라이언트를 찾을 수 있도록 설정합니다.
+        all-namespaces: true
+    openfeign:
+      client:
+        config:
+          default:
+            # none: 로깅하지 않습니다. (디폴트)
+            # basic: 요청 메서드, URL, 응답 상태 코드, 실행 시간을 로깅합니다.
+            # headers: 요청/응답 헤더를 로깅합니다.
+            # full: 요청/응답 헤더, 본문, 메타데이터 모두 로깅합니다.
+            logger-level: full
+      circuitbreaker:
+        enabled: true
+
+## 액츄에이터 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+endpoints:
+  shutdown:
+    enabled: false
+
+## Resilience4j 설정
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 10
+      permittedNumberOfCallsInHalfOpenState: 2
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
+resilience4j.retry:
+  configs:
+    default:
+      maxAttempts: 3
+      waitDuration: 500
+      enableExponentialBackoff: true
+      exponentialBackoffMultiplier: 2
+      ignoreExceptions:
+        - java.lang.NullPointerException
+      retryExceptions:
+        - java.util.concurrent.TimeoutException
+resilience4j.ratelimiter:
+  configs:
+    default:
+      timeoutDuration: 1000
+      limitRefreshPeriod: 5000
+      limitForPeriod: 1
