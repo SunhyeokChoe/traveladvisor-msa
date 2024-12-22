@@ -49,6 +49,7 @@
         <module>hotelserver</module>
         <module>flightserver</module>
         <module>carserver</module>
+        <module>batchserver</module>
     </modules>
 
     <repositories>
