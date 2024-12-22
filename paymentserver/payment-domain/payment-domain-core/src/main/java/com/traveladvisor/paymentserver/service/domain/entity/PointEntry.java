@@ -25,7 +25,6 @@ public class PointEntry extends DomainEntity<PointEntryId> {
      * @param amount
      */
     public void subtractPointAmount(Money amount) {
-        // TODO: 차감 전 totalPointAmount가 마이너스가 되지 않을지? 체크 후 예외 던지는 로직이 필요할듯
         totalPointAmount = totalPointAmount.subtract(amount);
     }
 

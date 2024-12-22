@@ -1,5 +1,7 @@
 package com.traveladvisor.common.domain.vo;
 
+import com.traveladvisor.common.domain.exception.DomainException;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
@@ -34,6 +36,11 @@ public class Money {
     }
 
     public Money subtract(Money money) {
+        BigDecimal result = this.amount.subtract(money.getAmount());
+        if (result.compareTo(BigDecimal.ZERO) < 0) {
+            throw new DomainException("금액은 0보다 작을 수 없습니다.");
+        }
+
         return new Money(setScale(this.amount.subtract(money.getAmount())));
     }
 
