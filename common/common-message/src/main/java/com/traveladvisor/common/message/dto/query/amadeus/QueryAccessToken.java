@@ -1,4 +1,4 @@
-package com.traveladvisor.common.message.amadeus;
+package com.traveladvisor.common.message.dto.query.amadeus;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
