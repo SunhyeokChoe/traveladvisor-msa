@@ -12,6 +12,12 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <modules></modules>
+    <modules>
+        <module>batch-application</module>
+        <module>batch-container</module>
+        <module>batch-datasource</module>
+        <module>batch-message</module>
+        <module>batch-domain</module>
+    </modules>
 
 </project>
