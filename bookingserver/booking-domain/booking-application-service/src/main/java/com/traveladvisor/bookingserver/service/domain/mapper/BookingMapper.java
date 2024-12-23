@@ -5,7 +5,6 @@ import com.traveladvisor.bookingserver.service.domain.dto.command.CreateBookingR
 import com.traveladvisor.bookingserver.service.domain.dto.query.QueryBookingResponse;
 import com.traveladvisor.bookingserver.service.domain.entity.Booking;
 import com.traveladvisor.bookingserver.service.domain.event.BookingCreatedEvent;
-import com.traveladvisor.bookingserver.service.domain.event.BookingEvent;
 import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
 import com.traveladvisor.common.domain.event.booking.BookingCreatedEventPayload;
 import com.traveladvisor.common.domain.event.booking.HotelBookedEventPayload;
@@ -78,7 +77,7 @@ public class BookingMapper {
                 .memberEmail(hotelBookedEvent.getBooking().getMemberEmail())
                 .totalPrice(hotelBookedEvent.getBooking().getTotalPrice().getAmount())
                 .createdAt(hotelBookedEvent.getCreatedAt())
-                .hotelBookingStatus(hotelBookedEvent.getBooking().getBookingStatus().name())
+                .flightBookingStatus(hotelBookedEvent.getBooking().getBookingStatus().name())
                 .build();
     }
 

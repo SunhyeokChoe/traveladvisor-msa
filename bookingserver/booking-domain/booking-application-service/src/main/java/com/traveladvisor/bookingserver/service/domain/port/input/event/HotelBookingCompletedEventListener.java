@@ -5,14 +5,14 @@ import com.traveladvisor.bookingserver.service.domain.dto.message.HotelBookingRe
 public interface HotelBookingCompletedEventListener {
 
     /**
-     * 항공권 예약을 진행합니다.
+     * 호텔 예약 완료로 상태 전환 후 항공권 예약을 진행하기 위해 Flight Outbox에 이벤트를 저장합니다.
      *
      * @param hotelBookingResponse
      */
     void processFlightBooking(HotelBookingResponse hotelBookingResponse);
 
     /**
-     * 완료했던 호텔 예약을 취소합니다.
+     * 예약서의 예약 상태를 예약 실패 상태로 전환합니다.
      *
      * @param hotelBookingResponse
      */

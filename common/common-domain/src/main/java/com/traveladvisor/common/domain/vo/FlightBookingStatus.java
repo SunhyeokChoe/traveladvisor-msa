@@ -1,14 +1,14 @@
 package com.traveladvisor.common.domain.vo;
 
-public enum HotelBookingStatus {
+public enum FlightBookingStatus {
 
     /**
-     * 호텔 예약 진행 중
+     * 항공권 예약 진행 중
      */
     PENDING,
 
     /**
-     * 호텔 예약 취소 완료
+     * 항공권 예약 취소 완료
      */
     CANCELLED,
 

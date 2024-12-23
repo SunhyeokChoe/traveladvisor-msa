@@ -152,6 +152,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
      * @return
      */
     private Booking findBookingByBookingId(UUID bookingId) {
+
         return bookingRepository.findById(new BookingId(bookingId))
                 .orElseThrow(() -> {
                     log.error("예약서가 존재하지 않습니다. BookingId: {}", bookingId);

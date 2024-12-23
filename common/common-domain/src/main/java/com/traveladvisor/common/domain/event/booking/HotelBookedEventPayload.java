@@ -30,6 +30,6 @@ public class HotelBookedEventPayload {
     @JsonProperty
     private ZonedDateTime createdAt;
     @JsonProperty
-    private String hotelBookingStatus;
+    private String flightBookingStatus;
 
 }
