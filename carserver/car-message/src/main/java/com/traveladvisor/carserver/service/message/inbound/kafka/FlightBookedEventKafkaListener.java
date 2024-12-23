@@ -2,7 +2,7 @@ package com.traveladvisor.carserver.service.message.inbound.kafka;
 
 import com.traveladvisor.carserver.service.domain.exception.CarApplicationServiceException;
 import com.traveladvisor.carserver.service.domain.exception.CarNotFoundException;
-import com.traveladvisor.carserver.service.domain.port.input.event.CarBookedEventListener;
+import com.traveladvisor.carserver.service.domain.port.input.event.FlightBookedEventListener;
 import com.traveladvisor.carserver.service.message.mapper.CarMessageMapper;
 import com.traveladvisor.common.domain.event.booking.FlightBookedEventPayload;
 import com.traveladvisor.common.domain.vo.CarBookingStatus;
@@ -26,9 +26,9 @@ import java.sql.SQLException;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class CarBookedEventKafkaListener implements KafkaSingleMessageConsumer<Envelope> {
+public class FlightBookedEventKafkaListener implements KafkaSingleMessageConsumer<Envelope> {
 
-    private final CarBookedEventListener carBookedEventListener;
+    private final FlightBookedEventListener flightBookedEventListener;
     private final CarMessageMapper carMessageMapper;
     private final KafkaMessageHelper kafkaMessageHelper;
 
@@ -56,12 +56,12 @@ public class CarBookedEventKafkaListener implements KafkaSingleMessageConsumer<E
             switch (CarBookingStatus.valueOf(flightBookedEventPayload.getCarBookingStatus())) {
                 // 차량 예약 상태가 PENDING 인 경우 항공권 예약을 처리합니다.
                 case PENDING -> {
-                    carBookedEventListener.processCarBooking(carMessageMapper
+                    flightBookedEventListener.processCarBooking(carMessageMapper
                             .toCarBookingCommand(flightBookedEventPayload, flightBookedEventAvroModel));
                 }
                 // 차량 예약 상태가 CANCELLED 인 경우 항공권 예약을 취소 처리합니다.
                 case CANCELLED -> {
-                    carBookedEventListener.compensateCarBooking(carMessageMapper
+                    flightBookedEventListener.compensateCarBooking(carMessageMapper
                             .toCarBookingCommand(flightBookedEventPayload, flightBookedEventAvroModel));
                 }
                 default -> log.warn("알 수 없는 차량 예약 상태입니다. BookingId: {}", flightBookedEventPayload.getBookingId());

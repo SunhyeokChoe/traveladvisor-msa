@@ -7,7 +7,7 @@ import com.traveladvisor.common.kafka.producer.KafkaMessageHelper;
 import com.traveladvisor.common.message.constant.DebeziumOperator;
 import com.traveladvisor.flightserver.service.domain.exception.FlightApplicationServiceException;
 import com.traveladvisor.flightserver.service.domain.exception.FlightNotFoundException;
-import com.traveladvisor.flightserver.service.domain.port.input.event.FlightBookedEventListener;
+import com.traveladvisor.flightserver.service.domain.port.input.event.HotelBookedEventListener;
 import com.traveladvisor.flightserver.service.message.mapper.FlightMessageMapper;
 import debezium.booking.flight_outbox.Envelope;
 import debezium.booking.flight_outbox.Value;
@@ -26,9 +26,9 @@ import java.sql.SQLException;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class FlightBookedEventKafkaListener implements KafkaSingleMessageConsumer<Envelope> {
+public class HotelBookedEventKafkaListener implements KafkaSingleMessageConsumer<Envelope> {
 
-    private final FlightBookedEventListener flightBookedEventListener;
+    private final HotelBookedEventListener hotelBookedEventListener;
     private final FlightMessageMapper hotelMessageMapper;
     private final KafkaMessageHelper kafkaMessageHelper;
 
@@ -56,12 +56,12 @@ public class FlightBookedEventKafkaListener implements KafkaSingleMessageConsume
             switch (FlightBookingStatus.valueOf(hotelBookedEventPayload.getFlightBookingStatus())) {
                 // 항공권 예약 상태가 PENDING 인 경우 항공권 예약을 처리합니다.
                 case PENDING -> {
-                    flightBookedEventListener.processFlightBooking(hotelMessageMapper
+                    hotelBookedEventListener.processFlightBooking(hotelMessageMapper
                             .toFlightBookingCommand(hotelBookedEventPayload, hotelBookedEventAvroModel));
                 }
                 // 항공권 예약 상태가 CANCELLED 인 경우 항공권 예약을 취소 처리합니다.
                 case CANCELLED -> {
-                    flightBookedEventListener.compensateFlightBooking(hotelMessageMapper
+                    hotelBookedEventListener.compensateFlightBooking(hotelMessageMapper
                             .toFlightBookingCommand(hotelBookedEventPayload, hotelBookedEventAvroModel));
                 }
                 default -> log.warn("알 수 없는 항공권 예약 상태입니다. BookingId: {}", hotelBookedEventPayload.getBookingId());

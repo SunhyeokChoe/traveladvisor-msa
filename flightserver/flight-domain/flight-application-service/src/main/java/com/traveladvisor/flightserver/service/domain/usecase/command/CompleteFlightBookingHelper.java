@@ -134,7 +134,7 @@ public class CompleteFlightBookingHelper {
     }
 
     /**
-     * 호텔 예약 상태를 Outbox 메시지함에 저장합니다.
+     * 항공권 예약 상태를 Outbox 메시지함에 저장합니다.
      *
      * @param flightBookingCommand
      * @param flightBookingEvent
