@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traveladvisor.common.domain.event.hotel.HotelBookingCompletedEventPayload;
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
 import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
-import com.traveladvisor.common.domain.vo.HotelBookingStatus;
 import com.traveladvisor.hotelserver.service.domain.exception.HotelApplicationServiceException;
 import com.traveladvisor.hotelserver.service.domain.outbox.model.BookingOutbox;
 import com.traveladvisor.hotelserver.service.domain.port.output.repository.BookingOutboxRepository;
@@ -31,7 +30,7 @@ public class BookingOutboxHelper {
     private final BookingOutboxRepository bookingOutboxRepository;
     private final ObjectMapper objectMapper;
 
-    public Optional<BookingOutbox> queryCompletedBookingOutboxMessage(
+    public Optional<BookingOutbox> findCompletedBookingOutboxMessage(
             UUID sagaActionId,
             HotelBookingApprovalStatus hotelBookingApprovalStatus) {
 

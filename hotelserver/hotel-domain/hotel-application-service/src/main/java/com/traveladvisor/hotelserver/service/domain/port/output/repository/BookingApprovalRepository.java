@@ -1,6 +1,9 @@
 package com.traveladvisor.hotelserver.service.domain.port.output.repository;
 
+import com.traveladvisor.common.domain.vo.BookingApprovalId;
 import com.traveladvisor.hotelserver.service.domain.entity.BookingApproval;
+
+import java.util.Optional;
 
 public interface BookingApprovalRepository {
 
@@ -11,5 +14,7 @@ public interface BookingApprovalRepository {
      * @return
      */
     BookingApproval save(BookingApproval bookingApproval);
+
+    Optional<BookingApproval> findById(BookingApprovalId bookingApprovalId);
 
 }
