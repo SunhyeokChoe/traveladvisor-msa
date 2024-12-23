@@ -1,7 +1,7 @@
 package com.traveladvisor.flightserver.service.message.mapper;
 
 import com.traveladvisor.common.domain.event.booking.HotelBookedEventPayload;
-import com.traveladvisor.common.domain.vo.FlightBookingStatus;
+import com.traveladvisor.common.domain.vo.FlightBookingApprovalStatus;
 import com.traveladvisor.flightserver.service.domain.dto.command.FlightBookingCommand;
 import debezium.booking.flight_outbox.Value;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ public class FlightMessageMapper {
                 hotelBookedEventPayload.getFlightOfferId(),
                 hotelBookedEventPayload.getMemberEmail(),
                 hotelBookedEventPayload.getTotalPrice(),
-                FlightBookingStatus.valueOf(hotelBookedEventPayload.getFlightBookingStatus()),
+                FlightBookingApprovalStatus.valueOf(hotelBookedEventPayload.getFlightBookingStatus()),
                 hotelBookedEventPayload.getCreatedAt()
         );
     }
