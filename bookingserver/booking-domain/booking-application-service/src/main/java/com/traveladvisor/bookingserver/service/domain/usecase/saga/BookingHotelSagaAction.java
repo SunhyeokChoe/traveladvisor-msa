@@ -3,7 +3,6 @@ package com.traveladvisor.bookingserver.service.domain.usecase.saga;
 import com.traveladvisor.bookingserver.service.domain.BookingDomainService;
 import com.traveladvisor.bookingserver.service.domain.dto.message.HotelBookingResponse;
 import com.traveladvisor.bookingserver.service.domain.entity.Booking;
-import com.traveladvisor.bookingserver.service.domain.event.BookingEvent;
 import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
 import com.traveladvisor.bookingserver.service.domain.exception.BookingNotFoundException;
 import com.traveladvisor.bookingserver.service.domain.mapper.BookingMapper;
@@ -53,7 +52,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
     private final FlightOutboxHelper flightOutboxHelper;
 
     /**
-     * 결제 성공 시 주문 승인 요청
+     * 호텔 예약 성공 시 항공권 예약을 요청합니다.
      */
     @Override
     @Transactional
@@ -90,18 +89,25 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
 
         // Saga Action의 다음 단계인 항공권 예약 요청을 위해 booking.flight_outbox 테이블에
         // HotelBookedEvent 이벤트를 저장합니다. (OutboxStatus.STARTED, SagaActionStatus.PROCESSING)
-        flightOutboxHelper
-                .save(bookingMapper.toHotelBookedEventPayload(hotelBookedEvent),
-                        hotelBookedEvent.getBooking().getBookingStatus(),
-                        sagaActionStatus,
-                        OutboxStatus.STARTED,
-                        UUID.fromString(hotelBookingResponse.sagaActionId()));
+        flightOutboxHelper.save(
+                bookingMapper.toHotelBookedEventPayload(hotelBookedEvent),
+                hotelBookedEvent.getBooking().getBookingStatus(),
+                sagaActionStatus,
+                OutboxStatus.STARTED,
+                UUID.fromString(hotelBookingResponse.sagaActionId()));
 
         log.info("정상적으로 호텔 객실 예약 상태를 호텔 예약 완료({})로 처리합니다. BookingId: {}",
                 hotelBookedEvent.getBooking().getBookingStatus().name(),
                 hotelBookedEvent.getBooking().getId().getValue());
     }
 
+    /**
+     * HotelOutbox의 예약 상태와 Saga Action 상태를 변경합니다.
+     *
+     * @param hotelOutbox
+     * @param bookingStatus
+     * @param sagaActionStatus
+     */
     private static void updateHotelOutbox(
             HotelOutbox hotelOutbox, BookingStatus bookingStatus, SagaActionStatus sagaActionStatus) {
         hotelOutbox.setBookingStatus(bookingStatus);
@@ -109,25 +115,42 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
         hotelOutbox.setCompletedAt(ZonedDateTime.now(ZoneId.of(UTC)));
     }
 
+    /**
+     * 호텔 예약 실패 시 예약서의 상태를 실패 상태로 전환합니다.
+     *
+     * @param hotelBookingResponse
+     */
     @Override
     @Transactional
     public void compensate(HotelBookingResponse hotelBookingResponse) {
 
     }
 
+    /**
+     * 예약서 상태를 호텔 예약 완료로 변경하고 저장합니다.
+     *
+     * @param hotelBookingResponse
+     * @return
+     */
     private HotelBookedEvent completeHotelBooking(HotelBookingResponse hotelBookingResponse) {
         // 전달받은 예약서 ID로 호텔 예약 완료 처리할 대상을 DB에서 검색 조회합니다.
         Booking booking = findBookingByBookingId(UUID.fromString(hotelBookingResponse.bookingId()));
 
         // 예약서의 호텔 예약을 완료 처리합니다.
-        HotelBookedEvent domainEvent = bookingDomainService.markAsHotelBooked(booking);
+        HotelBookedEvent hotelBookedEvent = bookingDomainService.markAsHotelBooked(booking);
 
         // 주문서 현재 상태 저장 (주문 상태: HOTEL_BOOKED)
         bookingRepository.save(booking);
 
-        return domainEvent;
+        return hotelBookedEvent;
     }
 
+    /**
+     * 예약서를 조회합니다.
+     *
+     * @param bookingId
+     * @return
+     */
     private Booking findBookingByBookingId(UUID bookingId) {
         return bookingRepository.findById(new BookingId(bookingId))
                 .orElseThrow(() -> {
