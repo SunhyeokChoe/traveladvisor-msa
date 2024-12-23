@@ -5,8 +5,10 @@ import com.traveladvisor.bookingserver.service.domain.dto.command.CreateBookingR
 import com.traveladvisor.bookingserver.service.domain.dto.query.QueryBookingResponse;
 import com.traveladvisor.bookingserver.service.domain.entity.Booking;
 import com.traveladvisor.bookingserver.service.domain.event.BookingCreatedEvent;
+import com.traveladvisor.bookingserver.service.domain.event.FlightBookedEvent;
 import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
 import com.traveladvisor.common.domain.event.booking.BookingCreatedEventPayload;
+import com.traveladvisor.common.domain.event.booking.FlightBookedEventPayload;
 import com.traveladvisor.common.domain.event.booking.HotelBookedEventPayload;
 import com.traveladvisor.common.domain.vo.*;
 import org.springframework.stereotype.Component;
@@ -81,4 +83,15 @@ public class BookingMapper {
                 .build();
     }
 
+    public FlightBookedEventPayload toFlightBookedEventPayload(FlightBookedEvent flightBookedEvent) {
+        return FlightBookedEventPayload.builder()
+                .id(flightBookedEvent.getBooking().getId().getValue().toString())
+                .bookingId(flightBookedEvent.getBooking().getId().getValue().toString())
+                .carOfferId(flightBookedEvent.getBooking().getCarOfferId().getValue().toString())
+                .memberEmail(flightBookedEvent.getBooking().getMemberEmail())
+                .totalPrice(flightBookedEvent.getBooking().getTotalPrice().getAmount())
+                .createdAt(flightBookedEvent.getCreatedAt())
+                .carBookingStatus(flightBookedEvent.getBooking().getBookingStatus().name())
+                .build();
+    }
 }

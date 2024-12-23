@@ -29,7 +29,7 @@ import static com.traveladvisor.common.domain.constant.common.DomainConstants.UT
 
 /**
  * 호텔 서비스로부터 호텔 예약 요청에 대한 처리 결과를 전달받아 그 다음 처리 혹은 직전 단계 보상 Saga Action을 수행합니다.
- * <p>
+ *
  * 예약서의 예약 상태를 호텔 예약 상태로 변경 완료 한 후 저장까지 완료하면
  * Saga Action의 다음 단계인 항공권 예약을 위해 process 메서드에서 booking.flight_outbox 테이블에 데이터를 저장합니다.
  * 그럼 Debezium CDC 측에서 이를 인지하고 카프카 토픽 debezium.booking.flight_outbox으로 메시지를 발행할 것이고,
@@ -58,7 +58,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
     @Transactional
     public void process(HotelBookingResponse hotelBookingResponse) {
         Optional<HotelOutbox> hotelOutboxOrEmpty =
-                hotelOutboxHelper.getPaymentOutboxMessageBySagaIdAndSagaStatus(
+                hotelOutboxHelper.findHotelOutboxBySagaIdAndSagaStatus(
                         UUID.fromString(hotelBookingResponse.sagaActionId()), SagaActionStatus.STARTED);
 
         if (hotelOutboxOrEmpty.isEmpty()) {
@@ -96,7 +96,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
                 OutboxStatus.STARTED,
                 UUID.fromString(hotelBookingResponse.sagaActionId()));
 
-        log.info("정상적으로 호텔 객실 예약 상태를 호텔 예약 완료({})로 처리합니다. BookingId: {}",
+        log.info("정상적으로 예약서의 예약 상태를 호텔 예약 완료({})로 변경했습니다. BookingId: {}",
                 hotelBookedEvent.getBooking().getBookingStatus().name(),
                 hotelBookedEvent.getBooking().getId().getValue());
     }
@@ -139,7 +139,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
         // 예약서의 호텔 예약을 완료 처리합니다.
         HotelBookedEvent hotelBookedEvent = bookingDomainService.markAsHotelBooked(booking);
 
-        // 주문서 현재 상태 저장 (주문 상태: HOTEL_BOOKED)
+        // 호텔 예약 상태를 저장합니다. (예약 상태: HOTEL_BOOKED)
         bookingRepository.save(booking);
 
         return hotelBookedEvent;

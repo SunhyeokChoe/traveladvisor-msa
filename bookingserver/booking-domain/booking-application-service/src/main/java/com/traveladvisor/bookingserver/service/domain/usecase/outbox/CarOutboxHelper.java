@@ -3,10 +3,9 @@ package com.traveladvisor.bookingserver.service.domain.usecase.outbox;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traveladvisor.bookingserver.service.domain.exception.BookingApplicationServiceException;
-import com.traveladvisor.bookingserver.service.domain.outbox.model.flight.FlightOutbox;
-import com.traveladvisor.bookingserver.service.domain.outbox.model.hotel.HotelOutbox;
-import com.traveladvisor.bookingserver.service.domain.port.output.repository.FlightOutboxRepository;
-import com.traveladvisor.common.domain.event.booking.HotelBookedEventPayload;
+import com.traveladvisor.bookingserver.service.domain.outbox.model.car.CarOutbox;
+import com.traveladvisor.bookingserver.service.domain.port.output.repository.CarOutboxRepository;
+import com.traveladvisor.common.domain.event.booking.FlightBookedEventPayload;
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
 import com.traveladvisor.common.domain.saga.SagaActionStatus;
 import com.traveladvisor.common.domain.vo.BookingStatus;
@@ -24,24 +23,24 @@ import static com.traveladvisor.common.domain.constant.booking.SagaActionConstan
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class FlightOutboxHelper {
+public class CarOutboxHelper {
 
-    private final FlightOutboxRepository flightOutboxRepository;
+    private final CarOutboxRepository carOutboxRepository;
 
     private final ObjectMapper objectMapper;
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void save(HotelBookedEventPayload hotelBookedEventPayload,
+    public void save(FlightBookedEventPayload flightBookedEventPayload,
                      BookingStatus bookingStatus,
                      SagaActionStatus sagaActionStatus,
                      OutboxStatus outboxStatus,
                      UUID sagaActionId) {
-        save(FlightOutbox.builder()
+        save(CarOutbox.builder()
                 .id(UUID.randomUUID())
                 .sagaActionId(sagaActionId)
-                .createdAt(hotelBookedEventPayload.getCreatedAt())
+                .createdAt(flightBookedEventPayload.getCreatedAt())
                 .eventType(BOOKING_SAGA_ACTION_NAME)
-                .eventPayload(serialize(hotelBookedEventPayload))
+                .eventPayload(serialize(flightBookedEventPayload))
                 .bookingStatus(bookingStatus)
                 .sagaActionStatus(sagaActionStatus)
                 .outboxStatus(outboxStatus)
@@ -49,18 +48,18 @@ public class FlightOutboxHelper {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void save(FlightOutbox flightOutbox) {
-        FlightOutbox savedFlightOutbox = flightOutboxRepository.save(flightOutbox);
+    public void save(CarOutbox carOutbox) {
+        CarOutbox savedCarOutbox = carOutboxRepository.save(carOutbox);
 
-        if (savedFlightOutbox == null) {
-            throw new BookingApplicationServiceException("FlightOutbox 저장에 실패했습니다. OutboxId: " +
-                    flightOutbox.getId().toString());
+        if (savedCarOutbox == null) {
+            throw new BookingApplicationServiceException("CarOutbox 저장에 실패했습니다. OutboxId: " +
+                    carOutbox.getId().toString());
         }
 
-        log.info("FlightOutbox 저장을 완료했습니다. OutboxId: {}", flightOutbox.getId().toString());
+        log.info("CarOutbox 저장을 완료했습니다. OutboxId: {}", carOutbox.getId().toString());
     }
 
-    private String serialize(HotelBookedEventPayload hotelBookedEventPayload) {
+    private String serialize(FlightBookedEventPayload hotelBookedEventPayload) {
         try {
             return objectMapper.writeValueAsString(hotelBookedEventPayload);
         } catch (JsonProcessingException ex) {
@@ -69,10 +68,10 @@ public class FlightOutboxHelper {
         }
     }
 
-    public Optional<FlightOutbox> findFlightOutboxBySagaIdAndSagaStatus(
+    public Optional<CarOutbox> findCarOutboxBySagaIdAndSagaStatus(
             UUID sagaId, SagaActionStatus... sagaActionStatuses) {
 
-        return flightOutboxRepository.findByEventTypeAndSagaActionIdAndSagaActionStatusIn(
+        return carOutboxRepository.findByEventTypeAndSagaActionIdAndSagaActionStatusIn(
                 BOOKING_SAGA_ACTION_NAME, sagaId, sagaActionStatuses);
     }
 

@@ -68,7 +68,7 @@ public class HotelOutboxHelper {
         }
     }
 
-    public Optional<HotelOutbox> getPaymentOutboxMessageBySagaIdAndSagaStatus(
+    public Optional<HotelOutbox> findHotelOutboxBySagaIdAndSagaStatus(
             UUID sagaId, SagaActionStatus... sagaActionStatuses) {
 
         return hotelOutboxRepository.findByEventTypeAndSagaActionIdAndSagaActionStatusIn(
