@@ -18,4 +18,15 @@ public interface FlightDomainService {
     FlightBookingEvent initializeBookingApproval(
             BookingId bookingId, FlightOffer flightOffer, List<String> failureMessages);
 
+    /**
+     * 예약 가능 항공권 데이터가 유효한지 검증하고 예약 취소 상태로 초기화 합니다.
+     *
+     * @param bookingId
+     * @param flightOffer
+     * @param failureMessages
+     * @return
+     */
+    FlightBookingEvent cancelBookingApproval(
+            BookingId bookingId, FlightOffer flightOffer, List<String> failureMessages);
+
 }

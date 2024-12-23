@@ -11,6 +11,7 @@ import com.traveladvisor.carserver.service.domain.port.output.repository.Booking
 import com.traveladvisor.carserver.service.domain.port.output.repository.CarOfferRepository;
 import com.traveladvisor.carserver.service.domain.usecase.outbox.BookingOutboxHelper;
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
+import com.traveladvisor.common.domain.vo.BookingApprovalId;
 import com.traveladvisor.common.domain.vo.CarBookingApprovalStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,8 +62,7 @@ public class CompleteCarBookingHelper {
 
         /*
          * 이벤트 전달: Car 서비스 ---CarBookingEvent---> Booking 서비스
-         * 예약 Saga Action 중 네 번째 단계이므로 Saga Action 상태를 PROCESSING으로, Outbox 상태를 STARTED로 설정합니다.
-         * flight.booking_outbox 테이블에 CarBookingEvent 이벤트와 함께 저장합니다.
+         * Outbox 상태를 STARTED로 설정하고 flight.booking_outbox 테이블에 CarBookingEvent 이벤트와 함께 저장합니다.
          */
         saveBookingOutbox(carBookingCommand, carBookingEvent);
     }
@@ -83,6 +83,38 @@ public class CompleteCarBookingHelper {
 
     @Transactional
     public void cancelCarBooking(CarBookingCommand carBookingCommand) {
+        // 이미 처리된 예약은 스킵합니다.
+        if (isOutboxMessageProcessedFor(carBookingCommand, CarBookingApprovalStatus.CANCELLED)) {
+            log.info("이미 예약 취소 처리된 차량 입니다. Saga Action ID: {}", carBookingCommand.sagaActionId());
+            return;
+        }
+
+        log.info("예약서 BookingID: {}에 대한 차량 예약 취소 처리를 시작합니다.", carBookingCommand.bookingId());
+
+        // 애그리거트 루트 CarOffer 검색
+        CarOffer carOffer = findCarOfferById(Long.parseLong(carBookingCommand.carOfferId()));
+
+        // 예약서 검색
+        BookingApproval bookingApproval = bookingApprovalRepository.findById(
+                        new BookingApprovalId(UUID.fromString(carBookingCommand.bookingId())))
+                .orElseThrow(() -> {
+                    log.error("호텔 예약서를 찾을 수 없습니다. BookingApprovalId: {}", carBookingCommand.bookingId());
+                    return new CarNotFoundException("차량 예약서를 찾을 수 없습니다. BookingApprovalId: " +
+                            carBookingCommand.bookingId());
+                });
+
+        // CarOffer가 유효한지 검증하고 예약 승인서 초기화 합니다.
+        CarBookingEvent carBookingEvent = carDomainService.cancelBookingApproval(
+                bookingApproval.getBookingId(), carOffer, new ArrayList<>());
+
+        // 변경된 차량 예약서 저장
+        bookingApprovalRepository.save(carBookingEvent.getBookingApproval());
+
+        /*
+         * 이벤트 전달: Car 서비스 ---CarBookingEvent---> Booking 서비스
+         * Outbox 상태를 STARTED로 설정하고 car.booking_outbox 테이블에 CarBookingEvent 이벤트와 함께 저장합니다.
+         */
+        saveBookingOutbox(carBookingCommand, carBookingEvent);
     }
 
     /**
@@ -101,7 +133,7 @@ public class CompleteCarBookingHelper {
     }
 
     /**
-     * 호텔 예약 상태를 Outbox 메시지함에 저장합니다.
+     * 차량 예약 상태를 Outbox 메시지함에 저장합니다.
      *
      * @param carBookingCommand
      * @param carBookingEvent

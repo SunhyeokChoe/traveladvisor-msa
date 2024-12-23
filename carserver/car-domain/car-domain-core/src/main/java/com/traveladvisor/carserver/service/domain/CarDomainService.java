@@ -18,4 +18,15 @@ public interface CarDomainService {
     CarBookingEvent initializeBookingApproval(
             BookingId bookingId, CarOffer carOffer, List<String> failureMessages);
 
+    /**
+     * 예약 가능 차량 데이터가 유효한지 검증하고 예약 취소 상태로 초기화 합니다.
+     *
+     * @param bookingId
+     * @param carOffer
+     * @param failureMessages
+     * @return
+     */
+    CarBookingEvent cancelBookingApproval(
+            BookingId bookingId, CarOffer carOffer, List<String> failureMessages);
+
 }

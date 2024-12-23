@@ -1,7 +1,7 @@
 package com.traveladvisor.carserver.service.domain.usecase;
 
 import com.traveladvisor.carserver.service.domain.dto.query.command.CarBookingCommand;
-import com.traveladvisor.carserver.service.domain.port.input.event.CarBookedEventListener;
+import com.traveladvisor.carserver.service.domain.port.input.event.FlightBookedEventListener;
 import com.traveladvisor.carserver.service.domain.usecase.command.CompleteCarBookingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class CarBookedEventListenerImpl implements CarBookedEventListener {
+public class FlightBookedEventListenerImpl implements FlightBookedEventListener {
 
     private final CompleteCarBookingHelper completeCarBookingHelper;
 

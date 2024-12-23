@@ -6,11 +6,11 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
- * 차량 예약 반려 이벤트 입니다.
+ * 차량 예약 실패 이벤트 입니다.
  */
-public class CarBookingRejectedEvent extends CarBookingEvent {
+public class CarBookingFailedEvent extends CarBookingEvent {
 
-    public CarBookingRejectedEvent(BookingApproval bookingApproval, List<String> failureMessages, ZonedDateTime createdAt) {
+    public CarBookingFailedEvent(BookingApproval bookingApproval, List<String> failureMessages, ZonedDateTime createdAt) {
         super(bookingApproval, failureMessages, createdAt);
     }
 

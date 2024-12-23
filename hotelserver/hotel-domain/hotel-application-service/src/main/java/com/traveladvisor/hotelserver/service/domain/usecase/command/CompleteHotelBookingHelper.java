@@ -1,6 +1,7 @@
 package com.traveladvisor.hotelserver.service.domain.usecase.command;
 
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
+import com.traveladvisor.common.domain.vo.BookingApprovalId;
 import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
 import com.traveladvisor.hotelserver.service.domain.HotelDomainService;
 import com.traveladvisor.hotelserver.service.domain.dto.command.HotelBookingCommand;
@@ -62,8 +63,7 @@ public class CompleteHotelBookingHelper {
 
         /*
          * 이벤트 전달: Hotel 서비스 ---HotelBookingEvent---> Booking 서비스
-         * 예약 Saga Action 중 두 번째 단계이므로 Saga Action 상태를 PROCESSING으로, Outbox 상태를 STARTED로 설정합니다.
-         * hotel.booking_outbox 테이블에 HotelBookingEvent 이벤트와 함께 저장합니다.
+         * Outbox 상태를 STARTED로 설정하고 hotel.booking_outbox 테이블에 HotelBookingEvent 이벤트와 함께 저장합니다.
          */
         saveBookingOutbox(hotelBookingCommand, hotelBookingEvent);
     }
@@ -84,7 +84,38 @@ public class CompleteHotelBookingHelper {
 
     @Transactional
     public void cancelHotelBooking(HotelBookingCommand hotelBookingCommand) {
-        return;
+        // 이미 처리된 예약은 스킵합니다.
+        if (isOutboxMessageProcessedFor(hotelBookingCommand, HotelBookingApprovalStatus.CANCELLED)) {
+            log.info("이미 예약 취소 처리된 호텔 객실 입니다. Saga Action ID: {}", hotelBookingCommand.sagaActionId());
+            return;
+        }
+
+        log.info("예약서 BookingID: {}에 대한 호텔 객실 예약 취소 처리를 시작합니다.", hotelBookingCommand.bookingId());
+
+        // 애그리거트 루트 HotelOffer 검색
+        HotelOffer hotelOffer = findHotelOfferById(Long.parseLong(hotelBookingCommand.hotelOfferId()));
+
+        // 예약서 검색
+        BookingApproval bookingApproval = bookingApprovalRepository.findById(
+                        new BookingApprovalId(UUID.fromString(hotelBookingCommand.bookingId())))
+                .orElseThrow(() -> {
+                    log.error("호텔 예약서를 찾을 수 없습니다. BookingApprovalId: {}", hotelBookingCommand.bookingId());
+                    return new HotelNotFoundException("호텔 예약서를 찾을 수 없습니다. BookingApprovalId: " +
+                            hotelBookingCommand.bookingId());
+                });
+
+        // HotelOffer가 유효한지 검증하고 예약 승인서 초기화 합니다.
+        HotelBookingEvent hotelBookingEvent = hotelDomainService.cancelBookingApproval(
+                bookingApproval.getBookingId(), hotelOffer, new ArrayList<>());
+        
+        // 변경된 호텔 예약서 저장
+        bookingApprovalRepository.save(hotelBookingEvent.getBookingApproval());
+
+        /*
+         * 이벤트 전달: Hotel 서비스 ---HotelBookingEvent---> Booking 서비스
+         * Outbox 상태를 STARTED로 설정하고 hotel.booking_outbox 테이블에 HotelBookingEvent 이벤트와 함께 저장합니다.
+         */
+        saveBookingOutbox(hotelBookingCommand, hotelBookingEvent);
     }
 
     /**
@@ -97,7 +128,7 @@ public class CompleteHotelBookingHelper {
     private boolean isOutboxMessageProcessedFor(HotelBookingCommand hotelBookingCommand,
                                                 HotelBookingApprovalStatus hotelBookingApprovalStatus) {
 
-        return bookingOutboxHelper.queryCompletedBookingOutboxMessage(
+        return bookingOutboxHelper.findCompletedBookingOutboxMessage(
                 UUID.fromString(hotelBookingCommand.sagaActionId()),
                 hotelBookingApprovalStatus).isPresent();
     }
@@ -113,7 +144,7 @@ public class CompleteHotelBookingHelper {
         bookingOutboxHelper.saveBookingOutbox(
                 bookingApprovalMapper.toHotelBookingCompletedEventPayload(hotelBookingEvent),
                 hotelBookingEvent.getBookingApproval().getStatus(),
-                OutboxStatus.STARTED,
+                OutboxStatus.STARTED, // Outbox 메시지함에 저장할 때에는 새로운 Outbox 시작이므로 STARTED 상태로 저장합니다.
                 UUID.fromString(hotelBookingCommand.sagaActionId()));
     }
 
