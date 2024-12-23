@@ -95,6 +95,8 @@ public class Booking extends AggregateRoot<BookingId> {
         this.failureMessages = failureMessages;
     }
 
+
+
     private Booking(Builder builder) {
         super.setId(builder.bookingId);
         this.traceId = builder.traceId;
