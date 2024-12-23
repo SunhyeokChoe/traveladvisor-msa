@@ -49,7 +49,7 @@ kafka:
       auto-offset-reset: earliest
       specific-avro-reader-key: specific.avro.reader
       specific-avro-reader: true
-      batch-listener: false # 이벤트를 단일로 받아 처리합니다.
+#      batch-listener: false
       auto-startup: true
       concurrency-level: 3
       session-timeout-ms: 10000
