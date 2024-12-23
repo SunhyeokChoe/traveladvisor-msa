@@ -3,19 +3,19 @@ package com.traveladvisor.hotelserver.service.domain.entity;
 import com.traveladvisor.common.domain.entity.DomainEntity;
 import com.traveladvisor.common.domain.vo.BookingApprovalId;
 import com.traveladvisor.common.domain.vo.BookingId;
-import com.traveladvisor.common.domain.vo.HotelBookingStatus;
+import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
 import com.traveladvisor.common.domain.vo.HotelOfferId;
 
 public class BookingApproval extends DomainEntity<BookingApprovalId> {
 
     private final BookingId bookingId;
-    private final HotelOfferId hotelOffersId;
-    private final HotelBookingStatus status;
+    private final HotelOfferId hotelOfferId;
+    private final HotelBookingApprovalStatus status;
 
     private BookingApproval(Builder builder) {
         super.setId(builder.bookingApprovalId);
         this.bookingId = builder.bookingId;
-        this.hotelOffersId = builder.hotelOffersId;
+        this.hotelOfferId = builder.hotelOfferId;
         this.status = builder.status;
     }
 
@@ -24,11 +24,11 @@ public class BookingApproval extends DomainEntity<BookingApprovalId> {
         return bookingId;
     }
 
-    public HotelOfferId getHotelOffersId() {
-        return hotelOffersId;
+    public HotelOfferId getHotelOfferId() {
+        return hotelOfferId;
     }
 
-    public HotelBookingStatus getStatus() {
+    public HotelBookingApprovalStatus getStatus() {
         return status;
     }
     // END: Getter
@@ -41,8 +41,8 @@ public class BookingApproval extends DomainEntity<BookingApprovalId> {
     public static final class Builder {
         private BookingApprovalId bookingApprovalId;
         private BookingId bookingId;
-        private HotelOfferId hotelOffersId;
-        private HotelBookingStatus status;
+        private HotelOfferId hotelOfferId;
+        private HotelBookingApprovalStatus status;
 
         private Builder() {
         }
@@ -57,12 +57,12 @@ public class BookingApproval extends DomainEntity<BookingApprovalId> {
             return this;
         }
 
-        public Builder hotelOffersId(HotelOfferId val) {
-            hotelOffersId = val;
+        public Builder hotelOfferId(HotelOfferId val) {
+            hotelOfferId = val;
             return this;
         }
 
-        public Builder status(HotelBookingStatus val) {
+        public Builder status(HotelBookingApprovalStatus val) {
             status = val;
             return this;
         }

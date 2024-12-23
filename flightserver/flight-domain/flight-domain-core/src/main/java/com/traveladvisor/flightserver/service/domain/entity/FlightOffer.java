@@ -1,11 +1,16 @@
 package com.traveladvisor.flightserver.service.domain.entity;
 
 import com.traveladvisor.common.domain.entity.AggregateRoot;
+import com.traveladvisor.common.domain.vo.BookingApprovalId;
+import com.traveladvisor.common.domain.vo.BookingId;
+import com.traveladvisor.common.domain.vo.FlightBookingApprovalStatus;
 import com.traveladvisor.common.domain.vo.FlightOfferId;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * FlightOffer 도메인의 Aggregate Root입니다.
@@ -25,6 +30,63 @@ public class FlightOffer extends AggregateRoot<FlightOfferId> {
     private final Boolean blacklistedInEu;
     private final Integer numberOfStops;
     private final BigDecimal price;
+
+    private BookingApproval bookingApproval;
+
+    /**
+     * 항공권 예약서가 유효한지 검증합니다.
+     *
+     * @param failureMessages 검증 실패 메시지를 담을 리스트
+     */
+    public void validateFlightOffer(List<String> failureMessages) {
+        validateDepartureAndArrival(failureMessages);
+        validateDuration(failureMessages);
+        validatePrice(failureMessages);
+        validateBlacklistedCarrier(failureMessages);
+        // 그 외 항공권 유효성 검증은 스킵합니다.
+    }
+
+    private void validateDepartureAndArrival(List<String> failureMessages) {
+        if (departureIata == null || departureIata.isBlank()) {
+            failureMessages.add("출발 공항 코드가 유효하지 않습니다.");
+        }
+        if (arrivalIata == null || arrivalIata.isBlank()) {
+            failureMessages.add("도착 공항 코드가 유효하지 않습니다.");
+        }
+        if (departureAt == null || arrivalAt == null || departureAt.isAfter(arrivalAt)) {
+            failureMessages.add("출발 및 도착 시간이 유효하지 않습니다.");
+        }
+    }
+
+    private void validateDuration(List<String> failureMessages) {
+        if (duration == null || duration.isNegative() || duration.isZero()) {
+            failureMessages.add("비행 시간이 유효하지 않습니다.");
+        }
+    }
+
+    private void validatePrice(List<String> failureMessages) {
+        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+            failureMessages.add("항공권 가격이 유효하지 않습니다.");
+        }
+    }
+
+    private void validateBlacklistedCarrier(List<String> failureMessages) {
+        if (blacklistedInEu != null && blacklistedInEu) {
+            failureMessages.add("이 항공사는 EU 블랙리스트에 포함되어 있습니다.");
+        }
+    }
+
+    /**
+     * 항공권 예약 엔터티를 초기화 합니다.
+     */
+    public void initializeBookingApproval(BookingId bookingId, FlightBookingApprovalStatus flightBookingApprovalStatus) {
+        this.bookingApproval = BookingApproval.builder()
+                .bookingId(bookingId)
+                .bookingApprovalId(new BookingApprovalId(UUID.randomUUID()))
+                .flightOfferId(this.getId())
+                .status(flightBookingApprovalStatus)
+                .build();
+    }
 
     private FlightOffer(Builder builder) {
         super.setId(builder.flightOfferId);
@@ -89,6 +151,10 @@ public class FlightOffer extends AggregateRoot<FlightOfferId> {
 
     public BigDecimal getPrice() {
         return price;
+    }
+
+    public BookingApproval getBookingApproval() {
+        return bookingApproval;
     }
     // END: Getter
 

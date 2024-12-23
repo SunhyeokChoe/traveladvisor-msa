@@ -1,5 +1,6 @@
 package com.traveladvisor.hotelserver.service.datasource.hotel.entity;
 
+import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
 import com.traveladvisor.common.domain.vo.HotelBookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,14 +18,14 @@ public class BookingApprovalEntity {
     private UUID id;
 
     @Column(name = "hotel_offers_id")
-    private Long hotelOffersId;
+    private Long hotelOfferId;
 
     @Column(name = "booking_id")
     private UUID bookingId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private HotelBookingStatus status;
+    private HotelBookingApprovalStatus status;
 
     @Version
     @Column(name = "version")

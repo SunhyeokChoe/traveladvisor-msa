@@ -1,6 +1,7 @@
 package com.traveladvisor.carserver.service.application.handler;
 
 import com.traveladvisor.carserver.service.domain.exception.CarApplicationServiceException;
+import com.traveladvisor.carserver.service.domain.exception.CarNotFoundException;
 import com.traveladvisor.common.application.dto.ErrorResponseDto;
 import com.traveladvisor.common.application.exception.GlobalExceptionHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
@@ -26,6 +28,20 @@ public class CarGlobalExceptionHandler extends GlobalExceptionHandler {
                 webRequest.getDescription(false),
                 HttpStatus.BAD_REQUEST,
                 "예상치 못한 서버 에러가 발생했습니다. 고객 센터에 문의 바랍니다.",
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ResponseBody
+    @ExceptionHandler(value = {CarNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND) // 404를 반환합니다.
+    public ResponseEntity<ErrorResponseDto> handleException(CarNotFoundException ex, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
                 LocalDateTime.now()
         );
 

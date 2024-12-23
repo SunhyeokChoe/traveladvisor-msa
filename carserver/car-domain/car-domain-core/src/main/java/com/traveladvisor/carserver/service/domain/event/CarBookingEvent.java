@@ -1,20 +1,20 @@
-package com.traveladvisor.hotelserver.service.domain.event;
+package com.traveladvisor.carserver.service.domain.event;
 
+import com.traveladvisor.carserver.service.domain.entity.BookingApproval;
 import com.traveladvisor.common.domain.event.DomainEvent;
-import com.traveladvisor.hotelserver.service.domain.entity.BookingApproval;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public abstract class BookingApprovalEvent implements DomainEvent<BookingApproval> {
+public abstract class CarBookingEvent implements DomainEvent<BookingApproval> {
 
     private final BookingApproval bookingApproval;
     private final List<String> failureMessages;
     private final ZonedDateTime createdAt;
 
-    protected BookingApprovalEvent(BookingApproval bookingApproval,
-                                   List<String> failureMessages,
-                                   ZonedDateTime createdAt) {
+    protected CarBookingEvent(BookingApproval bookingApproval,
+                              List<String> failureMessages,
+                              ZonedDateTime createdAt) {
         this.bookingApproval = bookingApproval;
         this.failureMessages = failureMessages;
         this.createdAt = createdAt;

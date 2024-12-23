@@ -2,6 +2,8 @@ package com.traveladvisor.bookingserver.service.domain;
 
 import com.traveladvisor.bookingserver.service.domain.entity.Booking;
 import com.traveladvisor.bookingserver.service.domain.event.BookingCreatedEvent;
+import com.traveladvisor.bookingserver.service.domain.event.FlightBookedEvent;
+import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZoneId;
@@ -32,6 +34,32 @@ public class BookingDomainServiceImpl implements BookingDomainService {
          * 이벤트 발행은 도메인 코어의 책임 밖의 일이며 이는 Application Service에서 담당합니다.
          */
         return new BookingCreatedEvent(booking, ZonedDateTime.now(ZoneId.of(UTC)));
+    }
+
+    /**
+     * 예약서의 예약 상태를 호텔 예약 완료로 업데이트 합니다.
+     *
+     * @param booking
+     * @return
+     */
+    @Override
+    public HotelBookedEvent markAsHotelBooked(Booking booking) {
+        booking.markAsHotelBooked();
+
+        return new HotelBookedEvent(booking, ZonedDateTime.now(ZoneId.of(UTC)));
+    }
+
+    /**
+     * 예약서의 예약 상태를 항공권 예약 완료로 업데이트 합니다.
+     *
+     * @param booking
+     * @return
+     */
+    @Override
+    public FlightBookedEvent markAsFlightBooked(Booking booking) {
+        booking.markAsFlightBooked();
+
+        return new FlightBookedEvent(booking, ZonedDateTime.now(ZoneId.of(UTC)));
     }
 
 }

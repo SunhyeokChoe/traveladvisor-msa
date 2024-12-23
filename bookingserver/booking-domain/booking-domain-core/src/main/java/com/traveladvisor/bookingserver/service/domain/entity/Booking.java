@@ -1,5 +1,6 @@
 package com.traveladvisor.bookingserver.service.domain.entity;
 
+import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
 import com.traveladvisor.bookingserver.service.domain.exception.BookingDomainCoreException;
 import com.traveladvisor.common.domain.entity.AggregateRoot;
 import com.traveladvisor.common.domain.vo.*;
@@ -93,6 +94,14 @@ public class Booking extends AggregateRoot<BookingId> {
 
     public void updateFailureMessages(List<String> failureMessages) {
         this.failureMessages = failureMessages;
+    }
+
+    public void markAsHotelBooked() {
+        this.bookingStatus = BookingStatus.HOTEL_BOOKED;
+    }
+
+    public void markAsFlightBooked() {
+        this.bookingStatus = BookingStatus.FLIGHT_BOOKED;
     }
 
     private Booking(Builder builder) {

@@ -1,7 +1,7 @@
 package com.traveladvisor.hotelserver.service.domain.port.output.repository;
 
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
-import com.traveladvisor.common.domain.vo.HotelBookingStatus;
+import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
 import com.traveladvisor.hotelserver.service.domain.outbox.model.BookingOutbox;
 
 import java.util.List;
@@ -32,13 +32,13 @@ public interface BookingOutboxRepository {
      *
      * @param eventType
      * @param sagaActionId
-     * @param hotelBookingStatus
+     * @param hotelBookingApprovalStatus
      * @param outboxStatus
      * @return
      */
     Optional<BookingOutbox> findByEventTypeAndSagaActionIdAndBookingStatusAndOutboxStatus(String eventType,
                                                                                           UUID sagaActionId,
-                                                                                          HotelBookingStatus hotelBookingStatus,
+                                                                                          HotelBookingApprovalStatus hotelBookingApprovalStatus,
                                                                                           OutboxStatus outboxStatus);
 
     /**

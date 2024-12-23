@@ -1,12 +1,12 @@
 package com.traveladvisor.hotelserver.service.domain.usecase.command;
 
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
-import com.traveladvisor.common.domain.vo.HotelBookingStatus;
+import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
 import com.traveladvisor.hotelserver.service.domain.HotelDomainService;
-import com.traveladvisor.hotelserver.service.domain.dto.command.CompleteHotelBookingCommand;
+import com.traveladvisor.hotelserver.service.domain.dto.command.HotelBookingCommand;
 import com.traveladvisor.hotelserver.service.domain.entity.BookingApproval;
 import com.traveladvisor.hotelserver.service.domain.entity.HotelOffer;
-import com.traveladvisor.hotelserver.service.domain.event.BookingApprovalEvent;
+import com.traveladvisor.hotelserver.service.domain.event.HotelBookingEvent;
 import com.traveladvisor.hotelserver.service.domain.exception.HotelNotFoundException;
 import com.traveladvisor.hotelserver.service.domain.mapper.BookingApprovalMapper;
 import com.traveladvisor.hotelserver.service.domain.port.output.repository.BookingApprovalRepository;
@@ -29,42 +29,43 @@ public class CompleteHotelBookingHelper {
     private final HotelOfferRepository hotelOfferRepository;
     private final BookingApprovalMapper bookingApprovalMapper;
     private final BookingApprovalRepository bookingApprovalRepository;
-    private final PaymentRepository paymentRepository;
-    private final CreditEntryRepository creditEntryRepository;
-    private final CreditHistoryRepository creditHistoryRepository;
     private final BookingOutboxHelper bookingOutboxHelper;
 
     @Transactional
-    public void completeHotelBooking(CompleteHotelBookingCommand completeHotelBookingCommand) {
+    public void completeHotelBooking(HotelBookingCommand hotelBookingCommand) {
         // 이미 처리된 예약은 스킵합니다.
-        if (isOutboxMessageProcessedFor(completeHotelBookingCommand, HotelBookingStatus.HOTEL_BOOKED)) {
-            log.info("이미 처리된 호텔 예약 입니다. Saga Action ID: {}", completeHotelBookingCommand.sagaActionId());
+        if (isOutboxMessageProcessedFor(hotelBookingCommand, HotelBookingApprovalStatus.COMPLETED)) {
+            log.info("이미 예약 처리된 호텔 객실 입니다. Saga Action ID: {}", hotelBookingCommand.sagaActionId());
             return;
         }
 
-        log.info("예약서 BookingID: {}에 대한 호텔 예약 요청 처리를 시작합니다.", completeHotelBookingCommand.bookingId());
+        log.info("예약서 BookingID: {}에 대한 호텔 객실 예약 요청 처리를 시작합니다.", hotelBookingCommand.bookingId());
 
-        // 예약서를 생성합니다.
-        BookingApproval bookingApproval = bookingApprovalMapper.toBookingApproval(completeHotelBookingCommand);
+        // 호텔 객실 예약 승인서를 생성합니다.
+        BookingApproval bookingApproval = bookingApprovalMapper.toBookingApproval(hotelBookingCommand);
 
         // 예약 가능한 호텔 객실 정보를 조회합니다.
-        HotelOffer hotelOffer = queryHotelOffer(Long.parseLong(completeHotelBookingCommand.hotelOfferId()));
+        HotelOffer hotelOffer = findHotelOfferById(Long.parseLong(hotelBookingCommand.hotelOfferId()));
+
+
+        // ※ 프로덕션에서는 Amadeus OTA에 해당 Offer ID 로 객실이 예약 가능한 상태인지 Feign Client로 Sync 호출하여 검증하고 반드시 통과했을 때에만 예약 성공 처리해야 합니다.
+
 
         // hotelOffer가 유효한지 검증하고 예약 승인서 초기화 합니다.
-        BookingApprovalEvent bookingApprovalEvent = hotelDomainService.initializeBookingApproval(
+        HotelBookingEvent hotelBookingEvent = hotelDomainService.initializeBookingApproval(
                 bookingApproval.getBookingId(), hotelOffer, new ArrayList<>());
 
         // 예약 상태를 저장합니다.
-        bookingApprovalRepository.save(bookingApprovalEvent.getBookingApproval());
+        bookingApprovalRepository.save(hotelBookingEvent.getBookingApproval());
 
         // TODO: payment 서비스에 Feign Client로 결제 요청을 보냅니다. 만약 포인트가 존재하는 경우 포인트를 차감하도록 합니다.
 
         /*
-         * 이벤트 전달: Hotel 서비스 ---HotelBookingCompletedEvent---> Booking 서비스
-         * 예약 Saga Action 중 두 번째 단계이므로 Saga Action 상태를 PROCESSING으로, Outbox 상태를 STARTED로 설정해
-         * hotel.booking_outbox 테이블에 HotelBookingCompletedEvent 이벤트와 함께 저장합니다.
+         * 이벤트 전달: Hotel 서비스 ---HotelBookingEvent---> Booking 서비스
+         * 예약 Saga Action 중 두 번째 단계이므로 Saga Action 상태를 PROCESSING으로, Outbox 상태를 STARTED로 설정합니다.
+         * hotel.booking_outbox 테이블에 HotelBookingEvent 이벤트와 함께 저장합니다.
          */
-        saveBookingOutbox(completeHotelBookingCommand, bookingApprovalEvent);
+        saveBookingOutbox(hotelBookingCommand, hotelBookingEvent);
     }
 
     /**
@@ -73,47 +74,47 @@ public class CompleteHotelBookingHelper {
      * @param hotelOfferId
      * @return HotelOffer
      */
-    private HotelOffer queryHotelOffer(Long hotelOfferId) {
+    private HotelOffer findHotelOfferById(Long hotelOfferId) {
         return hotelOfferRepository.findById(hotelOfferId)
                 .orElseThrow(() -> {
                     log.error("해당 호텔 객실이 존재하지 않습니다. hotelOfferId: {}", hotelOfferId);
-                    return new HotelNotFoundException("해당 호텔 객실이 존재하지 않습니다.");
+                    return new HotelNotFoundException("해당 호텔 객실이 존재하지 않습니다. hotelOfferId: " + hotelOfferId);
                 });
     }
 
     @Transactional
-    public void cancelHotelBooking(CompleteHotelBookingCommand completeHotelBookingCommand) {
+    public void cancelHotelBooking(HotelBookingCommand hotelBookingCommand) {
         return;
     }
 
     /**
      * 이미 처리된 Outbox 메시지를 조회합니다.
      *
-     * @param completeHotelBookingCommand
-     * @param hotelBookingStatus
+     * @param hotelBookingCommand
+     * @param hotelBookingApprovalStatus
      * @return
      */
-    private boolean isOutboxMessageProcessedFor(
-            CompleteHotelBookingCommand completeHotelBookingCommand,
-            HotelBookingStatus hotelBookingStatus) {
+    private boolean isOutboxMessageProcessedFor(HotelBookingCommand hotelBookingCommand,
+                                                HotelBookingApprovalStatus hotelBookingApprovalStatus) {
 
         return bookingOutboxHelper.queryCompletedBookingOutboxMessage(
-                UUID.fromString(completeHotelBookingCommand.sagaActionId()),
-                hotelBookingStatus).isPresent();
+                UUID.fromString(hotelBookingCommand.sagaActionId()),
+                hotelBookingApprovalStatus).isPresent();
     }
 
     /**
      * 호텔 예약 상태를 Outbox 메시지함에 저장합니다.
      *
-     * @param completeHotelBookingCommand
-     * @param bookingApprovalEvent
+     * @param hotelBookingCommand
+     * @param hotelBookingEvent
      */
-    private void saveBookingOutbox(CompleteHotelBookingCommand completeHotelBookingCommand, BookingApprovalEvent bookingApprovalEvent) {
+    private void saveBookingOutbox(HotelBookingCommand hotelBookingCommand,
+                                   HotelBookingEvent hotelBookingEvent) {
         bookingOutboxHelper.saveBookingOutbox(
-                bookingApprovalMapper.toHotelBookingCompletedEventPayload(bookingApprovalEvent),
-                bookingApprovalEvent.getBookingApproval().getStatus(),
+                bookingApprovalMapper.toHotelBookingCompletedEventPayload(hotelBookingEvent),
+                hotelBookingEvent.getBookingApproval().getStatus(),
                 OutboxStatus.STARTED,
-                UUID.fromString(completeHotelBookingCommand.sagaActionId()));
+                UUID.fromString(hotelBookingCommand.sagaActionId()));
     }
 
 }

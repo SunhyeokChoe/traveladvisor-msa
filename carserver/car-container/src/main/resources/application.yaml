@@ -16,7 +16,45 @@ info:
     version: "1.0.0"
 
 ## 커스텀 설정
-#carserver:
+kafka:
+  topic:
+    booking:
+      inbound-topic-name: debezium.booking.car_outbox
+      outbound-topic-name: debezium.car.booking_outbox
+  config:
+    common:
+      schema-registry-url: http://localhost:8081
+      schema-registry-url-key: schema.registry.url
+      bootstrap-servers: localhost:19092, localhost:29092, localhost:39092
+      num-of-partitions: 3
+      replication-factor: 3
+    producer:
+      key-serializer-class: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer-class: io.confluent.kafka.serializers.KafkaAvroSerializer
+      compression-type: none
+      acks: all
+      batch-size: 16384
+      batch-size-boost-factor: 100
+      linger-ms: 5
+      request-timeout-ms: 60000
+      retry-count: 5
+    consumer:
+      car-consumer-group-id: car-consumer-booking-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      auto-offset-reset: earliest
+      specific-avro-reader-key: specific.avro.reader
+      specific-avro-reader: true
+      batch-listener: false
+      auto-startup: true
+      concurrency-level: 3
+      session-timeout-ms: 10000
+      heartbeat-interval-ms: 3000
+      max-poll-interval-ms: 300000
+      max-poll-records: 500
+      max-partition-fetch-bytes-default: 1048576
+      max-partition-fetch-bytes-boost-factor: 1
+      poll-timeout-ms: 150
 
 ## 로깅 설정
 # TODO: PROD 헬름 차트에서 로그 레벨을 WARN 으로 설정 후 배포 시 이 프로파일에 덮어씌우도록 해야 합니다.

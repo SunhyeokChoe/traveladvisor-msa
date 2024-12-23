@@ -10,8 +10,9 @@ CREATE SCHEMA hotel;
 ----------------------------------------
 DROP TYPE IF EXISTS hotel.booking_status;
 CREATE TYPE hotel.booking_status AS ENUM (
-    'HOTEL_BOOKED',
-    'HOTEL_CANCELLED');
+    'COMPLETED',
+    'CANCELLED',
+    'FAILED');
 
 ----------------------------------------
 -- Outbox Status ENUM
@@ -241,8 +242,8 @@ CREATE TABLE hotel.booking_outbox
 (
     id             UUID PRIMARY KEY,
     saga_action_id UUID                 NOT NULL,
-    event_type     VARCHAR(20)          NOT NULL, -- 이벤트 타입(HOTEL_BOOKED, HOTEL_CANCELLED)
-    event_payload  JSONB                NOT NULL, -- 이벤트 데이터(JSON)
+    event_type     VARCHAR(20)          NOT NULL,
+    event_payload  JSONB                NOT NULL,
     booking_status hotel.booking_status NOT NULL,
     outbox_status  hotel.outbox_status  NOT NULL DEFAULT 'STARTED',
     created_at     TIMESTAMP WITH TIME ZONE      DEFAULT now() NOT NULL,
@@ -254,39 +255,3 @@ CREATE TABLE hotel.booking_outbox
 CREATE INDEX "hotel_booking_outbox_booking_status"
     ON "hotel".booking_outbox
         (event_type, booking_status);
-
--- DROP
--- MATERIALIZED VIEW IF EXISTS hotel.booking_hotel_m_view;
--- CREATE
--- MATERIALIZED VIEW hotel.booking_hotel_m_view TABLESPACE pg_default
--- AS
--- SELECT r.id        AS hotel_id,
---        r.name      AS hotel_name,
---        p.id        AS product_id,
---        p.name      AS product_name,
---        p.price     AS product_price,
---        p.available AS product_available
--- FROM hotel.hotels r,
---      hotel.products p,
---      hotel.hotel_products rp
--- WHERE r.id = rp.hotel_id
---   AND p.id = rp.product_id WITH DATA;
---
--- refresh
--- materialized VIEW hotel.booking_hotel_m_view;
--- DROP function IF EXISTS hotel.refresh_booking_hotel_m_view;
--- CREATE
--- OR replace function hotel.refresh_booking_hotel_m_view()
---               returns trigger
---               AS '
--- BEGIN
---     refresh materialized VIEW hotel.booking_hotel_m_view;
---     return null;
--- END;
--- '  LANGUAGE plpgsql;
---
--- DROP trigger IF EXISTS refresh_booking_hotel_m_view ON hotel.hotel_products;
--- CREATE trigger refresh_booking_hotel_m_view
---     after INSERT OR UPDATE OR DELETE OR truncate
--- ON hotel.hotel_products FOR each statement
---     EXECUTE PROCEDURE hotel.refresh_booking_hotel_m_view();

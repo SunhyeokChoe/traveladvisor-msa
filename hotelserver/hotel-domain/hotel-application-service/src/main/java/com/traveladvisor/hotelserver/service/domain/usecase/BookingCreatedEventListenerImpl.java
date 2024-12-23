@@ -1,6 +1,6 @@
 package com.traveladvisor.hotelserver.service.domain.usecase;
 
-import com.traveladvisor.hotelserver.service.domain.dto.command.CompleteHotelBookingCommand;
+import com.traveladvisor.hotelserver.service.domain.dto.command.HotelBookingCommand;
 import com.traveladvisor.hotelserver.service.domain.port.input.event.BookingCreatedEventListener;
 import com.traveladvisor.hotelserver.service.domain.usecase.command.CompleteHotelBookingHelper;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +15,13 @@ public class BookingCreatedEventListenerImpl implements BookingCreatedEventListe
     private final CompleteHotelBookingHelper completeHotelBookingHelper;
 
     @Override
-    public void completeHotelBooking(CompleteHotelBookingCommand completeHotelBookingCommand) {
-        completeHotelBookingHelper.completeHotelBooking(completeHotelBookingCommand);
+    public void processHotelBooking(HotelBookingCommand hotelBookingCommand) {
+        completeHotelBookingHelper.completeHotelBooking(hotelBookingCommand);
     }
 
     @Override
-    public void cancelHotelBooking(CompleteHotelBookingCommand completeHotelBookingCommand) {
-        completeHotelBookingHelper.cancelHotelBooking(completeHotelBookingCommand);
+    public void compensateHotelBooking(HotelBookingCommand hotelBookingCommand) {
+        completeHotelBookingHelper.cancelHotelBooking(hotelBookingCommand);
     }
 
 }

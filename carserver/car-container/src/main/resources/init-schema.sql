@@ -10,8 +10,9 @@ CREATE SCHEMA IF NOT EXISTS car;
 ----------------------------------------
 DROP TYPE IF EXISTS car.booking_status;
 CREATE TYPE car.booking_status AS ENUM (
-    'CAR_BOOKED',
-    'CAR_CANCELLED');
+    'COMPLETED',
+    'CANCELLED',
+    'FAILED');
 
 ----------------------------------------
 -- Outbox Status ENUM
@@ -75,7 +76,7 @@ CREATE TABLE car.booking_outbox
 (
     id             UUID PRIMARY KEY,
     saga_action_id UUID               NOT NULL,
-    event_type     VARCHAR(20)        NOT NULL, -- 이벤트 타입(CAR_BOOKED, CAR_CANCELLED)
+    event_type     VARCHAR(20)        NOT NULL,
     event_payload  JSONB              NOT NULL, -- 이벤트 데이터(JSON)
     booking_status car.booking_status NOT NULL,
     outbox_status  car.outbox_status  NOT NULL DEFAULT 'STARTED',
@@ -88,43 +89,3 @@ CREATE TABLE car.booking_outbox
 CREATE INDEX car_booking_outbox_booking_status
     ON car.booking_outbox
         (event_type, booking_status);
-
--- DROP
--- MATERIALIZED VIEW IF EXISTS car.reservation_car_m_view;
--- CREATE
--- MATERIALIZED VIEW car.reservation_car_m_view TABLESPACE pg_default
--- AS
--- SELECT r.id        AS car_offers_id,
---        r.name      AS car_name,
---        p.id        AS product_id,
---        p.name      AS product_name,
---        p.price     AS product_price,
---        p.available AS product_available
--- FROM car.car_offers r,
---      car.products p,
---      car.car_products rp
--- WHERE r.id = rp.car_offers_id
---   AND p.id = rp.product_id WITH DATA;
---
--- refresh
--- materialized VIEW car.reservation_car_m_view;
--- DROP function IF EXISTS car.refresh_reservation_car_m_view;
--- CREATE
--- OR replace function car.refresh_reservation_car_m_view()
---               returns trigger
---               AS '
--- BEGIN
---     refresh materialized VIEW car.reservation_car_m_view;
---     return null;
--- END;
--- '  LANGUAGE plpgsql;
---
--- DROP trigger IF EXISTS refresh_reservation_car_m_view ON car.car_products;
---
--- CREATE trigger refresh_reservation_car_m_view
---     after INSERT OR
--- UPDATE OR
--- DELETE
--- OR truncate
--- ON car.car_products FOR each statement
---     EXECUTE PROCEDURE car.refresh_reservation_car_m_view();

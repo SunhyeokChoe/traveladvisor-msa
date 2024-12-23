@@ -14,12 +14,12 @@
     <dependencies>
         <dependency>
             <groupId>com.traveladvisor</groupId>
-            <artifactId>common-message</artifactId>
+            <artifactId>hotel-application-service</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.traveladvisor</groupId>
-            <artifactId>hotel-application-service</artifactId>
+            <artifactId>common-message</artifactId>
         </dependency>
 
         <dependency>

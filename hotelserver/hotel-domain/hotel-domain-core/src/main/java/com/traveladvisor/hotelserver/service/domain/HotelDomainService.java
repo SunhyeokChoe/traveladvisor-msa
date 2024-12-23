@@ -2,7 +2,7 @@ package com.traveladvisor.hotelserver.service.domain;
 
 import com.traveladvisor.common.domain.vo.BookingId;
 import com.traveladvisor.hotelserver.service.domain.entity.HotelOffer;
-import com.traveladvisor.hotelserver.service.domain.event.BookingApprovalEvent;
+import com.traveladvisor.hotelserver.service.domain.event.HotelBookingEvent;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public interface HotelDomainService {
      * @param failureMessages
      * @return
      */
-    BookingApprovalEvent initializeBookingApproval(
+    HotelBookingEvent initializeBookingApproval(
             BookingId bookingId, HotelOffer hotelOffer, List<String> failureMessages);
 
 }
