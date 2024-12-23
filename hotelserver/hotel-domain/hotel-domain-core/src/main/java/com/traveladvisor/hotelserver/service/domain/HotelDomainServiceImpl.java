@@ -3,8 +3,8 @@ package com.traveladvisor.hotelserver.service.domain;
 import com.traveladvisor.common.domain.vo.BookingId;
 import com.traveladvisor.common.domain.vo.HotelBookingStatus;
 import com.traveladvisor.hotelserver.service.domain.entity.HotelOffer;
-import com.traveladvisor.hotelserver.service.domain.event.BookingApprovalEvent;
-import com.traveladvisor.hotelserver.service.domain.event.HotelBookingApprovedEvent;
+import com.traveladvisor.hotelserver.service.domain.event.HotelBookingEvent;
+import com.traveladvisor.hotelserver.service.domain.event.HotelBookingCompletedEvent;
 import com.traveladvisor.hotelserver.service.domain.event.HotelBookingRejectedEvent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,8 +18,9 @@ import static com.traveladvisor.common.domain.constant.common.DomainConstants.UT
 public class HotelDomainServiceImpl implements HotelDomainService {
 
     @Override
-    public BookingApprovalEvent initializeBookingApproval(
-            BookingId bookingId, HotelOffer hotelOffer, List<String> failureMessages) {
+    public HotelBookingEvent initializeBookingApproval(BookingId bookingId,
+                                                       HotelOffer hotelOffer,
+                                                       List<String> failureMessages) {
         // HotelOffer가 유효한지 검증합니다.
         hotelOffer.validateHotelOffer(failureMessages);
 
@@ -28,8 +29,8 @@ public class HotelDomainServiceImpl implements HotelDomainService {
             log.info("호텔 예약에 실패했습니다. BookingID: {}", bookingId.getValue());
 
             // HotelOffer Aggregate Root 를 통해 BookingApproval을 초기화 합니다.
-            // DDD 관점에서 HotelOffer가 BookingApproval 엔터티를 다루는 주체가 되도록 설계했기 때문에 하위 엔터티를 관리할 의무를 갖습니다.
-            hotelOffer.initializeBookingApproval(bookingId, HotelBookingStatus.HOTEL_FAILED);
+            // DDD 관점에서 HotelOffer가 BookingApproval 엔터티를 다루는 주체가 되도록 설계했기 때문에 하위 엔터티를 관리할 책임을 갖습니다.
+            hotelOffer.initializeBookingApproval(bookingId, HotelBookingStatus.HOTEL_REJECTED);
 
             return new HotelBookingRejectedEvent(
                     hotelOffer.getBookingApproval(),
@@ -42,7 +43,7 @@ public class HotelDomainServiceImpl implements HotelDomainService {
 
         hotelOffer.initializeBookingApproval(bookingId, HotelBookingStatus.HOTEL_BOOKED);
 
-        return new HotelBookingApprovedEvent(
+        return new HotelBookingCompletedEvent(
                 hotelOffer.getBookingApproval(),
                 failureMessages,
                 ZonedDateTime.now(ZoneId.of(UTC)));

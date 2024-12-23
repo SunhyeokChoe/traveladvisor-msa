@@ -8,9 +8,9 @@ import java.util.List;
 /**
  * 호텔 예약 완료 이벤트 입니다.
  */
-public class HotelBookingApprovedEvent extends BookingApprovalEvent {
+public class HotelBookingCompletedEvent extends HotelBookingEvent {
 
-    public HotelBookingApprovedEvent(BookingApproval bookingApproval, List<String> failureMessages, ZonedDateTime createdAt) {
+    public HotelBookingCompletedEvent(BookingApproval bookingApproval, List<String> failureMessages, ZonedDateTime createdAt) {
         super(bookingApproval, failureMessages, createdAt);
     }
 

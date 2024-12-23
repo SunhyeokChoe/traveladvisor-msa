@@ -6,15 +6,15 @@ import com.traveladvisor.hotelserver.service.domain.entity.BookingApproval;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public abstract class BookingApprovalEvent implements DomainEvent<BookingApproval> {
+public abstract class HotelBookingEvent implements DomainEvent<BookingApproval> {
 
     private final BookingApproval bookingApproval;
     private final List<String> failureMessages;
     private final ZonedDateTime createdAt;
 
-    protected BookingApprovalEvent(BookingApproval bookingApproval,
-                                   List<String> failureMessages,
-                                   ZonedDateTime createdAt) {
+    protected HotelBookingEvent(BookingApproval bookingApproval,
+                                List<String> failureMessages,
+                                ZonedDateTime createdAt) {
         this.bookingApproval = bookingApproval;
         this.failureMessages = failureMessages;
         this.createdAt = createdAt;

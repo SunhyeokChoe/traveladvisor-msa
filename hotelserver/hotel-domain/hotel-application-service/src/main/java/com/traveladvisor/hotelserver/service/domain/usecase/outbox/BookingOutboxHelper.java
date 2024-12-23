@@ -2,8 +2,9 @@ package com.traveladvisor.hotelserver.service.domain.usecase.outbox;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.traveladvisor.common.domain.event.hotel.HotelBookingApprovedEventPayload;
+import com.traveladvisor.common.domain.event.hotel.HotelBookingCompletedEventPayload;
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
+import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
 import com.traveladvisor.common.domain.vo.HotelBookingStatus;
 import com.traveladvisor.hotelserver.service.domain.exception.HotelApplicationServiceException;
 import com.traveladvisor.hotelserver.service.domain.outbox.model.BookingOutbox;
@@ -32,36 +33,36 @@ public class BookingOutboxHelper {
 
     public Optional<BookingOutbox> queryCompletedBookingOutboxMessage(
             UUID sagaActionId,
-            HotelBookingStatus hotelBookingStatus) {
+            HotelBookingApprovalStatus hotelBookingApprovalStatus) {
 
         return bookingOutboxRepository.findByEventTypeAndSagaActionIdAndBookingStatusAndOutboxStatus(
                 BOOKING_SAGA_ACTION_NAME,
                 sagaActionId,
-                hotelBookingStatus,
+                hotelBookingApprovalStatus,
                 OutboxStatus.COMPLETED);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void saveBookingOutbox(
-            HotelBookingApprovedEventPayload hotelBookingApprovedEventPayload,
+            HotelBookingCompletedEventPayload hotelBookingCompletedEventPayload,
             HotelBookingStatus hotelBookingStatus,
             OutboxStatus outboxStatus,
             UUID sagaId) {
         save(BookingOutbox.builder()
                 .id(UUID.randomUUID())
                 .sagaActionId(sagaId)
-                .createdAt(hotelBookingApprovedEventPayload.getCreatedAt())
+                .createdAt(hotelBookingCompletedEventPayload.getCreatedAt())
                 .completedAt(ZonedDateTime.now(ZoneId.of(UTC)))
                 .eventType(BOOKING_SAGA_ACTION_NAME)
-                .eventPayload(serialize(hotelBookingApprovedEventPayload))
+                .eventPayload(serialize(hotelBookingCompletedEventPayload))
                 .bookingStatus(hotelBookingStatus)
                 .outboxStatus(outboxStatus)
                 .build());
     }
 
-    private String serialize(HotelBookingApprovedEventPayload hotelBookingApprovedEventPayload) {
+    private String serialize(HotelBookingCompletedEventPayload hotelBookingCompletedEventPayload) {
         try {
-            return objectMapper.writeValueAsString(hotelBookingApprovedEventPayload);
+            return objectMapper.writeValueAsString(hotelBookingCompletedEventPayload);
         } catch (JsonProcessingException ex) {
             log.error("hotelBookingApprovedEventPayload 직렬화에 실패했습니다.", ex);
             throw new HotelApplicationServiceException("hotelBookingApprovedEventPayload 직렬화에 실패했습니다.", ex);

@@ -2,6 +2,7 @@ package com.traveladvisor.hotelserver.service.message.inbound.kafka;
 
 import com.traveladvisor.common.domain.event.booking.BookingCreatedEventPayload;
 import com.traveladvisor.common.domain.vo.BookingStatus;
+import com.traveladvisor.common.domain.vo.HotelBookingStatus;
 import com.traveladvisor.common.kafka.consumer.KafkaSingleMessageConsumer;
 import com.traveladvisor.common.kafka.producer.KafkaMessageHelper;
 import com.traveladvisor.common.message.constant.DebeziumOperator;
@@ -48,29 +49,30 @@ public class BookingCreatedEventKafkaListener implements KafkaSingleMessageConsu
         log.info("[IN-BOUND] 수신 메시지: {}, 키: {}, 파티션: {}, 오프셋: {}", message, key, partition, offset);
 
         // 카프카 메시지로부터 Avro 메시지와 EventPayload를 추출합니다.
-        Value hotelBookingRequestAvroModel = message.getAfter();
-        BookingCreatedEventPayload bookingCreatedEventPayload = kafkaMessageHelper.getOrderEventPayload(
-                hotelBookingRequestAvroModel.getEventPayload(), BookingCreatedEventPayload.class);
+        Value bookingCreatedEventAvroModel = message.getAfter();
+        BookingCreatedEventPayload bookingCreatedEventPayload = kafkaMessageHelper.getEventPayload(
+                bookingCreatedEventAvroModel.getEventPayload(), BookingCreatedEventPayload.class);
 
         try {
-
-            // Booking 상태가 PENDING 인 경우 호텔 예약을 처리합니다.
-            if (BookingStatus.PENDING.name().equals(bookingCreatedEventPayload.getHotelBookingStatus())) {
-                bookingCreatedEventListener.completeHotelBooking(hotelMessageMapper
-                        .toCompleteHotelBookingCommand(bookingCreatedEventPayload, hotelBookingRequestAvroModel));
+            switch (HotelBookingStatus.valueOf(bookingCreatedEventPayload.getHotelBookingStatus())) {
+                // Booking 상태가 PENDING 인 경우 호텔 예약을 처리합니다.
+                case PENDING -> {
+                    bookingCreatedEventListener.processHotelBooking(hotelMessageMapper
+                            .toHotelBookingCommand(bookingCreatedEventPayload, bookingCreatedEventAvroModel));
+                }
+                // Booking 상태가 CANCELLED 인 경우 호텔 예약을 취소 처리합니다.
+                case CANCELLED -> {
+                    bookingCreatedEventListener.compensateHotelBooking(hotelMessageMapper
+                            .toHotelBookingCommand(bookingCreatedEventPayload, bookingCreatedEventAvroModel));
+                }
+                default -> log.warn("알 수 없는 호텔 예약 상태입니다. BookingId: {}", bookingCreatedEventPayload.getBookingId());
             }
-            // TODO: Booking 상태가 CANCELLED 인 경우 호텔 예약을 취소 처리합니다.
-//            else if (BookingStatus.CANCELLED.name().equals(bookingCreatedEventPayload.getHotelBookingStatus())) {
-//                bookingCreatedEventListener.cancelHotelBooking(hotelMessageMapper
-//                        .to(bookingCreatedEventPayload, hotelBookingRequestAvroModel));
-//            }
-
         } catch (DataAccessException ex) {
             SQLException sqlException = (SQLException) ex.getRootCause();
 
             if (sqlException != null && sqlException.getSQLState() != null &&
                     PSQLState.UNIQUE_VIOLATION.getState().equals(sqlException.getSQLState())) {
-                // NO-OP: 유니크 인덱스 제약 조건 위반 예외 발생의 경우 이미 다른 Consumer에서 처리 한 요청이기에 로그만 남깁니다.
+                // 유니크 인덱스 제약 조건 위반 예외 발생의 경우 이미 다른 Consumer에서 처리 한 요청이기에 로그만 남깁니다.
                 log.error("[PSQLState: {}] 유니크 제약 조건 예외가 발생했습니다. 이미 처리된 예약서 ID: {}",
                         sqlException.getSQLState(), bookingCreatedEventPayload.getBookingId());
             } else {
@@ -79,7 +81,7 @@ public class BookingCreatedEventKafkaListener implements KafkaSingleMessageConsu
                         + ex.getMessage(), ex);
             }
         } catch (HotelNotFoundException ex) {
-            // NO-OP: 이 @KafkaListener는 예약서 정보가 없으면 메시지 처리를 다시 시도하지 않도록 합니다.
+            // 이 @KafkaListener는 예약서 정보가 없으면 메시지 처리를 다시 시도하지 않도록 합니다.
             log.error("예약서를 찾지 못했습니다. BookingId: {}", bookingCreatedEventPayload.getBookingId());
         }
 

@@ -1,12 +1,12 @@
 package com.traveladvisor.hotelserver.service.domain.mapper;
 
-import com.traveladvisor.common.domain.event.hotel.HotelBookingApprovedEventPayload;
+import com.traveladvisor.common.domain.event.hotel.HotelBookingCompletedEventPayload;
 import com.traveladvisor.common.domain.vo.BookingApprovalId;
 import com.traveladvisor.common.domain.vo.BookingId;
 import com.traveladvisor.common.domain.vo.HotelOfferId;
-import com.traveladvisor.hotelserver.service.domain.dto.command.CompleteHotelBookingCommand;
+import com.traveladvisor.hotelserver.service.domain.dto.command.HotelBookingCommand;
 import com.traveladvisor.hotelserver.service.domain.entity.BookingApproval;
-import com.traveladvisor.hotelserver.service.domain.event.BookingApprovalEvent;
+import com.traveladvisor.hotelserver.service.domain.event.HotelBookingEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -17,30 +17,30 @@ public class BookingApprovalMapper {
     /**
      * CompleteHotelBookingCommand -> BookingApproval
      *
-     * @param completeHotelBookingCommand
+     * @param hotelBookingCommand
      * @return BookingApproval
      */
-    public BookingApproval toBookingApproval(CompleteHotelBookingCommand completeHotelBookingCommand) {
+    public BookingApproval toBookingApproval(HotelBookingCommand hotelBookingCommand) {
         return BookingApproval.builder()
-                .bookingApprovalId(new BookingApprovalId(UUID.fromString(completeHotelBookingCommand.id())))
-                .bookingId(new BookingId(UUID.fromString(completeHotelBookingCommand.bookingId())))
-                .hotelOffersId(new HotelOfferId(Long.parseLong(completeHotelBookingCommand.hotelOfferId())))
-                .status(completeHotelBookingCommand.bookingStatus())
+                .bookingApprovalId(new BookingApprovalId(UUID.fromString(hotelBookingCommand.id())))
+                .bookingId(new BookingId(UUID.fromString(hotelBookingCommand.bookingId())))
+                .hotelOffersId(new HotelOfferId(Long.parseLong(hotelBookingCommand.hotelOfferId())))
+                .status(hotelBookingCommand.bookingStatus())
                 .build();
     }
 
     /**
      * BookingApprovalEvent -> HotelBookingApprovedEventPayload
      *
-     * @param bookingApprovalEvent
+     * @param hotelBookingEvent
      * @return HotelBookingApprovedEventPayload
      */
-    public HotelBookingApprovedEventPayload toHotelBookingCompletedEventPayload(BookingApprovalEvent bookingApprovalEvent) {
-        return HotelBookingApprovedEventPayload.builder()
-                .bookingId(bookingApprovalEvent.getBookingApproval().getBookingId().toString())
-                .hotelOfferId(bookingApprovalEvent.getBookingApproval().getHotelOffersId().toString())
-                .createdAt(bookingApprovalEvent.getCreatedAt())
-                .hotelBookingStatus(bookingApprovalEvent.getBookingApproval().getStatus().toString())
+    public HotelBookingCompletedEventPayload toHotelBookingCompletedEventPayload(HotelBookingEvent hotelBookingEvent) {
+        return HotelBookingCompletedEventPayload.builder()
+                .bookingId(hotelBookingEvent.getBookingApproval().getBookingId().toString())
+                .hotelOfferId(hotelBookingEvent.getBookingApproval().getHotelOffersId().toString())
+                .createdAt(hotelBookingEvent.getCreatedAt())
+                .hotelBookingApprovalStatus(hotelBookingEvent.getBookingApproval().getStatus().toString())
                 .build();
     }
 

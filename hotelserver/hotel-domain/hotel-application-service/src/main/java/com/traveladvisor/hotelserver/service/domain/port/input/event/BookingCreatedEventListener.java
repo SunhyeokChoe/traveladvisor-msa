@@ -1,21 +1,21 @@
 package com.traveladvisor.hotelserver.service.domain.port.input.event;
 
-import com.traveladvisor.hotelserver.service.domain.dto.command.CompleteHotelBookingCommand;
+import com.traveladvisor.hotelserver.service.domain.dto.command.HotelBookingCommand;
 
 public interface BookingCreatedEventListener {
 
     /**
      * 호텔 예약을 진행합니다.
      *
-     * @param completeHotelBookingCommand
+     * @param hotelBookingCommand
      */
-    void completeHotelBooking(CompleteHotelBookingCommand completeHotelBookingCommand);
+    void processHotelBooking(HotelBookingCommand hotelBookingCommand);
 
     /**
      * 완료했던 호텔 예약을 취소합니다.
      *
-     * @param completeHotelBookingCommand
+     * @param hotelBookingCommand
      */
-    void cancelHotelBooking(CompleteHotelBookingCommand completeHotelBookingCommand);
+    void compensateHotelBooking(HotelBookingCommand hotelBookingCommand);
 
 }
