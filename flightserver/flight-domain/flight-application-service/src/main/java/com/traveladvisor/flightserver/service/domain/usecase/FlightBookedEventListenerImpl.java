@@ -12,16 +12,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class FlightBookedEventListenerImpl implements FlightBookedEventListener {
 
-    private final CompleteFlightBookingHelper completeHotelBooking;
+    private final CompleteFlightBookingHelper completeFlightBookingHelper;
 
     @Override
     public void processFlightBooking(FlightBookingCommand flightBookingCommand) {
-        completeHotelBooking.completeFlightBooking(flightBookingCommand);
+        completeFlightBookingHelper.completeFlightBooking(flightBookingCommand);
     }
 
     @Override
     public void compensateFlightBooking(FlightBookingCommand flightBookingCommand) {
-        completeHotelBooking.cancelFlightBooking(flightBookingCommand);
+        completeFlightBookingHelper.cancelFlightBooking(flightBookingCommand);
     }
 
 }

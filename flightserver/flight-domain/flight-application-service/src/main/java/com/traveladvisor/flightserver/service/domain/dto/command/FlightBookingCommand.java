@@ -1,7 +1,6 @@
 package com.traveladvisor.flightserver.service.domain.dto.command;
 
 import com.traveladvisor.common.domain.vo.FlightBookingApprovalStatus;
-import com.traveladvisor.common.domain.vo.FlightBookingStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
