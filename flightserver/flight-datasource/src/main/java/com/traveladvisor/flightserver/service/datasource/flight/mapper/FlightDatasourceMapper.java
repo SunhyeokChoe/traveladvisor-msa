@@ -3,7 +3,7 @@ package com.traveladvisor.flightserver.service.datasource.flight.mapper;
 import com.traveladvisor.common.domain.vo.BookingApprovalId;
 import com.traveladvisor.common.domain.vo.BookingId;
 import com.traveladvisor.common.domain.vo.FlightOfferId;
-import com.traveladvisor.flightserver.service.datasource.entity.BookingApprovalEntity;
+import com.traveladvisor.flightserver.service.datasource.flight.entity.BookingApprovalEntity;
 import com.traveladvisor.flightserver.service.domain.entity.BookingApproval;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ public class FlightDatasourceMapper {
         return BookingApproval.builder()
                 .bookingApprovalId(new BookingApprovalId(bookingApprovalEntity.getId()))
                 .bookingId(new BookingId(bookingApprovalEntity.getBookingId()))
-                .flightOfferId(new FlightOfferId(bookingApprovalEntity.getHotelOfferId()))
+                .flightOfferId(new FlightOfferId(bookingApprovalEntity.getFlightOfferId()))
                 .status(bookingApprovalEntity.getStatus())
                 .build();
     }
@@ -35,7 +35,7 @@ public class FlightDatasourceMapper {
         return BookingApprovalEntity.builder()
                 .id(bookingApproval.getId().getValue())
                 .bookingId(bookingApproval.getBookingId().getValue())
-                .hotelOfferId(bookingApproval.getFlightOfferId().getValue())
+                .flightOfferId(bookingApproval.getFlightOfferId().getValue())
                 .status(bookingApproval.getStatus())
                 .build();
     }

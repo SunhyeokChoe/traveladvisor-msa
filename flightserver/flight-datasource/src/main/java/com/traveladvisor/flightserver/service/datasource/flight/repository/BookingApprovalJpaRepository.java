@@ -1,6 +1,6 @@
 package com.traveladvisor.flightserver.service.datasource.flight.repository;
 
-import com.traveladvisor.flightserver.service.datasource.entity.BookingApprovalEntity;
+import com.traveladvisor.flightserver.service.datasource.flight.entity.BookingApprovalEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

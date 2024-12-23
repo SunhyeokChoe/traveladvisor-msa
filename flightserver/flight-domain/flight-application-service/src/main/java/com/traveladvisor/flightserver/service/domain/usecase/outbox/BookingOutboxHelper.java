@@ -30,7 +30,7 @@ public class BookingOutboxHelper {
     private final BookingOutboxRepository bookingOutboxRepository;
     private final ObjectMapper objectMapper;
 
-    public Optional<BookingOutbox> queryCompletedBookingOutboxMessage(
+    public Optional<BookingOutbox> findCompletedBookingOutboxMessage(
             UUID sagaActionId,
             FlightBookingApprovalStatus flightBookingApprovalStatus) {
 
@@ -63,7 +63,7 @@ public class BookingOutboxHelper {
         try {
             return objectMapper.writeValueAsString(flightBookingCompletedEventPayload);
         } catch (JsonProcessingException ex) {
-            log.error("hotelBookingApprovedEventPayload 직렬화에 실패했습니다.", ex);
+            log.error("flightBookingCompletedEventPayload 직렬화에 실패했습니다.", ex);
             throw new FlightApplicationServiceException("flightBookingCompletedEventPayload 직렬화에 실패했습니다.", ex);
         }
     }

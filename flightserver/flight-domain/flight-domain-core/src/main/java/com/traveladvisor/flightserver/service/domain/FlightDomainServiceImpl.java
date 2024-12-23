@@ -30,7 +30,7 @@ public class FlightDomainServiceImpl implements FlightDomainService {
             log.info("항공권 예약에 실패했습니다. BookingID: {}", bookingId.getValue());
 
             // FlightOffer Aggregate Root 를 통해 BookingApproval을 초기화 합니다.
-            // DDD 관점에서 FotelOffer가 BookingApproval 엔터티를 다루는 주체가 되도록 설계했기 때문에 하위 엔터티를 관리할 책임을 갖습니다.
+            // DDD 관점에서 FlightOffer가 BookingApproval 엔터티를 다루는 주체가 되도록 설계했기 때문에 하위 엔터티를 관리할 책임을 갖습니다.
             flightOffer.initializeBookingApproval(bookingId, FlightBookingApprovalStatus.FAILED);
 
             return new FlightBookingRejectedEvent(

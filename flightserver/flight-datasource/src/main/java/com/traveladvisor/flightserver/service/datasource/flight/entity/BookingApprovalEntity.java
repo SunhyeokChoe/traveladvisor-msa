@@ -1,4 +1,4 @@
-package com.traveladvisor.flightserver.service.datasource.entity;
+package com.traveladvisor.flightserver.service.datasource.flight.entity;
 
 import com.traveladvisor.common.domain.vo.FlightBookingApprovalStatus;
 import jakarta.persistence.*;
@@ -17,7 +17,7 @@ public class BookingApprovalEntity {
     private UUID id;
 
     @Column(name = "hotel_offers_id")
-    private Long hotelOfferId;
+    private Long flightOfferId;
 
     @Column(name = "booking_id")
     private UUID bookingId;

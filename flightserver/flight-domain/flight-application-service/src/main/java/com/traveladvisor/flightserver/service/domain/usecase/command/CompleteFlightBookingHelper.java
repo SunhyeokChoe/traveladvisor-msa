@@ -40,7 +40,7 @@ public class CompleteFlightBookingHelper {
             return;
         }
 
-        log.info("예약서 BookingID: {}에 대한 항공권 예약 요청 처리를 시작합니다.", flightBookingCommand.bookingId());
+        log.info("예약서 BookingID: {}에 대한 항공권 예약 처리를 시작합니다.", flightBookingCommand.bookingId());
 
         // 항공권 예약 승인서를 생성합니다.
         BookingApproval bookingApproval = bookingApprovalMapper.toBookingApproval(flightBookingCommand);
@@ -77,7 +77,7 @@ public class CompleteFlightBookingHelper {
         return flightOfferRepository.findById(flightOfferId)
                 .orElseThrow(() -> {
                     log.error("해당 항공권이 존재하지 않습니다. flightOfferId: {}", flightOfferId);
-                    return new FlightNotFoundException("해당 항공권 존재하지 않습니다. flightOfferId: " + flightOfferId);
+                    return new FlightNotFoundException("해당 항공권이 존재하지 않습니다. flightOfferId: " + flightOfferId);
                 });
     }
 
@@ -95,7 +95,7 @@ public class CompleteFlightBookingHelper {
     private boolean isOutboxMessageProcessedFor(FlightBookingCommand flightBookingCommand,
                                                 FlightBookingApprovalStatus flightBookingApprovalStatus) {
 
-        return bookingOutboxHelper.queryCompletedBookingOutboxMessage(
+        return bookingOutboxHelper.findCompletedBookingOutboxMessage(
                 UUID.fromString(flightBookingCommand.sagaActionId()),
                 flightBookingApprovalStatus).isPresent();
     }

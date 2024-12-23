@@ -30,7 +30,7 @@ public class BookingApprovalMapper {
     }
 
     /**
-     * BookingApprovalEvent -> FlightBookingCompletedEventPayload
+     * FlightBookingEvent -> FlightBookingCompletedEventPayload
      *
      * @param flightBookingEvent
      * @return FlightBookingCompletedEventPayload

@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
- * Hotel 서비스에서 Booking 서비스로 메시지를 보내기 위한 outbox 테이블입니다.
+ * Flight 서비스에서 Booking 서비스로 메시지를 보내기 위한 outbox 테이블입니다.
  */
 @Getter @Builder
 @AllArgsConstructor
