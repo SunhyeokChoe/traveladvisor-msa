@@ -61,8 +61,7 @@ public class CompleteCarBookingHelper {
 
         /*
          * 이벤트 전달: Car 서비스 ---CarBookingEvent---> Booking 서비스
-         * 예약 Saga Action 중 네 번째 단계이므로 Saga Action 상태를 PROCESSING으로, Outbox 상태를 STARTED로 설정합니다.
-         * flight.booking_outbox 테이블에 CarBookingEvent 이벤트와 함께 저장합니다.
+         * Outbox 상태를 STARTED로 설정하고 flight.booking_outbox 테이블에 CarBookingEvent 이벤트와 함께 저장합니다.
          */
         saveBookingOutbox(carBookingCommand, carBookingEvent);
     }
