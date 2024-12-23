@@ -1,6 +1,7 @@
 package com.traveladvisor.hotelserver.service.domain;
 
 import com.traveladvisor.common.domain.vo.BookingId;
+import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
 import com.traveladvisor.common.domain.vo.HotelBookingStatus;
 import com.traveladvisor.hotelserver.service.domain.entity.HotelOffer;
 import com.traveladvisor.hotelserver.service.domain.event.HotelBookingEvent;
@@ -30,7 +31,7 @@ public class HotelDomainServiceImpl implements HotelDomainService {
 
             // HotelOffer Aggregate Root 를 통해 BookingApproval을 초기화 합니다.
             // DDD 관점에서 HotelOffer가 BookingApproval 엔터티를 다루는 주체가 되도록 설계했기 때문에 하위 엔터티를 관리할 책임을 갖습니다.
-            hotelOffer.initializeBookingApproval(bookingId, HotelBookingStatus.HOTEL_REJECTED);
+            hotelOffer.initializeBookingApproval(bookingId, HotelBookingApprovalStatus.FAILED);
 
             return new HotelBookingRejectedEvent(
                     hotelOffer.getBookingApproval(),
@@ -41,7 +42,7 @@ public class HotelDomainServiceImpl implements HotelDomainService {
         // 검증에 성공한 경우 이를 이벤트에 기록합니다.
         log.info("호텔 예약을 정상적으로 마쳤습니다. BookingID: {}", bookingId.getValue());
 
-        hotelOffer.initializeBookingApproval(bookingId, HotelBookingStatus.HOTEL_BOOKED);
+        hotelOffer.initializeBookingApproval(bookingId, HotelBookingApprovalStatus.COMPLETED);
 
         return new HotelBookingCompletedEvent(
                 hotelOffer.getBookingApproval(),
