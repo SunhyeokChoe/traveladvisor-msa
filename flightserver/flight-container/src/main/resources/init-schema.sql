@@ -10,8 +10,9 @@ CREATE SCHEMA flight;
 ----------------------------------------
 DROP TYPE IF EXISTS flight.booking_status;
 CREATE TYPE flight.booking_status AS ENUM (
-    'FLIGHT_BOOKED',
-    'FLIGHT_CANCELLED');
+    'COMPLETED',
+    'CANCELLED',
+    'FAILED');
 
 ----------------------------------------
 -- Outbox Status ENUM
@@ -91,8 +92,8 @@ CREATE TABLE flight.booking_outbox
 (
     id             UUID PRIMARY KEY,
     saga_action_id UUID                  NOT NULL,
-    event_type     VARCHAR(20)           NOT NULL, -- 이벤트 타입(FLIGHT_BOOKED, FLIGHT_CANCELLED)
-    event_payload  JSONB                 NOT NULL, -- 이벤트 데이터(JSON)
+    event_type     VARCHAR(20)           NOT NULL,
+    event_payload  JSONB                 NOT NULL,
     booking_status flight.booking_status NOT NULL,
     outbox_status  flight.outbox_status  NOT NULL DEFAULT 'STARTED',
     created_at     TIMESTAMP WITH TIME ZONE       DEFAULT now() NOT NULL,
@@ -104,43 +105,3 @@ CREATE TABLE flight.booking_outbox
 CREATE INDEX flight_booking_outbox_booking_status
     ON flight.booking_outbox
         (event_type, booking_status);
-
--- DROP
--- MATERIALIZED VIEW IF EXISTS flight.booking_flight_m_view;
--- CREATE
--- MATERIALIZED VIEW flight.booking_flight_m_view TABLESPACE pg_default
--- AS
--- SELECT r.id        AS flight_offers_id,
---        r.name      AS flight_name,
---        p.id        AS product_id,
---        p.name      AS product_name,
---        p.price     AS product_price,
---        p.available AS product_available
--- FROM flight.flight_offers r,
---      flight.products p,
---      flight.flight_products rp
--- WHERE r.id = rp.flight_offers_id
---   AND p.id = rp.product_id WITH DATA;
---
--- refresh
--- materialized VIEW flight.booking_flight_m_view;
--- DROP function IF EXISTS flight.refresh_booking_flight_m_view;
--- CREATE
--- OR replace function flight.refresh_booking_flight_m_view()
---               returns trigger
---               AS '
--- BEGIN
---     refresh materialized VIEW flight.booking_flight_m_view;
---     return null;
--- END;
--- '  LANGUAGE plpgsql;
---
--- DROP trigger IF EXISTS refresh_booking_flight_m_view ON flight.flight_products;
---
--- CREATE trigger refresh_booking_flight_m_view
---     after INSERT OR
--- UPDATE OR
--- DELETE
--- OR truncate
--- ON flight.flight_products FOR each statement
---     EXECUTE PROCEDURE flight.refresh_booking_flight_m_view();

@@ -100,8 +100,8 @@ CREATE TABLE booking.hotel_outbox
 (
     id                 UUID PRIMARY KEY,
     saga_action_id     UUID                       NOT NULL,
-    event_type         VARCHAR(20)                NOT NULL, -- 이벤트 타입(HOTEL_BOOKED, HOTEL_CANCELLED)
-    event_payload      JSONB                      NOT NULL, -- 이벤트 데이터(JSON)
+    event_type         VARCHAR(20)                NOT NULL,
+    event_payload      JSONB                      NOT NULL,
     booking_status     booking.booking_status     NOT NULL,
     outbox_status      booking.outbox_status      NOT NULL DEFAULT 'STARTED',
     saga_action_status booking.saga_action_status NOT NULL DEFAULT 'STARTED',
@@ -120,8 +120,8 @@ CREATE TABLE booking.flight_outbox
 (
     id                 UUID PRIMARY KEY,
     saga_action_id     UUID                       NOT NULL,
-    event_type         VARCHAR(20)                NOT NULL, -- 이벤트 타입(FLIGHT_BOOKED, FLIGHT_CANCELLED)
-    event_payload      JSONB                      NOT NULL, -- 이벤트 데이터(JSON)
+    event_type         VARCHAR(20)                NOT NULL,
+    event_payload      JSONB                      NOT NULL,
     booking_status     booking.booking_status     NOT NULL,
     outbox_status      booking.outbox_status      NOT NULL DEFAULT 'STARTED',
     saga_action_status booking.saga_action_status NOT NULL DEFAULT 'STARTED',
@@ -140,8 +140,8 @@ CREATE TABLE booking.car_outbox
 (
     id                 UUID PRIMARY KEY,
     saga_action_id     UUID                       NOT NULL,
-    event_type         VARCHAR(20)                NOT NULL, -- 이벤트 타입(CAR_BOOKED, CAR_CANCELLED)
-    event_payload      JSONB                      NOT NULL, -- 이벤트 데이터(JSON)
+    event_type         VARCHAR(20)                NOT NULL,
+    event_payload      JSONB                      NOT NULL,
     booking_status     booking.booking_status     NOT NULL,
     outbox_status      booking.outbox_status      NOT NULL DEFAULT 'STARTED',
     saga_action_status booking.saga_action_status NOT NULL DEFAULT 'STARTED',
