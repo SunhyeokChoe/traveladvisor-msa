@@ -104,7 +104,7 @@ public class CompleteHotelBookingHelper {
                             hotelBookingCommand.bookingId());
                 });
 
-        // hotelOffer가 유효한지 검증하고 예약 승인서 초기화 합니다.
+        // HotelOffer가 유효한지 검증하고 예약 승인서 초기화 합니다.
         HotelBookingEvent hotelBookingEvent = hotelDomainService.cancelBookingApproval(
                 bookingApproval.getBookingId(), hotelOffer, new ArrayList<>());
         
