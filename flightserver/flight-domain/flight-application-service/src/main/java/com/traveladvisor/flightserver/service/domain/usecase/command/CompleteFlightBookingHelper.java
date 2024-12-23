@@ -112,8 +112,8 @@ public class CompleteFlightBookingHelper {
         bookingApprovalRepository.save(flightBookingEvent.getBookingApproval());
 
         /*
-         * 이벤트 전달: Hotel 서비스 ---HotelBookingEvent---> Booking 서비스
-         * Outbox 상태를 STARTED로 설정하고 hotel.booking_outbox 테이블에 HotelBookingEvent 이벤트와 함께 저장합니다.
+         * 이벤트 전달: Flight 서비스 ---FlightBookingEvent---> Booking 서비스
+         * Outbox 상태를 STARTED로 설정하고 flight.booking_outbox 테이블에 FlightBookingEvent 이벤트와 함께 저장합니다.
          */
         saveBookingOutbox(flightBookingCommand, flightBookingEvent);
     }
