@@ -85,12 +85,12 @@ public class HotelOffer extends AggregateRoot<HotelOfferId> {
     /**
      * 호텔 예약 엔터티를 초기화 합니다.
      */
-    public void initializeBookingApproval(BookingId bookingId, HotelBookingStatus hotelBookingStatus) {
+    public void initializeBookingApproval(BookingId bookingId, HotelBookingApprovalStatus hotelBookingApprovalStatus) {
         this.bookingApproval = BookingApproval.builder()
                 .bookingId(bookingId)
                 .bookingApprovalId(new BookingApprovalId(UUID.randomUUID()))
-                .hotelOffersId(this.getId())
-                .status(hotelBookingStatus)
+                .hotelOfferId(this.getId())
+                .status(hotelBookingApprovalStatus)
                 .build();
     }
 

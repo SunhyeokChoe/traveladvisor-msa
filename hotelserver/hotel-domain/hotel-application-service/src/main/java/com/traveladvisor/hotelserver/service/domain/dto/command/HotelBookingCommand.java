@@ -1,5 +1,6 @@
 package com.traveladvisor.hotelserver.service.domain.dto.command;
 
+import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
 import com.traveladvisor.common.domain.vo.HotelBookingStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +15,7 @@ public record HotelBookingCommand(
         @NotBlank String hotelOfferId,
         @NotBlank String memberEmail,
         @NotNull BigDecimal totalPrice,
-        @NotNull HotelBookingStatus bookingStatus,
+        @NotNull HotelBookingApprovalStatus bookingStatus,
         @NotNull ZonedDateTime createdAt
 
 ) {

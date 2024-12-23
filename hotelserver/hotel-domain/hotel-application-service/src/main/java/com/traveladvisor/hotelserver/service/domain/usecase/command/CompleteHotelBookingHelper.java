@@ -35,13 +35,13 @@ public class CompleteHotelBookingHelper {
     public void completeHotelBooking(HotelBookingCommand hotelBookingCommand) {
         // 이미 처리된 예약은 스킵합니다.
         if (isOutboxMessageProcessedFor(hotelBookingCommand, HotelBookingApprovalStatus.COMPLETED)) {
-            log.info("이미 처리된 호텔 예약 입니다. Saga Action ID: {}", hotelBookingCommand.sagaActionId());
+            log.info("이미 예약 처리된 호텔 객실 입니다. Saga Action ID: {}", hotelBookingCommand.sagaActionId());
             return;
         }
 
-        log.info("예약서 BookingID: {}에 대한 호텔 예약 요청 처리를 시작합니다.", hotelBookingCommand.bookingId());
+        log.info("예약서 BookingID: {}에 대한 호텔 객실 예약 요청 처리를 시작합니다.", hotelBookingCommand.bookingId());
 
-        // 예약서를 생성합니다.
+        // 호텔 객실 예약 승인서를 생성합니다.
         BookingApproval bookingApproval = bookingApprovalMapper.toBookingApproval(hotelBookingCommand);
 
         // 예약 가능한 호텔 객실 정보를 조회합니다.
@@ -61,9 +61,9 @@ public class CompleteHotelBookingHelper {
         // TODO: payment 서비스에 Feign Client로 결제 요청을 보냅니다. 만약 포인트가 존재하는 경우 포인트를 차감하도록 합니다.
 
         /*
-         * 이벤트 전달: Hotel 서비스 ---HotelBookingCompletedEvent---> Booking 서비스
-         * 예약 Saga Action 중 두 번째 단계이므로 Saga Action 상태를 PROCESSING으로, Outbox 상태를 STARTED로 설정해
-         * hotel.booking_outbox 테이블에 HotelBookingCompletedEvent 이벤트와 함께 저장합니다.
+         * 이벤트 전달: Hotel 서비스 ---HotelBookingEvent---> Booking 서비스
+         * 예약 Saga Action 중 두 번째 단계이므로 Saga Action 상태를 PROCESSING으로, Outbox 상태를 STARTED로 설정합니다.
+         * hotel.booking_outbox 테이블에 HotelBookingEvent 이벤트와 함께 저장합니다.
          */
         saveBookingOutbox(hotelBookingCommand, hotelBookingEvent);
     }
@@ -78,7 +78,7 @@ public class CompleteHotelBookingHelper {
         return hotelOfferRepository.findById(hotelOfferId)
                 .orElseThrow(() -> {
                     log.error("해당 호텔 객실이 존재하지 않습니다. hotelOfferId: {}", hotelOfferId);
-                    return new HotelNotFoundException("해당 호텔 객실이 존재하지 않습니다.");
+                    return new HotelNotFoundException("해당 호텔 객실이 존재하지 않습니다. hotelOfferId: " + hotelOfferId);
                 });
     }
 

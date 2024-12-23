@@ -64,7 +64,7 @@ public class HotelDatasourceMapper {
         return BookingApproval.builder()
                 .bookingApprovalId(new BookingApprovalId(entity.getId()))
                 .bookingId(new BookingId(entity.getBookingId()))
-                .hotelOffersId(new HotelOfferId(entity.getHotelOffersId()))
+                .hotelOfferId(new HotelOfferId(entity.getHotelOfferId()))
                 .status(entity.getStatus())
                 .build();
     }
@@ -79,7 +79,7 @@ public class HotelDatasourceMapper {
         return BookingApprovalEntity.builder()
                 .id(domain.getId().getValue())
                 .bookingId(domain.getBookingId().getValue())
-                .hotelOffersId(domain.getHotelOffersId().getValue())
+                .hotelOfferId(domain.getHotelOfferId().getValue())
                 .status(domain.getStatus())
                 .build();
     }

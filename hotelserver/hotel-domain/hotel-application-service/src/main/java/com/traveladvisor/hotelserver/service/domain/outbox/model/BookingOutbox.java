@@ -2,6 +2,7 @@ package com.traveladvisor.hotelserver.service.domain.outbox.model;
 
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
 import com.traveladvisor.common.domain.saga.SagaActionStatus;
+import com.traveladvisor.common.domain.vo.HotelBookingApprovalStatus;
 import com.traveladvisor.common.domain.vo.HotelBookingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +23,7 @@ public class BookingOutbox {
     private UUID sagaActionId;
     private String eventType;
     private String eventPayload;
-    private HotelBookingStatus bookingStatus;
+    private HotelBookingApprovalStatus bookingStatus;
     @Setter
     private OutboxStatus outboxStatus;
     private SagaActionStatus sagaActionStatus;

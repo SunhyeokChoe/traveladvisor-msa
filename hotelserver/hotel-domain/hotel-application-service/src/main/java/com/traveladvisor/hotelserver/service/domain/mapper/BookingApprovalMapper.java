@@ -24,7 +24,7 @@ public class BookingApprovalMapper {
         return BookingApproval.builder()
                 .bookingApprovalId(new BookingApprovalId(UUID.fromString(hotelBookingCommand.id())))
                 .bookingId(new BookingId(UUID.fromString(hotelBookingCommand.bookingId())))
-                .hotelOffersId(new HotelOfferId(Long.parseLong(hotelBookingCommand.hotelOfferId())))
+                .hotelOfferId(new HotelOfferId(Long.parseLong(hotelBookingCommand.hotelOfferId())))
                 .status(hotelBookingCommand.bookingStatus())
                 .build();
     }
@@ -38,7 +38,7 @@ public class BookingApprovalMapper {
     public HotelBookingCompletedEventPayload toHotelBookingCompletedEventPayload(HotelBookingEvent hotelBookingEvent) {
         return HotelBookingCompletedEventPayload.builder()
                 .bookingId(hotelBookingEvent.getBookingApproval().getBookingId().toString())
-                .hotelOfferId(hotelBookingEvent.getBookingApproval().getHotelOffersId().toString())
+                .hotelOfferId(hotelBookingEvent.getBookingApproval().getHotelOfferId().toString())
                 .createdAt(hotelBookingEvent.getCreatedAt())
                 .hotelBookingApprovalStatus(hotelBookingEvent.getBookingApproval().getStatus().toString())
                 .build();

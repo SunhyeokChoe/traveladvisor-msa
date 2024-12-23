@@ -45,17 +45,17 @@ public class BookingOutboxHelper {
     @Transactional(propagation = Propagation.REQUIRED)
     public void saveBookingOutbox(
             HotelBookingCompletedEventPayload hotelBookingCompletedEventPayload,
-            HotelBookingStatus hotelBookingStatus,
+            HotelBookingApprovalStatus hotelBookingApprovalStatus,
             OutboxStatus outboxStatus,
-            UUID sagaId) {
+            UUID sagaActionId) {
         save(BookingOutbox.builder()
                 .id(UUID.randomUUID())
-                .sagaActionId(sagaId)
+                .sagaActionId(sagaActionId)
                 .createdAt(hotelBookingCompletedEventPayload.getCreatedAt())
                 .completedAt(ZonedDateTime.now(ZoneId.of(UTC)))
                 .eventType(BOOKING_SAGA_ACTION_NAME)
                 .eventPayload(serialize(hotelBookingCompletedEventPayload))
-                .bookingStatus(hotelBookingStatus)
+                .bookingStatus(hotelBookingApprovalStatus)
                 .outboxStatus(outboxStatus)
                 .build());
     }

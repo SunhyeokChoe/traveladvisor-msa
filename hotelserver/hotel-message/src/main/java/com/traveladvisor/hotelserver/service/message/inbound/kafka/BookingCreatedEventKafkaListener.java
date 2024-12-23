@@ -1,7 +1,6 @@
 package com.traveladvisor.hotelserver.service.message.inbound.kafka;
 
 import com.traveladvisor.common.domain.event.booking.BookingCreatedEventPayload;
-import com.traveladvisor.common.domain.vo.BookingStatus;
 import com.traveladvisor.common.domain.vo.HotelBookingStatus;
 import com.traveladvisor.common.kafka.consumer.KafkaSingleMessageConsumer;
 import com.traveladvisor.common.kafka.producer.KafkaMessageHelper;
