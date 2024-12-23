@@ -2,7 +2,7 @@ package com.traveladvisor.flightserver.service.domain.port.input.event;
 
 import com.traveladvisor.flightserver.service.domain.dto.command.FlightBookingCommand;
 
-public interface HotelBookedEventListener {
+public interface FlightBookedEventListener {
 
     /**
      * 항공권 예약을 진행합니다.

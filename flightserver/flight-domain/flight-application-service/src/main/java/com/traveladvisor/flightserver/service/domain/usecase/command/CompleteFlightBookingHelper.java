@@ -82,8 +82,7 @@ public class CompleteFlightBookingHelper {
     }
 
     @Transactional
-    public void cancelHotelBooking(FlightBookingCommand flightBookingCommand) {
-        return;
+    public void cancelFlightBooking(FlightBookingCommand flightBookingCommand) {
     }
 
     /**
