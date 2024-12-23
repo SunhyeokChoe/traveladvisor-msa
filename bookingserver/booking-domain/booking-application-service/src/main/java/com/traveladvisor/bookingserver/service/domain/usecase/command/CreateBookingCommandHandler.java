@@ -35,13 +35,13 @@ public class CreateBookingCommandHandler {
 
     private final BookingDomainService bookingDomainService;
     private final BookingSagaActionHelper bookingSagaActionHelper;
-    private final HotelOutboxHelper hotelOutboxHelper;
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
 
     private final MemberServiceApiClient memberServiceApiClient;
 
     private final HotelServiceApiClient hotelServiceApiClient;
+    private final HotelOutboxHelper hotelOutboxHelper;
 
     private final FlightServiceApiClient flightServiceApiClient;
 
@@ -53,7 +53,7 @@ public class CreateBookingCommandHandler {
         validateMemberIsExists(createBookingCommand.email(), correlationId);
 
         // TODO: 호텔/항공권/차량 데이터 요청 메서드에서 응답을 전달받음과 동시에 각 도메인 객체로 매핑해 반환하고, 이곳에서 전달받아 initializeBooking 에
-        //       Booking/HotelOffer/FlightOffer/CarOffer 데이터를 모두 넘기고 Booking 에서 검증해야 한다.
+        //       Booking/HotelOffer/FlightOffer/CarOffer 데이터를 모두 넘기고 Booking 에서 검증해야 합니다.
         // 예약 가능한 호텔인지 확인합니다.
         validateHotelOfferIsExists(createBookingCommand.hotelOfferId(), correlationId);
         // 예약 가능한 항공권인지 확인합니다.

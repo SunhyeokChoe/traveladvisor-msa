@@ -5,11 +5,11 @@ import com.traveladvisor.bookingserver.service.domain.entity.Booking;
 import java.time.ZonedDateTime;
 
 /**
- * 예약서 생성 완료 이벤트입니다.
+ * 호텔 예약 완료 이벤트입니다.
  */
-public class BookingCreatedEvent extends BookingEvent {
+public class HotelBookedEvent extends BookingEvent {
 
-    public BookingCreatedEvent(Booking booking, ZonedDateTime createdAt) {
+    public HotelBookedEvent(Booking booking, ZonedDateTime createdAt) {
         super(booking, createdAt);
     }
 

@@ -5,7 +5,10 @@ import com.traveladvisor.bookingserver.service.domain.dto.command.CreateBookingR
 import com.traveladvisor.bookingserver.service.domain.dto.query.QueryBookingResponse;
 import com.traveladvisor.bookingserver.service.domain.entity.Booking;
 import com.traveladvisor.bookingserver.service.domain.event.BookingCreatedEvent;
+import com.traveladvisor.bookingserver.service.domain.event.BookingEvent;
+import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
 import com.traveladvisor.common.domain.event.booking.BookingCreatedEventPayload;
+import com.traveladvisor.common.domain.event.booking.HotelBookedEventPayload;
 import com.traveladvisor.common.domain.vo.*;
 import org.springframework.stereotype.Component;
 
@@ -56,7 +59,7 @@ public class BookingMapper {
                 .bookingId(bookingCreatedEvent.getBooking().getId().getValue().toString())
                 .totalPrice(bookingCreatedEvent.getBooking().getTotalPrice().getAmount())
                 .createdAt(bookingCreatedEvent.getCreatedAt())
-                .hotelBookingStatus(BookingStatus.PENDING.name())
+                .hotelBookingStatus(HotelBookingStatus.PENDING.name())
                 .build();
     }
 
@@ -65,6 +68,18 @@ public class BookingMapper {
                 booking.getTraceId().getValue(),
                 booking.getBookingStatus(),
                 booking.getFailureMessages());
+    }
+
+    public HotelBookedEventPayload toHotelBookedEventPayload(HotelBookedEvent hotelBookedEvent) {
+        return HotelBookedEventPayload.builder()
+                .id(hotelBookedEvent.getBooking().getId().getValue().toString())
+                .bookingId(hotelBookedEvent.getBooking().getId().getValue().toString())
+                .flightOfferId(hotelBookedEvent.getBooking().getFlightOfferId().getValue().toString())
+                .memberEmail(hotelBookedEvent.getBooking().getMemberEmail())
+                .totalPrice(hotelBookedEvent.getBooking().getTotalPrice().getAmount())
+                .createdAt(hotelBookedEvent.getCreatedAt())
+                .hotelBookingStatus(hotelBookedEvent.getBooking().getBookingStatus().name())
+                .build();
     }
 
 }

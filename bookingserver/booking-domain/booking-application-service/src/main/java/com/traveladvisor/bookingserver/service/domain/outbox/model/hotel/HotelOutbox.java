@@ -1,5 +1,6 @@
 package com.traveladvisor.bookingserver.service.domain.outbox.model.hotel;
 
+import com.traveladvisor.bookingserver.service.domain.event.BookingEvent;
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
 import com.traveladvisor.common.domain.saga.SagaActionStatus;
 import com.traveladvisor.common.domain.vo.BookingStatus;
@@ -8,8 +9,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
+
+import static com.traveladvisor.common.domain.constant.common.DomainConstants.UTC;
 
 /**
  * Booking 서비스에서 Hotel 서비스로 메시지를 보내기 위한 outbox 테이블입니다.

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.traveladvisor.common.domain.constant.booking.SagaActionConstants.BOOKING_SAGA_ACTION_NAME;
@@ -25,6 +26,7 @@ import static com.traveladvisor.common.domain.constant.booking.SagaActionConstan
 public class HotelOutboxHelper {
 
     private final HotelOutboxRepository hotelOutboxRepository;
+
     private final ObjectMapper objectMapper;
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -51,19 +53,26 @@ public class HotelOutboxHelper {
 
         if (savedHotelOutbox == null) {
             throw new BookingApplicationServiceException("HotelOutbox 저장에 실패했습니다. OutboxId: " +
-                    hotelOutbox.getId());
+                    hotelOutbox.getId().toString());
         }
 
-        log.info("HotelOutbox를 저장 완료했습니다. id: {}", hotelOutbox.getId());
+        log.info("HotelOutbox를 저장 완료했습니다. OutboxId: {}", hotelOutbox.getId().toString());
     }
 
     private String serialize(BookingCreatedEventPayload bookingCreatedEventPayload) {
         try {
             return objectMapper.writeValueAsString(bookingCreatedEventPayload);
         } catch (JsonProcessingException ex) {
-            throw new BookingApplicationServiceException("BookingCreatedEventPayload 생성에 실패했습니다. BookingId: " +
+            throw new BookingApplicationServiceException("BookingCreatedEventPayload 직렬화에 실패했습니다. BookingId: " +
                     bookingCreatedEventPayload.getBookingId(), ex);
         }
+    }
+
+    public Optional<HotelOutbox> getPaymentOutboxMessageBySagaIdAndSagaStatus(
+            UUID sagaId, SagaActionStatus... sagaActionStatuses) {
+
+        return hotelOutboxRepository.findByEventTypeAndSagaActionIdAndSagaActionStatusIn(
+                BOOKING_SAGA_ACTION_NAME, sagaId, sagaActionStatuses);
     }
 
 }

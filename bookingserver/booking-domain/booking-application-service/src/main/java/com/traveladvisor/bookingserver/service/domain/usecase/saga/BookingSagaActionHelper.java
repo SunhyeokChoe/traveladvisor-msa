@@ -1,7 +1,6 @@
 package com.traveladvisor.bookingserver.service.domain.usecase.saga;
 
 import com.traveladvisor.bookingserver.service.domain.entity.Booking;
-import com.traveladvisor.bookingserver.service.domain.exception.BookingApplicationServiceException;
 import com.traveladvisor.bookingserver.service.domain.exception.BookingNotFoundException;
 import com.traveladvisor.bookingserver.service.domain.port.output.repository.BookingRepository;
 import com.traveladvisor.common.domain.saga.SagaActionStatus;
@@ -50,8 +49,8 @@ public class BookingSagaActionHelper {
             case PENDING:
                 return SagaActionStatus.STARTED; // 예약이 진행중(PENDING)인 경우 Saga Action 상태는 STARTED
             default:
-                throw new BookingApplicationServiceException("BookingStatus가 새로 생성됨을 감지했습니다. " +
-                        "변경된 상태에 따른 SagaActionStatus 값을 재정의 해주세요.");
+                log.info("기존에 없던 BookingStatus가 감지됐습니다. 변경된 상태에 따른 SagaActionStatus 값을 정의 해주세요.");
+                return SagaActionStatus.FAILED;
         }
     }
 
