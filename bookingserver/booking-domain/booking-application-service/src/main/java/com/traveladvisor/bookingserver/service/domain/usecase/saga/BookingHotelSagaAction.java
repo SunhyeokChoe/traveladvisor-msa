@@ -148,7 +148,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
                             "FlightOutbox가 존재하지 않습니다. SagaActionId: " + hotelBookingResponse.sagaActionId());
                 });
 
-        // Flight Outbox의 Saga Action 상태를 COMPENSATED로 변경합니다.
+        // Flight Outbox의 Saga Action 상태를 COMPENSATING에서 COMPENSATED로 변경합니다.
         flightOutboxHelper.updateOutbox(flightOutbox, booking.getBookingStatus(), sagaActionStatus);
 
         // 변경된 Flight Outbox 상태를 저장합니다.
