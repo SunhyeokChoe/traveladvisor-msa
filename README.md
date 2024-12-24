@@ -30,9 +30,9 @@
 - 코어 도메인 설계는 DDD 기반으로 합니다.
 - Hexagonal Architecture를 도입해 외부 요인과의 강결합을 없애고, 코어 도메인과 서비스 레이어를 분리해 도메인을 보호합니다.
 - 모든 애플리케이션과 리소스는 쿠버네티스 클러스터에 등록합니다.
-- Booking, Payment, Hotel, Car, Flight 마이크로서비스를 구성합니다.
+- Batch, Member, Booking, Payment, Hotel, Flight, Car, Config, Gateway 마이크로서비스를 구성합니다.
 
-  Hotel, Car, Flight 에 관한 테스트 정보를 얻기 위한 OTA* 벤더로 Amadeus를 사용합니다.
+  Hotel, Flight, Car 에 관한 테스트 정보를 얻기 위한 OTA* 벤더로 Amadeus를 사용합니다.
 
   ※ *OTA: OTA는 Online Travel Agency의 약자로, 온라인 여행 예약 대행 서비스를 의미합니다. Agoda와 Expedia가 대표적인 OTA로 잘 알려져 있습니다.
 
