@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traveladvisor.bookingserver.service.domain.exception.BookingApplicationServiceException;
 import com.traveladvisor.bookingserver.service.domain.outbox.model.flight.FlightOutbox;
-import com.traveladvisor.bookingserver.service.domain.outbox.model.hotel.HotelOutbox;
 import com.traveladvisor.bookingserver.service.domain.port.output.repository.FlightOutboxRepository;
 import com.traveladvisor.common.domain.event.booking.HotelBookedEventPayload;
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
@@ -16,10 +15,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static com.traveladvisor.common.domain.constant.booking.SagaActionConstants.BOOKING_SAGA_ACTION_NAME;
+import static com.traveladvisor.common.domain.constant.common.DomainConstants.UTC;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -74,6 +76,20 @@ public class FlightOutboxHelper {
 
         return flightOutboxRepository.findByEventTypeAndSagaActionIdAndSagaActionStatusIn(
                 BOOKING_SAGA_ACTION_NAME, sagaId, sagaActionStatuses);
+    }
+
+    /**
+     * FlightOutbox의 예약 상태와 Saga Action 상태를 변경합니다.
+     *
+     * @param flightOutbox
+     * @param bookingStatus
+     * @param sagaActionStatus
+     */
+    public void updateFlightOutbox(
+            FlightOutbox flightOutbox, BookingStatus bookingStatus, SagaActionStatus sagaActionStatus) {
+        flightOutbox.setBookingStatus(bookingStatus);
+        flightOutbox.setSagaActionStatus(sagaActionStatus);
+        flightOutbox.setCompletedAt(ZonedDateTime.now(ZoneId.of(UTC)));
     }
 
 }

@@ -62,7 +62,7 @@ public class BookingFlightSagaAction implements SagaAction<FlightBookingResponse
                         UUID.fromString(flightBookingResponse.sagaActionId()), SagaActionStatus.PROCESSING); // 항공권 예약 처리 전에 반드시 SagaActionStatus 가 PROCESSING 이어야 합니다.
 
         if (flightOutboxOrEmpty.isEmpty()) {
-            log.info("이미 처리된 이벤트 입니다. SagaActionID {}", flightBookingResponse.sagaActionId());
+            log.info("이미 예약 처리된 이벤트 입니다. SagaActionID {}", flightBookingResponse.sagaActionId());
             return;
         }
 

@@ -6,6 +6,7 @@ import com.traveladvisor.common.domain.entity.AggregateRoot;
 import com.traveladvisor.common.domain.vo.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,7 +40,23 @@ public class Booking extends AggregateRoot<BookingId> {
         // 초기화
         initializeId();
         initializeTraceId();
+
+        // 업데이트
         updateBookingStatus(BookingStatus.PENDING);
+    }
+
+    /**
+     * 예약서에 실패 메시지를 등록하고 예약 취소 상태로 변경합니다.
+     *
+     * @param failureMessages 예약 실패 메시지 목록
+     */
+    public void cancelBooking(List<String> failureMessages) {
+        // 검증
+        validateBookingStatusCancelable();
+
+        // 업데이트
+        updateBookingStatus(BookingStatus.CANCELLED);
+        updateFailureMessages(failureMessages);
     }
 
     /**
@@ -93,7 +110,18 @@ public class Booking extends AggregateRoot<BookingId> {
     }
 
     public void updateFailureMessages(List<String> failureMessages) {
-        this.failureMessages = failureMessages;
+        if (failureMessages == null || failureMessages.isEmpty()) {
+            return;
+        }
+
+        if (this.failureMessages == null) {
+            this.failureMessages = new ArrayList<>();
+        }
+
+        this.failureMessages.addAll(failureMessages.stream()
+                .filter(message -> !message.isEmpty())
+                .toList()
+        );
     }
 
     public void markAsHotelBooked() {
@@ -103,6 +131,16 @@ public class Booking extends AggregateRoot<BookingId> {
     public void markAsFlightBooked() {
         this.bookingStatus = BookingStatus.FLIGHT_BOOKED;
     }
+
+    /**
+     * 예약 상태가 현재 취소 가능한 상태인지 검증합니다.
+     */
+    private void validateBookingStatusCancelable() {
+        if (!(BookingStatus.CANCELLING.equals(bookingStatus)) || BookingStatus.PENDING.equals(bookingStatus)) {
+            throw new BookingDomainCoreException("현재 예약서의 상태(" + bookingStatus.toString() + ")가 취소할 수 있는 상태가 아닙니다.");
+        }
+    }
+
 
     private Booking(Builder builder) {
         super.setId(builder.bookingId);
@@ -166,7 +204,8 @@ public class Booking extends AggregateRoot<BookingId> {
         private BookingStatus bookingStatus;
         private List<String> failureMessages;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder id(BookingId bookingId) {
             this.bookingId = bookingId;

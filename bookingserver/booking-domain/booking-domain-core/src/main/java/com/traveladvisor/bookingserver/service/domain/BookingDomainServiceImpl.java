@@ -8,15 +8,23 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static com.traveladvisor.common.domain.constant.common.DomainConstants.UTC;
 
 @Slf4j
 public class BookingDomainServiceImpl implements BookingDomainService {
 
-    // 도메인 서비스에서 애그리거트 루트(Booking)를 사용해 일부 비즈니스 요구사항을 체크합니다. 이는 DDD에서 애그리거트 루트의 책임입니다.
+    /**
+     * 예약서를 초기화 합니다.
+     *
+     * @param booking 예약서
+     * @return
+     */
     @Override
     public BookingCreatedEvent initializeBooking(Booking booking) {
+        // 도메인 서비스에서 애그리거트 루트(Booking)를 사용해 일부 비즈니스 요구사항을 체크합니다. 이는 DDD에서 애그리거트 루트의 책임입니다.
+
         /*
          * 프로덕션에서는 호텔, 항공권, 차량 모두 예약 가능 기간이 지나지는 않았는지,
          * 객실이 활성 상태가 맞는지, 항공사가 EU에 제재를 받는 곳은 아닌지 등의 완전한 검증이 필요합니다.
@@ -39,7 +47,7 @@ public class BookingDomainServiceImpl implements BookingDomainService {
     /**
      * 예약서의 예약 상태를 호텔 예약 완료로 업데이트 합니다.
      *
-     * @param booking
+     * @param booking 예약서
      * @return
      */
     @Override
@@ -52,7 +60,7 @@ public class BookingDomainServiceImpl implements BookingDomainService {
     /**
      * 예약서의 예약 상태를 항공권 예약 완료로 업데이트 합니다.
      *
-     * @param booking
+     * @param booking 예약서
      * @return
      */
     @Override
@@ -60,6 +68,18 @@ public class BookingDomainServiceImpl implements BookingDomainService {
         booking.markAsFlightBooked();
 
         return new FlightBookedEvent(booking, ZonedDateTime.now(ZoneId.of(UTC)));
+    }
+
+    /**
+     * 예약서에 실패 메시지 목록을 등록하고 예약 실패 상태로 변경합니다.
+     *
+     * @param booking         예약서
+     * @param failureMessages 예약 실패 메시지 목록
+     */
+    @Override
+    public void cancelBooking(Booking booking, List<String> failureMessages) {
+        booking.cancelBooking(failureMessages);
+        log.info("예약서 상태를 취소 상태로 변경했습니다. BookingId: {}", booking.getId().getValue());
     }
 
 }

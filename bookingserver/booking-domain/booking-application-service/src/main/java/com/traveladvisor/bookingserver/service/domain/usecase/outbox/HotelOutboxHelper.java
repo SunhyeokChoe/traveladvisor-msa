@@ -15,10 +15,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static com.traveladvisor.common.domain.constant.booking.SagaActionConstants.BOOKING_SAGA_ACTION_NAME;
+import static com.traveladvisor.common.domain.constant.common.DomainConstants.UTC;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -68,11 +71,25 @@ public class HotelOutboxHelper {
         }
     }
 
-    public Optional<HotelOutbox> findHotelOutboxBySagaIdAndSagaStatus(
-            UUID sagaId, SagaActionStatus... sagaActionStatuses) {
+    public Optional<HotelOutbox> findHotelOutboxBySagaIdAndSagaStatus(UUID sagaId,
+                                                                      SagaActionStatus... sagaActionStatuses) {
 
         return hotelOutboxRepository.findByEventTypeAndSagaActionIdAndSagaActionStatusIn(
                 BOOKING_SAGA_ACTION_NAME, sagaId, sagaActionStatuses);
+    }
+
+    /**
+     * HotelOutbox의 예약 상태와 Saga Action 상태를 변경합니다.
+     *
+     * @param hotelOutbox
+     * @param bookingStatus
+     * @param sagaActionStatus
+     */
+    public void updateHotelOutbox(
+            HotelOutbox hotelOutbox, BookingStatus bookingStatus, SagaActionStatus sagaActionStatus) {
+        hotelOutbox.setBookingStatus(bookingStatus);
+        hotelOutbox.setSagaActionStatus(sagaActionStatus);
+        hotelOutbox.setCompletedAt(ZonedDateTime.now(ZoneId.of(UTC)));
     }
 
 }
