@@ -1,6 +1,7 @@
 package com.traveladvisor.bookingserver.service.domain.port.input.event;
 
 import com.traveladvisor.bookingserver.service.domain.dto.message.HotelBookingResponse;
+import jakarta.validation.Valid;
 
 public interface HotelBookingCompletedEventListener {
 
@@ -9,13 +10,13 @@ public interface HotelBookingCompletedEventListener {
      *
      * @param hotelBookingResponse
      */
-    void processFlightBooking(HotelBookingResponse hotelBookingResponse);
+    void processFlightBooking(@Valid HotelBookingResponse hotelBookingResponse);
 
     /**
      * 예약서의 예약 상태를 예약 실패 상태로 전환합니다.
      *
      * @param hotelBookingResponse
      */
-    void compensateHotelBooking(HotelBookingResponse hotelBookingResponse);
+    void compensateHotelBooking(@Valid HotelBookingResponse hotelBookingResponse);
 
 }
