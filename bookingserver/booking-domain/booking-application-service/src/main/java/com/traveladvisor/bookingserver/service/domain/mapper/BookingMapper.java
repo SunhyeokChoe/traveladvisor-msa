@@ -4,9 +4,11 @@ import com.traveladvisor.bookingserver.service.domain.dto.command.CreateBookingC
 import com.traveladvisor.bookingserver.service.domain.dto.command.CreateBookingResponse;
 import com.traveladvisor.bookingserver.service.domain.dto.query.QueryBookingResponse;
 import com.traveladvisor.bookingserver.service.domain.entity.Booking;
+import com.traveladvisor.bookingserver.service.domain.event.BookingCancelledEvent;
 import com.traveladvisor.bookingserver.service.domain.event.BookingCreatedEvent;
 import com.traveladvisor.bookingserver.service.domain.event.FlightBookedEvent;
 import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
+import com.traveladvisor.common.domain.event.booking.BookingCancelledEventPayload;
 import com.traveladvisor.common.domain.event.booking.BookingCreatedEventPayload;
 import com.traveladvisor.common.domain.event.booking.FlightBookedEventPayload;
 import com.traveladvisor.common.domain.event.booking.HotelBookedEventPayload;
@@ -83,6 +85,16 @@ public class BookingMapper {
                 .build();
     }
 
+    public BookingCancelledEventPayload toBookingCancelledEvent(BookingCancelledEvent bookingCancelledEvent) {
+        return BookingCancelledEventPayload.builder()
+                .memberEmail(bookingCancelledEvent.getBooking().getMemberEmail())
+                .bookingId(bookingCancelledEvent.getBooking().getId().getValue().toString())
+                .totalPrice(bookingCancelledEvent.getBooking().getTotalPrice().getAmount())
+                .createdAt(bookingCancelledEvent.getCreatedAt())
+                .hotelBookingStatus(HotelBookingStatus.PENDING.name())
+                .build();
+    }
+
     public FlightBookedEventPayload toFlightBookedEventPayload(FlightBookedEvent flightBookedEvent) {
         return FlightBookedEventPayload.builder()
                 .id(flightBookedEvent.getBooking().getId().getValue().toString())
@@ -94,4 +106,5 @@ public class BookingMapper {
                 .carBookingStatus(flightBookedEvent.getBooking().getBookingStatus().name())
                 .build();
     }
+
 }

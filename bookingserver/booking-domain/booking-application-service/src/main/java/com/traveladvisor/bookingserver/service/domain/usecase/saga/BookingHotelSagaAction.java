@@ -15,18 +15,13 @@ import com.traveladvisor.common.domain.outbox.OutboxStatus;
 import com.traveladvisor.common.domain.saga.SagaAction;
 import com.traveladvisor.common.domain.saga.SagaActionStatus;
 import com.traveladvisor.common.domain.vo.BookingId;
-import com.traveladvisor.common.domain.vo.BookingStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
-
-import static com.traveladvisor.common.domain.constant.common.DomainConstants.UTC;
 
 /**
  * 호텔 서비스로부터 호텔 예약 요청에 대한 처리 결과를 전달받아 그 다음 처리 혹은 직전 단계 보상 Saga Action을 수행합니다.
@@ -78,7 +73,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
                 .toSagaActionStatus(hotelBookedEvent.getBooking().getBookingStatus());
 
         // 호텔 Outbox의 호텔 예약 상태와 Saga Action 상태를 업데이트 합니다.
-        hotelOutboxHelper.updateHotelOutbox(hotelOutbox, hotelBookedEvent.getBooking().getBookingStatus(), sagaActionStatus);
+        hotelOutboxHelper.updateOutbox(hotelOutbox, hotelBookedEvent.getBooking().getBookingStatus(), sagaActionStatus);
 
         // booking.hotel_outbox 테이블의 Saga Action 상태를 업데이트 합니다.
         // HotelOutbox를 조회한 시점의 version과 DB에 저장되어 있는 레코드의 version이 서로 다른 경우
@@ -137,9 +132,12 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
         SagaActionStatus sagaActionStatus = bookingSagaActionHelper.toSagaActionStatus(booking.getBookingStatus());
 
         // Hotel Outbox의 호텔 예약 상태와 Saga Action 상태를 업데이트 합니다.
-        hotelOutboxHelper.updateHotelOutbox(hotelOutbox, booking.getBookingStatus(), sagaActionStatus);
+        hotelOutboxHelper.updateOutbox(hotelOutbox, booking.getBookingStatus(), sagaActionStatus);
 
-        // 이전 보상 단계인 Flight Outbox를 조회하합니다.
+        // 변경된 Hotel Outbox의 상태를 저장합니다.
+        hotelOutboxHelper.save(hotelOutbox);
+
+        // 이전 보상 단계인 Flight Outbox를 조회합니다.
         FlightOutbox flightOutbox = flightOutboxHelper.findFlightOutboxBySagaIdAndSagaStatus(
                 UUID.fromString(hotelBookingResponse.sagaActionId()), SagaActionStatus.COMPENSATING)
                 .orElseThrow(() -> {
@@ -151,7 +149,12 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
                 });
 
         // Flight Outbox의 Saga Action 상태를 COMPENSATED로 변경합니다.
-        flightOutboxHelper.updateFlightOutbox(flightOutbox, booking.getBookingStatus(), sagaActionStatus);
+        flightOutboxHelper.updateOutbox(flightOutbox, booking.getBookingStatus(), sagaActionStatus);
+
+        // 변경된 Flight Outbox 상태를 저장합니다.
+        flightOutboxHelper.save(flightOutbox);
+
+        log.info("예약서의 예약 상태가 CANCELLED로 변경됐습니다. BookingId: {}", booking.getId().getValue());
     }
 
 

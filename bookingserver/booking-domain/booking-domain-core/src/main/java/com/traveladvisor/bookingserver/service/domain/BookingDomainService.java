@@ -1,6 +1,7 @@
 package com.traveladvisor.bookingserver.service.domain;
 
 import com.traveladvisor.bookingserver.service.domain.entity.Booking;
+import com.traveladvisor.bookingserver.service.domain.event.BookingCancelledEvent;
 import com.traveladvisor.bookingserver.service.domain.event.BookingCreatedEvent;
 import com.traveladvisor.bookingserver.service.domain.event.FlightBookedEvent;
 import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
@@ -32,6 +33,15 @@ public interface BookingDomainService {
      * @return
      */
     FlightBookedEvent markAsFlightBooked(Booking booking);
+
+    /**
+     * 예약서에 실패 메시지 목록을 등록하고 항공권 예약 실패 상태로 변경합니다.
+     *
+     * @param booking         예약서
+     * @param failureMessages 예약 실패 메시지 목록
+     * @return
+     */
+    BookingCancelledEvent cancelFlightBooking(Booking booking, List<String> failureMessages);
 
     /**
      * 예약서에 실패 메시지 목록을 등록하고 예약 실패 상태로 변경합니다.

@@ -1,6 +1,5 @@
 package com.traveladvisor.bookingserver.service.domain.entity;
 
-import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
 import com.traveladvisor.bookingserver.service.domain.exception.BookingDomainCoreException;
 import com.traveladvisor.common.domain.entity.AggregateRoot;
 import com.traveladvisor.common.domain.vo.*;
@@ -46,7 +45,19 @@ public class Booking extends AggregateRoot<BookingId> {
     }
 
     /**
-     * 예약서에 실패 메시지를 등록하고 예약 취소 상태로 변경합니다.
+     * 예약 상태를 확인하고 CANCELLING으로 변경합니다.
+     *
+     * initializeBookingCancelling와 cancelBooking 메서드의 경우 다른 마이크로서비스에서 실패 메시지를 파라미터로 전달받습니다.
+     * 전달받은 에러 메시지를 Booking 엔터티의 에러 집계 목록 필드에 추가합니다. 이는 추후 예약서의 예약 실패 히스토리를 추적하는데 도움이 될 수 있습니다.
+     */
+    public void initializeBookingCancelling(List<String> failureMessages) {
+        // 업데이트
+        updateBookingStatus(BookingStatus.CANCELLING);
+        updateFailureMessages(failureMessages);
+    }
+
+    /**
+     * 예약서에 실패 메시지를 등록하고 최종적으로 예약 취소 상태로 변경합니다.
      *
      * @param failureMessages 예약 실패 메시지 목록
      */
@@ -60,7 +71,7 @@ public class Booking extends AggregateRoot<BookingId> {
     }
 
     /**
-     * 예약서를 공식적으로 초기화하기 전 기존 상태에 문제는 없는지 검증합니다.
+     * 예약서를 초기화하기 전 기존 상태에 문제는 없는지 검증합니다.
      */
     private void validateInitialBooking() {
         validateId();
@@ -140,7 +151,6 @@ public class Booking extends AggregateRoot<BookingId> {
             throw new BookingDomainCoreException("현재 예약서의 상태(" + bookingStatus.toString() + ")가 취소할 수 있는 상태가 아닙니다.");
         }
     }
-
 
     private Booking(Builder builder) {
         super.setId(builder.bookingId);

@@ -85,7 +85,7 @@ public class FlightOutboxHelper {
      * @param bookingStatus
      * @param sagaActionStatus
      */
-    public void updateFlightOutbox(
+    public void updateOutbox(
             FlightOutbox flightOutbox, BookingStatus bookingStatus, SagaActionStatus sagaActionStatus) {
         flightOutbox.setBookingStatus(bookingStatus);
         flightOutbox.setSagaActionStatus(sagaActionStatus);

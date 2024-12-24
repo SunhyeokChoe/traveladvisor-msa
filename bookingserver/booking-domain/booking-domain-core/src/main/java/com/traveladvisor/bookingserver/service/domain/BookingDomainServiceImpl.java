@@ -1,6 +1,7 @@
 package com.traveladvisor.bookingserver.service.domain;
 
 import com.traveladvisor.bookingserver.service.domain.entity.Booking;
+import com.traveladvisor.bookingserver.service.domain.event.BookingCancelledEvent;
 import com.traveladvisor.bookingserver.service.domain.event.BookingCreatedEvent;
 import com.traveladvisor.bookingserver.service.domain.event.FlightBookedEvent;
 import com.traveladvisor.bookingserver.service.domain.event.HotelBookedEvent;
@@ -68,6 +69,14 @@ public class BookingDomainServiceImpl implements BookingDomainService {
         booking.markAsFlightBooked();
 
         return new FlightBookedEvent(booking, ZonedDateTime.now(ZoneId.of(UTC)));
+    }
+
+    @Override
+    public BookingCancelledEvent cancelFlightBooking(Booking booking, List<String> failureMessages) {
+        booking.initializeBookingCancelling(failureMessages);
+        log.info("예약서 상태를 '취소 중' 상태로 변경했습니다. BookingId: {}", booking.getId().getValue());
+
+        return new BookingCancelledEvent(booking, ZonedDateTime.now(ZoneId.of(UTC)));
     }
 
     /**
