@@ -10,7 +10,7 @@ public interface HotelBookingCompletedEventListener {
      *
      * @param hotelBookingResponse
      */
-    void processFlightBooking(@Valid HotelBookingResponse hotelBookingResponse);
+    void processHotelBooking(@Valid HotelBookingResponse hotelBookingResponse);
 
     /**
      * 예약서의 예약 상태를 예약 실패 상태로 전환합니다.

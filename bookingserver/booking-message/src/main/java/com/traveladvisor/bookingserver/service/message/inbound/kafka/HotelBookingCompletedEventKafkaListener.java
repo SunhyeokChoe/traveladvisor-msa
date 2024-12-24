@@ -43,7 +43,7 @@ public class HotelBookingCompletedEventKafkaListener implements KafkaListMessage
                         @Header(KafkaHeaders.RECEIVED_PARTITION) List<Integer> partitions,
                         @Header(KafkaHeaders.OFFSET) List<Long> offsets) {
 
-        log.info("{} 개의 호텔 예약 완료 또는 반려 응답을 수신했습니다.",
+        log.info("{} 개의 호텔 예약 완료 또는 실패 응답을 수신했습니다.",
                 messages.stream().filter(
                         message -> message.getBefore() == null &&
                                 DebeziumOperator.CREATE.getValue().equals(message.getOp())
@@ -68,7 +68,7 @@ public class HotelBookingCompletedEventKafkaListener implements KafkaListMessage
                 switch (HotelBookingApprovalStatus.valueOf(hotelBookingCompletedEventPayload.getHotelBookingApprovalStatus())) {
                     // 호텔 예약 승인 상태가 COMPLETED 인 경우 예약서에 호텔 예약 완료 상태를 저장하고 항공권 예약을 요청합니다.
                     case COMPLETED -> {
-                        hotelBookingCompletedEventListener.processFlightBooking(
+                        hotelBookingCompletedEventListener.processHotelBooking(
                                 bookingMessageMapper.toHotelBookingResponse(hotelBookingCompletedEventPayload, hotelBookingCompletedEventAvroModel));
                         log.info("호텔 예약이 성공적으로 처리되었습니다. 항공권 예약 요청을 시도합니다. BookingId: {}", hotelBookingCompletedEventPayload.getBookingId());
                     }

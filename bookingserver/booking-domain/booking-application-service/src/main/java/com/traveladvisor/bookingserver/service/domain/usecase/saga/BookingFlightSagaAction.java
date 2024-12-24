@@ -16,18 +16,13 @@ import com.traveladvisor.common.domain.outbox.OutboxStatus;
 import com.traveladvisor.common.domain.saga.SagaAction;
 import com.traveladvisor.common.domain.saga.SagaActionStatus;
 import com.traveladvisor.common.domain.vo.BookingId;
-import com.traveladvisor.common.domain.vo.BookingStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
-
-import static com.traveladvisor.common.domain.constant.common.DomainConstants.UTC;
 
 /**
  * 항공권 서비스로부터 항공권 예약 요청에 대한 처리 결과를 전달받아 그 다음 처리 혹은 직전 단계 보상 Saga Action을 수행합니다.
@@ -62,7 +57,7 @@ public class BookingFlightSagaAction implements SagaAction<FlightBookingResponse
     @Transactional
     public void process(FlightBookingResponse flightBookingResponse) {
         Optional<FlightOutbox> flightOutboxOrEmpty =
-                flightOutboxHelper.findFlightOutboxBySagaIdAndSagaStatus(
+                flightOutboxHelper.findFlightOutboxBySagaIdAndSagaActionStatus(
                         UUID.fromString(flightBookingResponse.sagaActionId()), SagaActionStatus.PROCESSING); // 항공권 예약 처리 전에 반드시 SagaActionStatus 가 PROCESSING 이어야 합니다.
 
         if (flightOutboxOrEmpty.isEmpty()) {
@@ -76,12 +71,12 @@ public class BookingFlightSagaAction implements SagaAction<FlightBookingResponse
         FlightBookedEvent flightBookedEvent = completeFlightBooking(flightBookingResponse);
 
         // BookingStatus를 기반으로 다음 Saga Action 단계의 상태를 생성합니다.
-        // BookingStatus.FLIGHT_BOOKED 이므로 -> SagaStatus.PROCESSING 생성
+        // BookingStatus.FLIGHT_BOOKED 이므로 -> SagaActionStatus.PROCESSING 생성
         SagaActionStatus sagaActionStatus = bookingSagaActionHelper
                 .toSagaActionStatus(flightBookedEvent.getBooking().getBookingStatus());
 
         // 항공권 Outbox의 항공권 예약 상태와 Saga Action 상태를 업데이트 합니다.
-        updateHotelOutbox(flightOutbox, flightBookedEvent.getBooking().getBookingStatus(), sagaActionStatus);
+        flightOutboxHelper.updateOutbox(flightOutbox, flightBookedEvent.getBooking().getBookingStatus(), sagaActionStatus);
 
         flightOutboxHelper.save(flightOutbox);
 
@@ -100,20 +95,6 @@ public class BookingFlightSagaAction implements SagaAction<FlightBookingResponse
     }
 
     /**
-     * FlightOutbox의 예약 상태와 Saga Action 상태를 변경합니다.
-     *
-     * @param flightOutbox
-     * @param bookingStatus
-     * @param sagaActionStatus
-     */
-    private static void updateHotelOutbox(
-            FlightOutbox flightOutbox, BookingStatus bookingStatus, SagaActionStatus sagaActionStatus) {
-        flightOutbox.setBookingStatus(bookingStatus);
-        flightOutbox.setSagaActionStatus(sagaActionStatus);
-        flightOutbox.setCompletedAt(ZonedDateTime.now(ZoneId.of(UTC)));
-    }
-
-    /**
      * 항공권 예약 실패 시 예약서의 상태를 실패 상태로 전환합니다.
      *
      * @param flightBookingResponse
@@ -123,7 +104,7 @@ public class BookingFlightSagaAction implements SagaAction<FlightBookingResponse
     public void compensate(FlightBookingResponse flightBookingResponse) {
         // 트랜잭션 보상 대상 항공권 예약 Outbox을 조회합니다.
         Optional<FlightOutbox> flightOutboxOrEmpty =
-                flightOutboxHelper.findFlightOutboxBySagaIdAndSagaStatus(
+                flightOutboxHelper.findFlightOutboxBySagaIdAndSagaActionStatus(
                         UUID.fromString(flightBookingResponse.sagaActionId()), SagaActionStatus.PROCESSING);
 
         if (flightOutboxOrEmpty.isEmpty()) {
@@ -136,7 +117,8 @@ public class BookingFlightSagaAction implements SagaAction<FlightBookingResponse
         Booking booking = findBookingByBookingId(UUID.fromString(flightBookingResponse.bookingId()));
 
         // 예약서의 상태를 CANCELLING으로 변경합니다.
-        BookingCancelledEvent bookingCancelledEvent = bookingDomainService.cancelFlightBooking(booking, flightBookingResponse.failureMessages());
+        BookingCancelledEvent bookingCancelledEvent = bookingDomainService
+                .initializeBookingCancelling(booking, flightBookingResponse.failureMessages());
 
         // 변경된 예약서를 저장합니다.
         bookingRepository.save(booking);

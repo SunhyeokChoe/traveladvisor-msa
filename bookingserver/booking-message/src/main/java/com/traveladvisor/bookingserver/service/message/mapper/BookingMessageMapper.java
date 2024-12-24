@@ -1,7 +1,9 @@
 package com.traveladvisor.bookingserver.service.message.mapper;
 
+import com.traveladvisor.bookingserver.service.domain.dto.message.CarBookingResponse;
 import com.traveladvisor.bookingserver.service.domain.dto.message.FlightBookingResponse;
 import com.traveladvisor.bookingserver.service.domain.dto.message.HotelBookingResponse;
+import com.traveladvisor.common.domain.event.car.CarBookingCompletedEventPayload;
 import com.traveladvisor.common.domain.event.flight.FlightBookingCompletedEventPayload;
 import com.traveladvisor.common.domain.event.hotel.HotelBookingCompletedEventPayload;
 import com.traveladvisor.common.domain.vo.FlightBookingApprovalStatus;
@@ -36,6 +38,20 @@ public class BookingMessageMapper {
                 flightBookingCompletedEventPayload.getCreatedAt(),
                 FlightBookingApprovalStatus.valueOf(flightBookingCompletedEventPayload.getFlightBookingApprovalStatus()),
                 flightBookingCompletedEventPayload.getFailureMessages()
+        );
+    }
+
+    public CarBookingResponse toCarBookingResponse(CarBookingCompletedEventPayload carBookingCompletedEventPayload,
+                                                      debezium.car.booking_outbox.Value carBookingCompletedEventAvroModel) {
+
+        return new CarBookingResponse(
+                carBookingCompletedEventAvroModel.getId(),
+                carBookingCompletedEventAvroModel.getSagaActionId(),
+                carBookingCompletedEventPayload.getBookingId(),
+                carBookingCompletedEventPayload.getCarOfferId(),
+                carBookingCompletedEventPayload.getCreatedAt(),
+                FlightBookingApprovalStatus.valueOf(carBookingCompletedEventPayload.getCarBookingApprovalStatus()),
+                carBookingCompletedEventPayload.getFailureMessages()
         );
     }
 

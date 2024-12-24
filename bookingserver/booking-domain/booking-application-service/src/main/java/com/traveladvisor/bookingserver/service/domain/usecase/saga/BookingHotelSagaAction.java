@@ -54,7 +54,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
     @Transactional
     public void process(HotelBookingResponse hotelBookingResponse) {
         Optional<HotelOutbox> hotelOutboxOrEmpty =
-                hotelOutboxHelper.findHotelOutboxBySagaIdAndSagaStatus(
+                hotelOutboxHelper.findHotelOutboxBySagaIdAndSagaActionStatus(
                         UUID.fromString(hotelBookingResponse.sagaActionId()), SagaActionStatus.STARTED);
 
         if (hotelOutboxOrEmpty.isEmpty()) {
@@ -68,7 +68,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
         HotelBookedEvent hotelBookedEvent = completeHotelBooking(hotelBookingResponse);
 
         // BookingStatus를 기반으로 다음 Saga Action 단계의 상태를 생성합니다.
-        // BookingStatus.HOTEL_BOOKED 이므로 -> SagaStatus.PROCESSING 생성
+        // BookingStatus.HOTEL_BOOKED 이므로 -> SagaActionStatus.PROCESSING 생성
         SagaActionStatus sagaActionStatus = bookingSagaActionHelper
                 .toSagaActionStatus(hotelBookedEvent.getBooking().getBookingStatus());
 
@@ -107,7 +107,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
     public void compensate(HotelBookingResponse hotelBookingResponse) {
         // 트랜잭션 보상 대상 호텔 예약 Outbox을 조회합니다.
         Optional<HotelOutbox> hotelOutboxOrEmpty =
-                hotelOutboxHelper.findHotelOutboxBySagaIdAndSagaStatus(
+                hotelOutboxHelper.findHotelOutboxBySagaIdAndSagaActionStatus(
                         UUID.fromString(hotelBookingResponse.sagaActionId()), SagaActionStatus.PROCESSING);
 
         if (hotelOutboxOrEmpty.isEmpty()) {
@@ -138,7 +138,7 @@ public class BookingHotelSagaAction implements SagaAction<HotelBookingResponse> 
         hotelOutboxHelper.save(hotelOutbox);
 
         // 이전 보상 단계인 Flight Outbox를 조회합니다.
-        FlightOutbox flightOutbox = flightOutboxHelper.findFlightOutboxBySagaIdAndSagaStatus(
+        FlightOutbox flightOutbox = flightOutboxHelper.findFlightOutboxBySagaIdAndSagaActionStatus(
                 UUID.fromString(hotelBookingResponse.sagaActionId()), SagaActionStatus.COMPENSATING)
                 .orElseThrow(() -> {
                     log.error("Saga Action 상태가 ({})인 FlightOutbox가 존재하지 않습니다. SagaActionId: {}",

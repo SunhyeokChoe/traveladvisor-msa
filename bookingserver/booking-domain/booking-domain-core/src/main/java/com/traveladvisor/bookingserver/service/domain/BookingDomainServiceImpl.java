@@ -72,7 +72,7 @@ public class BookingDomainServiceImpl implements BookingDomainService {
     }
 
     @Override
-    public BookingCancelledEvent cancelFlightBooking(Booking booking, List<String> failureMessages) {
+    public BookingCancelledEvent initializeBookingCancelling(Booking booking, List<String> failureMessages) {
         booking.initializeBookingCancelling(failureMessages);
         log.info("예약서 상태를 '취소 중' 상태로 변경했습니다. BookingId: {}", booking.getId().getValue());
 

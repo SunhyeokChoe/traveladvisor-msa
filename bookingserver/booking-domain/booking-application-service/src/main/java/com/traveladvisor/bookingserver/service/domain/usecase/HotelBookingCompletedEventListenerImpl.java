@@ -17,7 +17,7 @@ public class HotelBookingCompletedEventListenerImpl implements HotelBookingCompl
     private final BookingHotelSagaAction bookingHotelSagaAction;
 
     @Override
-    public void processFlightBooking(HotelBookingResponse hotelBookingResponse) {
+    public void processHotelBooking(HotelBookingResponse hotelBookingResponse) {
         bookingHotelSagaAction.process(hotelBookingResponse);
     }
 

@@ -15,10 +15,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static com.traveladvisor.common.domain.constant.booking.SagaActionConstants.BOOKING_SAGA_ACTION_NAME;
+import static com.traveladvisor.common.domain.constant.common.DomainConstants.UTC;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -73,6 +76,20 @@ public class CarOutboxHelper {
 
         return carOutboxRepository.findByEventTypeAndSagaActionIdAndSagaActionStatusIn(
                 BOOKING_SAGA_ACTION_NAME, sagaId, sagaActionStatuses);
+    }
+
+    /**
+     * CarOutbox의 예약 상태와 Saga Action 상태를 변경합니다.
+     *
+     * @param carOutbox
+     * @param bookingStatus
+     * @param sagaActionStatus
+     */
+    public void updateOutbox(
+            CarOutbox carOutbox, BookingStatus bookingStatus, SagaActionStatus sagaActionStatus) {
+        carOutbox.setBookingStatus(bookingStatus);
+        carOutbox.setSagaActionStatus(sagaActionStatus);
+        carOutbox.setCompletedAt(ZonedDateTime.now(ZoneId.of(UTC)));
     }
 
 }

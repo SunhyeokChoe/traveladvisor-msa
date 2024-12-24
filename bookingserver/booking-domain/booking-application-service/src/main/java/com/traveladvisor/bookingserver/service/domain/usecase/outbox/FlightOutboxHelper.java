@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traveladvisor.bookingserver.service.domain.exception.BookingApplicationServiceException;
 import com.traveladvisor.bookingserver.service.domain.outbox.model.flight.FlightOutbox;
 import com.traveladvisor.bookingserver.service.domain.port.output.repository.FlightOutboxRepository;
+import com.traveladvisor.common.domain.event.booking.BookingCancelledEventPayload;
 import com.traveladvisor.common.domain.event.booking.HotelBookedEventPayload;
 import com.traveladvisor.common.domain.outbox.OutboxStatus;
 import com.traveladvisor.common.domain.saga.SagaActionStatus;
@@ -51,6 +52,24 @@ public class FlightOutboxHelper {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
+    public void save(BookingCancelledEventPayload bookingCancelledEventPayload,
+                     BookingStatus bookingStatus,
+                     SagaActionStatus sagaActionStatus,
+                     OutboxStatus outboxStatus,
+                     UUID sagaActionId) {
+        save(FlightOutbox.builder()
+                .id(UUID.randomUUID())
+                .sagaActionId(sagaActionId)
+                .createdAt(bookingCancelledEventPayload.getCreatedAt())
+                .eventType(BOOKING_SAGA_ACTION_NAME)
+                .eventPayload(serialize(bookingCancelledEventPayload))
+                .bookingStatus(bookingStatus)
+                .sagaActionStatus(sagaActionStatus)
+                .outboxStatus(outboxStatus)
+                .build());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
     public void save(FlightOutbox flightOutbox) {
         FlightOutbox savedFlightOutbox = flightOutboxRepository.save(flightOutbox);
 
@@ -71,7 +90,16 @@ public class FlightOutboxHelper {
         }
     }
 
-    public Optional<FlightOutbox> findFlightOutboxBySagaIdAndSagaStatus(
+    private String serialize(BookingCancelledEventPayload bookingCancelledEventPayload) {
+        try {
+            return objectMapper.writeValueAsString(bookingCancelledEventPayload);
+        } catch (JsonProcessingException ex) {
+            throw new BookingApplicationServiceException("bookingCancelledEventPayload 직렬화에 실패했습니다. BookingId: " +
+                    bookingCancelledEventPayload.getBookingId(), ex);
+        }
+    }
+
+    public Optional<FlightOutbox> findFlightOutboxBySagaIdAndSagaActionStatus(
             UUID sagaId, SagaActionStatus... sagaActionStatuses) {
 
         return flightOutboxRepository.findByEventTypeAndSagaActionIdAndSagaActionStatusIn(

@@ -99,8 +99,8 @@ public class HotelOutboxHelper {
         }
     }
 
-    public Optional<HotelOutbox> findHotelOutboxBySagaIdAndSagaStatus(UUID sagaId,
-                                                                      SagaActionStatus... sagaActionStatuses) {
+    public Optional<HotelOutbox> findHotelOutboxBySagaIdAndSagaActionStatus(UUID sagaId,
+                                                                            SagaActionStatus... sagaActionStatuses) {
 
         return hotelOutboxRepository.findByEventTypeAndSagaActionIdAndSagaActionStatusIn(
                 BOOKING_SAGA_ACTION_NAME, sagaId, sagaActionStatuses);

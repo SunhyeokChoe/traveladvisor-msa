@@ -41,7 +41,7 @@ public interface BookingDomainService {
      * @param failureMessages 예약 실패 메시지 목록
      * @return
      */
-    BookingCancelledEvent cancelFlightBooking(Booking booking, List<String> failureMessages);
+    BookingCancelledEvent initializeBookingCancelling(Booking booking, List<String> failureMessages);
 
     /**
      * 예약서에 실패 메시지 목록을 등록하고 예약 실패 상태로 변경합니다.

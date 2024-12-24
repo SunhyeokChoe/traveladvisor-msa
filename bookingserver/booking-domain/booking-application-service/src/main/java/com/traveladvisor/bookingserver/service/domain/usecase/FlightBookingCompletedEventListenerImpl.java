@@ -17,7 +17,7 @@ public class FlightBookingCompletedEventListenerImpl implements FlightBookingCom
     private final BookingFlightSagaAction bookingFlightSagaAction;
 
     @Override
-    public void processCarBooking(FlightBookingResponse flightBookingResponse) {
+    public void processFlightBooking(FlightBookingResponse flightBookingResponse) {
         bookingFlightSagaAction.process(flightBookingResponse);
     }
 
