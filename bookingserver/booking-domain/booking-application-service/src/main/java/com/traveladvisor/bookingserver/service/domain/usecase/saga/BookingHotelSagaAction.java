@@ -30,8 +30,6 @@ import java.util.UUID;
  * Saga Action의 다음 단계인 항공권 예약을 위해 process 메서드에서 booking.flight_outbox 테이블에 데이터를 저장합니다.
  * 그럼 Debezium CDC 측에서 이를 인지하고 카프카 토픽 debezium.booking.flight_outbox으로 메시지를 발행할 것이고,
  * Flight 서비스의 카프카 리스너가 이를 처리할 것입니다.
- * compensate 메서드의 경우 outbox 테이블에 아무런 영속화 작업도 하지 않습니다. 호텔 예약 이전 단계가 존재하지 않으므로
- * 그저 예약서의 상태를 실패로 변경하고 Saga Action을 중단하기만 하면 됩니다.
  */
 @Slf4j
 @RequiredArgsConstructor
