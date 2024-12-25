@@ -2,6 +2,7 @@ package com.traveladvisor.common.datasource.flight.entity;
 
 import com.traveladvisor.common.datasource.common.entity.BaseZonedDateTimeEntity;
 import com.traveladvisor.common.datasource.converter.DurationToIntervalConverter;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;

@@ -1,6 +1,7 @@
 package com.traveladvisor.common.datasource.hotel.entity;
 
 import com.traveladvisor.common.datasource.common.entity.BaseZonedDateTimeEntity;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;

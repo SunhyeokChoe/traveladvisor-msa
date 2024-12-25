@@ -11,13 +11,13 @@ import java.util.Map;
 
 @FeignClient(
         name = "amadeus-client",
-        url = "${batch.amadeus.base-url}",
+        url = "${batchserver.amadeus.base-url}",
         configuration = FeignFormEncoderConfig.class
 )
 public interface AmadeusFeignClient {
 
     @PostMapping(
-            value = "${batch.amadeus.endpoints.security.token}",
+            value = "${batchserver.amadeus.endpoints.security.token}",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
     ResponseEntity<Map<String, Object>> getAccessToken(@RequestBody QueryAccessToken queryAccessToken);
@@ -29,7 +29,7 @@ public interface AmadeusFeignClient {
      * @param cityCode      IATA Code (주의! 국가 ISO Code 아님)
      * @return
      */
-    @GetMapping("${batch.amadeus.endpoints.reference-data.location.hotels.by-city}")
+    @GetMapping("${batchserver.amadeus.endpoints.reference-data.location.hotels.by-city}")
     ResponseEntity<String> getHotelsByCityCode(@RequestHeader("Authorization") String authorization,
                                                @RequestParam("cityCode")       String cityCode);
 
