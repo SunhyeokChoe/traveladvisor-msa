@@ -150,21 +150,22 @@
 # 애플리케이션 목록
 - K8s 네임스페이스: `default`
 
-| **애플리케이션**           | **컨테이너 포트**             |
-|----------------------|-------------------------|
-| batch                | 9100                    |
-| member               | 9200                    |
-| payment              | 9300                    |
-| booking              | 9400                    |
-| hotel                | 9500                    |
-| flight               | 9600                    |
-| car                  | 9700                    |
-| grafana              | 3000                    |
-| config               | 8071                    |
-| gateway              | 8072                    |
-| K8s Discovery Server | 8761                    |
+| **애플리케이션**           | **컨테이너 포트**              |
+|----------------------|--------------------------|
+| batch                | 9100                     |
+| member               | 9200                     |
+| payment              | 9300                     |
+| booking              | 9400                     |
+| hotel                | 9500                     |
+| flight               | 9600                     |
+| car                  | 9700                     |
+| grafana              | 3000                     |
+| postgres             | 5432                     |
+| config               | 8071                     |
+| gateway              | 8072                     |
+| K8s Discovery Server | 8761                     |
 | KeyCloak             | 8080(HTTP) / 8443(HTTPS) |
-| Kafka Broker Cluster | 9092                    |
+| Kafka Broker Cluster | 9092                     |
 
 <br>
 
