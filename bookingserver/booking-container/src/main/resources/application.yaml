@@ -7,6 +7,7 @@ server:
       min-spare: 10
     accept-count: 400
     connection-timeout: 3000
+  shutdown: graceful
 
 ## 애플리케이션 정보
 info:
@@ -74,6 +75,8 @@ logging:
 spring:
   application:
     name: "bookingserver"
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   devtools:
     livereload.enabled: true
   jpa:

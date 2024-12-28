@@ -1,9 +1,12 @@
 server:
   port: 8072
+  shutdown: graceful
 
 spring:
   application:
     name: "gatewayserver"
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   config:
     import: "optional:configserver:http://localhost:8071/"
   cloud:

@@ -5,6 +5,7 @@ server:
     threads:
       max: 50
       min-spare: 10
+  shutdown: graceful
 
 ## 애플리케이션 정보
 info:
@@ -41,6 +42,8 @@ logging:
 spring:
   application:
     name: "batchserver"
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   devtools:
     livereload.enabled: true
   jpa:

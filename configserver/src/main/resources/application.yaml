@@ -1,9 +1,12 @@
 server:
   port: 8071
+  shutdown: graceful
 
 spring:
   application:
     name: "configserver"
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   profiles:
     active: native
 #    active: git
