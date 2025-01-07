@@ -1,4 +1,4 @@
-package com.traveladvisor.batchserver.service.domain.usecase.query;
+package com.traveladvisor.batchserver.service.domain.usecase.command;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
