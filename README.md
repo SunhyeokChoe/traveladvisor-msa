@@ -682,7 +682,7 @@ Booking Status Flow 를 중심으로 설명하겠습니다. 모든 도메인 이
 
 ## 2) 호텔 예약 실패 케이스
 
-![호텔 예약 실패 케이스](https://github.com/user-attachments/assets/17686cb7-54d3-4bee-9bab-8dec7b9eed26)
+![호텔 예약 실패 케이스](https://github.com/user-attachments/assets/5c3ed73c-fa85-4726-ad72-23dbd33eb1d8)
 
 호텔 예약 실패 케이스
 
