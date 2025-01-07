@@ -352,12 +352,12 @@ Intellij IDE 를 대상으로 설명하겠습니다. Cloud Code 플러그인이 
 2. Add New Configuration → Cloud Code: Kubernetes를 선택합니다.
 3. 다음과 같이 설정한 후 Apply → OK 버튼을 클릭합니다.
 
-   ![image 4.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/66656689cc7389d3ea2a517cfe3b92e23d6b5ca5/image%25204.png)
-   ![image 5.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/66656689cc7389d3ea2a517cfe3b92e23d6b5ca5/image%25205.png)
+   ![image 4.png](https://github.com/user-attachments/assets/a222d8a0-4a9c-4e30-9495-ee7f79932c90)
+   ![image 5.png](https://github.com/user-attachments/assets/434c6fcd-5405-494b-80ba-42948daeb996)
 
 4. Debug 버튼을 클릭하고 정상 동작을 확인합니다.
 
-   ![image.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/672bfd9cf048b8a700aeec9fe979382aac35e196/image%25206.png)
+   ![image.png](https://github.com/user-attachments/assets/c9d86bd2-75b2-4c88-b4ed-c959ff115fbd)
 
    이제 IDE에서 디버그 모드가 동작합니다. 👍
 
@@ -631,7 +631,7 @@ CDC는 데이터베이스의 변경 사항(삽입, 수정, 삭제)을 실시간�
 
 이 데모 프로젝트에서는 오픈소스 CDC 플랫폼인 Debezium을 사용합니다. 이 도구는 Kafka connect의 Source connector이며, DB의 변경 사항을 캡쳐하고 Kafka 토픽에 이를 발행합니다. 이 발행된 토픽은 해당 토픽을 구독하고 있던 Kakfa consumer가 받아 후속 조치를 취할 수 있습니다.
 
-![Debezium CDC 내부 동작](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/cdc.png)
+![Debezium CDC 내부 동작](https://github.com/user-attachments/assets/1c2ac272-1fd4-4d43-89d2-d7a9ca18f792)
 
 Debezium CDC 내부 동작
 
@@ -645,7 +645,7 @@ Debezium CDC 내부 동작
 
 Debezium은 오픈소스 CDC 플랫폼이며, 실제로 여러 IT 대기업에서 안정적으로 사용하고 있는 검증된 도구입니다.
 
-![image.png](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/cdc%2520with%2520kafka.png)
+![image.png](https://github.com/user-attachments/assets/0f928be0-0ad4-43a0-bf6a-8abc4c426dd6)
 
 Debezium Postgres Source Connector가 Replication Slot에 추가된 트랜잭션이 있는지 지속해서 확인하고, 존재하는 경우 Kafka 토픽에 발행합니다. Saga 액션 흐름의 Orchestrator 역할을 하는 Booking 마이크로서비스는 debezium 관련 토픽에 새로운 메시지가 들어왔는지 Polling하고, 이를 가져옵니다. Saga의 전체 단계 중 한 부분에 관해 작업을 마치면 해당 Saga 액션을 완수했음을 알리고, 다음 액션이 실행될 수 있도록 Kafka에 이벤트를 발행합니다. Orchestrator로부터 지령을 전달받은 마이크로서비스는 Saga 액션을 수행합니다.
 
@@ -653,7 +653,7 @@ Debezium Postgres Source Connector가 Replication Slot에 추가된 트랜잭션
 
 # Saga 패턴 + Outbox 패턴 + CDC를 결합한 비즈니스 구현
 
-![Saga, Outbox, Booking 상태 정의](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/saga+outbox+booking%2520status.png)
+![Saga, Outbox, Booking 상태 정의](https://github.com/user-attachments/assets/45131587-8cbf-46c2-8eec-e47dc370ab99)
 
 Saga, Outbox, Booking 상태 정의
 
@@ -661,7 +661,7 @@ Saga, Outbox, Booking 상태 정의
 
 ## 1) 호텔/항공권/차량 예약 성공 케이스
 
-![호텔/항공권/차량 예약 성공 케이스](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/booking%2520all%2520success.png)
+![호텔/항공권/차량 예약 성공 케이스](https://github.com/user-attachments/assets/313a5f06-f3cd-4e2f-b194-2323d1e4ec29)
 
 호텔/항공권/차량 예약 성공 케이스
 
@@ -682,19 +682,19 @@ Booking Status Flow 를 중심으로 설명하겠습니다. 모든 도메인 이
 
 ## 2) 호텔 예약 실패 케이스
 
-![호텔 예약 실패 케이스](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/booking%2520hotel%2520failed.png)
+![호텔 예약 실패 케이스](https://github.com/user-attachments/assets/17686cb7-54d3-4bee-9bab-8dec7b9eed26)
 
 호텔 예약 실패 케이스
 
 ## 3) 항공권 예약 실패 케이스
 
-![항공권 예약 실패 케이스](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/booking%2520flight%2520failed.png)
+![항공권 예약 실패 케이스](https://github.com/user-attachments/assets/c311540b-c81a-46db-b7cf-1ca9e77610ed)
 
 항공권 예약 실패 케이스
 
 ## 4) 차량 예약 실패 케이스
 
-![차량 예약 실패 케이스](https://gist.github.com/SunhyeokChoe/e892c5958a4a064b70929dec459e6462/raw/110a45b77ba8d2cda620356c19b456de6bcbdb25/car%2520failed.png)
+![차량 예약 실패 케이스](https://github.com/user-attachments/assets/c6fd2ea7-935e-4aad-a0c4-3c27ab445ae0)
 
 차량 예약 실패 케이스
 
