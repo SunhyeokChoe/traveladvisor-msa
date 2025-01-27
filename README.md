@@ -645,7 +645,7 @@ Debezium CDC 내부 동작
 
 Debezium은 오픈소스 CDC 플랫폼이며, 실제로 여러 IT 대기업에서 안정적으로 사용하고 있는 검증된 도구입니다.
 
-![image.png](https://github.com/user-attachments/assets/0f928be0-0ad4-43a0-bf6a-8abc4c426dd6)
+![image.png](https://github.com/user-attachments/assets/01cad1da-894a-482a-9f4e-7aaecd94501c)
 
 Debezium Postgres Source Connector가 Replication Slot에 추가된 트랜잭션이 있는지 지속해서 확인하고, 존재하는 경우 Kafka 토픽에 발행합니다. Saga 액션 흐름의 Orchestrator 역할을 하는 Booking 마이크로서비스는 debezium 관련 토픽에 새로운 메시지가 들어왔는지 Polling하고, 이를 가져옵니다. Saga의 전체 단계 중 한 부분에 관해 작업을 마치면 해당 Saga 액션을 완수했음을 알리고, 다음 액션이 실행될 수 있도록 Kafka에 이벤트를 발행합니다. Orchestrator로부터 지령을 전달받은 마이크로서비스는 Saga 액션을 수행합니다.
 
